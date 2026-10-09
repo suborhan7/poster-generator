@@ -150,7 +150,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, W = g.W;
       const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
       const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
-      if (!k.fitPhoto(g, 0, panelTop - 10)) k.photoHint(g, (g.st + panelTop) / 2);
+      if (!k.bleedPhoto(g, panelTop + 20)) k.photoHint(g, (g.st + panelTop) / 2);
       k.header(g);
       if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);
       const nm = String(g.val("name")).toUpperCase();
@@ -229,7 +229,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, hl = g.val("headline");
       const lay = hl ? k.layoutRich(String(hl).toUpperCase(), g.W - 112, 130, k.D, 2, 60) : null;
       const pb = lay ? g.footerY - 90 - lay.lines.length * lay.size * 1.02 : g.H;
-      if (!k.fitPhoto(g, 0, pb)) k.photoHint(g, g.H / 2);
+      if (!k.bleedPhoto(g, pb + 20)) k.photoHint(g, g.H / 2);
       ctx.lineWidth = 10; ctx.strokeStyle = g.accent; ctx.strokeRect(28, 28, g.W - 56, g.H - 56);
       k.header(g);
       if (lay) {
@@ -261,7 +261,7 @@ BPG.LAYOUTS = {
       const textTop = meterY - 56 - textH, ph = 92, pillTop = textTop - 34 - ph, photoBottom = pillTop + ph * 0.7;
 
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-      if (!k.fitPhoto(g, 0, photoBottom)) { ctx.fillStyle = panel; ctx.fillRect(0, 0, W, photoBottom); k.photoHint(g, photoBottom / 2); }
+      if (!k.bleedPhoto(g, textTop - 10)) { ctx.fillStyle = panel; ctx.fillRect(0, 0, W, photoBottom); k.photoHint(g, photoBottom / 2); }
 
       // Small logo in the top corner
       const logo = BPG.logoImage(), lx = 40, ly = Math.max(28, st - 20);

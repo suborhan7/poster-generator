@@ -156,7 +156,7 @@ window.BPG = window.BPG || {};
       ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
       ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
     }
-    if (!k.fitPhoto(g, 0, g.blockTop - 8)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
+    if (!k.bleedPhoto(g, g.blockTop + 30)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
     k.header(g);
     // A soft shadow keeps the text readable on top of the photo.
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 18;

@@ -75,6 +75,39 @@ BPG.createKit = function (ctx, env) {
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
   };
+  // Photo across the whole card, fading smoothly from the photo into dark where the text starts (textTop).
+  k.bleedPhoto = (g, textTop, grey) => {
+    if (!g.photo) return false;
+    const img = g.photo.img, a = env.adjust();
+    // Size the photo to the part of the card that stays visible, so it is zoomed in as little as possible.
+    const bh = Math.min(g.H, textTop + 80);
+    const s = Math.max(g.W / img.width, bh / img.height) * a.zoom, w = img.width * s, h = img.height * s;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
+    ctx.drawImage(img, (g.W - w) / 2 + (a.offx / 100) * g.W, (bh - h) * 0.3 + (a.offy / 100) * bh, w, h);
+    if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
+    if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, g.W, bh); }
+    ctx.restore();
+    const from = textTop - 380, to = textTop + 40, gr = ctx.createLinearGradient(0, from, 0, to);
+    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.35, k.hexA(g.bg, 0.25)); gr.addColorStop(0.7, k.hexA(g.bg, 0.75)); gr.addColorStop(1, k.hexA(g.bg, 0.97));
+    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from);
+    ctx.fillStyle = k.hexA(g.bg, 0.97); ctx.fillRect(0, to, g.W, g.H - to);
+    const top = ctx.createLinearGradient(0, 0, 0, g.st + 140);
+    top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
+    ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);
+    return true;
+  };
+  // Small logo mark: your uploaded logo, or the BR speech bubble. (x, y) is the top-left corner.
+  k.logoMark = (g, x, y, size = 64) => {
+    const logo = env.logo();
+    if (logo) { const sc = size / Math.max(logo.width, logo.height); ctx.drawImage(logo, x, y, logo.width * sc, logo.height * sc); return; }
+    const u = size / 64;
+    ctx.save(); ctx.translate(x + 32 * u, y + 26 * u); ctx.rotate(-0.08); ctx.scale(u, u);
+    ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 12;
+    ctx.fillStyle = g.accent; k.roundRect(-32, -25, 64, 50, 9); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-15, 22); ctx.lineTo(-25, 39); ctx.lineTo(0, 24); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
+    ctx.restore(); ctx.textAlign = "left";
+  };
   // The photo section: the photo fitted into the box from `top` to `bottom` and resting on its bottom edge.
   // Space around it is filled with a soft blurred copy of the same photo (not for cutouts).
   // The zoom and move sliders still work if you want to crop in.
@@ -124,30 +157,23 @@ BPG.createKit = function (ctx, env) {
       ctx.fillStyle = k.inkOn(accent); ctx.textBaseline = "middle";
       ctx.fillText(kick, 78, top + 49, W - 360); k.spaced(0);
     }
-    if (logo) {
-      const sc = 96 / Math.max(logo.width, logo.height);
-      ctx.drawImage(logo, W - 56 - logo.width * sc, top, logo.width * sc, logo.height * sc);
-    } else {
-      ctx.font = k.font(36, C, 700); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
-      ctx.fillText(s.brand.handle || "", W - 56, top + 49); ctx.textAlign = "left";
-    }
+    k.logoMark(g, W - 56 - 64, top + 14, 64);
     ctx.textBaseline = "alphabetic";
   };
   // Bottom row: your verdict if you typed one, otherwise the page name.
   k.footer = (g) => {
     const { W, footerY: y, accent } = g, s = env.state();
-    ctx.fillStyle = accent; ctx.fillRect(56, y - 22, 22, 22);
     const v = (s.verdict || "").trim();
     if (v) {
       ctx.font = k.font(30, C, 700); k.spaced(4); ctx.fillStyle = accent;
-      const lab = BPG.BRAND.verdictLabel; ctx.fillText(lab, 92, y);
+      const lab = BPG.BRAND.verdictLabel; ctx.fillText(lab, 56, y);
       const lw = ctx.measureText(lab).width; k.spaced(0);
-      ctx.font = k.font(k.fit(v, W - 92 - lw - 90, 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
-      ctx.fillText(v, 92 + lw + 22, y + 2);
+      ctx.font = k.font(k.fit(v, W - 56 - lw - 90, 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(v, 56 + lw + 22, y + 2);
       return;
     }
-    ctx.font = k.font(28, C, 700); k.spaced(5); ctx.fillStyle = "rgba(255,255,255,0.78)";
-    ctx.fillText((s.brand.name || "").toUpperCase(), 92, y); k.spaced(0);
+    ctx.font = k.font(24, C, 600); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.fillText(s.brand.handle || "", 56, y); k.spaced(0);
   };
 
   // ---- Text ----

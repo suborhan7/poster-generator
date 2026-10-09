@@ -15,7 +15,7 @@ window.BPG = window.BPG || {};
   // grey: 0 to 1 takes the colour out (used for wickets and ducks).
   function photo(k, g, fadeFrom, fadeTo, grey) {
     const ctx = k.ctx, { W, bg } = g;
-    if (k.fitPhoto(g, 0, fadeTo - 70, grey)) return;
+    if (k.bleedPhoto(g, fadeTo - 40, grey)) return;
     if (g.photo) {
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, g.H); ctx.clip();
       k.coverImg(g.photo.img, 0, 0, W, g.H);
