@@ -3,7 +3,7 @@
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Oct 2026 · v14";
+BPG.VERSION = "9 Oct 2026 · v15";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -32,7 +32,7 @@ BPG.PLATFORMS = {
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 
-BPG.CATS = { rants: "Borhan Rants", cricket: "Cricket", football: "Football", general: "General" };
+BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", football: "Football", general: "General" };
 
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
 BPG.FONTS = {

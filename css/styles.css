@@ -104,3 +104,19 @@ img { max-width: 100%; }
 .row2 .primary { flex: 1; }
 .wide-btn { width: 100%; }
 .seg#ctas button { padding: 5px 11px; font-size: 13px; }
+
+/* Series box */
+#seriesBox select, #seriesBox input:not([type="file"]), #seriesBox textarea { width: 100%; }
+#seriesBox .row2 { flex-wrap: wrap; align-items: center; }
+#seriesBox .row2 > select { flex: 1; min-width: 0; font: inherit; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); }
+.matches { display: flex; flex-direction: column; gap: 8px; }
+.match { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.match.open { border-color: var(--accent); }
+.match-head { width: 100%; text-align: left; background: var(--chip); border: 0; color: var(--ink); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; font: inherit; }
+.match-head span { font-size: 13px; color: var(--muted); }
+.match > .fields { padding: 12px; }
+.cardlist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cardlist .label { width: 100%; }
+.cardlist button { padding: 7px 12px; font-size: 13px; }
+.filebtn { display: inline-flex; align-items: center; }
+.ghost.danger { color: #d33; border-color: color-mix(in srgb, #d33 40%, var(--line)); }

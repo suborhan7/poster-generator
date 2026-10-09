@@ -25,6 +25,25 @@ BPG.TEMPLATES = {
       ["headline","Headline","221/2 to 225/5. *Classic Bangladesh.*",true],["body","Body text","Tanzid's 83 off 71 set it up. Then three wickets fell for 4 runs, Mushfiqur with a 7-ball duck. Liton's 53 dragged us to 317/8.",true,"area"],
       ["stats","Stat boxes (optional)","",true],["rant","Rant meter (0–5)","4"]] },
 
+  // ---------------- Series (uses the series you keep in the Series box) ----------------
+  seriesscore: { cat: "series", name: "Series score / results", layout: "seriesscore",
+    hint: "Worked out from the results you saved. Leave the headline empty and it writes one for you (e.g. PAKISTAN LEAD 2-1).",
+    fields: [["headline","Headline (optional)","",true],["tag","Small line above (optional, default: series name)","",true]] },
+  preview: { cat: "series", name: "Match preview", layout: "preview",
+    hint: "Shows the next match without a result. Type a match number to pick another one. Time shows as BD time.",
+    fields: [["match","Match number (empty = next)",""],["headline","Headline","MATCH DAY"],["tag","Small line above (optional)","",true]] },
+  mostruns: { cat: "series", name: "Most runs", layout: "leaders", stat: "runs", big: "MOST RUNS",
+    fields: [["title","Title (optional)",""],["rows","How many players","5"],["tag","Small line above (optional)","",true]] },
+  mostwkts: { cat: "series", name: "Most wickets", layout: "leaders", stat: "wkts", big: "MOST WICKETS",
+    fields: [["title","Title (optional)",""],["rows","How many players","5"],["tag","Small line above (optional)","",true]] },
+  points: { cat: "series", name: "Points table", layout: "points",
+    hint: "Cricket: 2 points a win, 1 for a tie or no result, sorted by net run rate. Football: 3/1/0, sorted by goal difference.",
+    fields: [["title","Title (optional)",""],["rows","How many teams","8"],["qualify","Teams that go through (coloured)","4"],["tag","Small line above (optional)","",true]] },
+  topscorers: { cat: "series", name: "Top scorers (football)", layout: "leaders", stat: "goals", big: "TOP SCORERS",
+    fields: [["title","Title (optional)",""],["rows","How many players","5"],["tag","Small line above (optional)","",true]] },
+  assists: { cat: "series", name: "Most assists (football)", layout: "leaders", stat: "assists", big: "MOST ASSISTS",
+    fields: [["title","Title (optional)",""],["rows","How many players","5"],["tag","Small line above (optional)","",true]] },
+
   // ---------------- Cricket ----------------
   fifty: { cat: "cricket", name: "Fifty", layout: "batting", milestone: "50", big: "FIFTY",
     hint: "Strike rate and the fours/sixes/running split are worked out for you. With a cutout photo, the big 50 sits behind the player.",

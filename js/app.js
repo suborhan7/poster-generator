@@ -59,6 +59,10 @@ window.BPG = window.BPG || {};
     const i = document.createElement(type === "area" ? "textarea" : "input");
     if (type !== "area") i.type = "text";
     i.id = id; i.value = value;
+    // Name suggestions from your saved series.
+    const key = id.split("_").pop();
+    if (/^(player|batter|bowler|potm|name|p1|p2|assist)$/.test(key)) i.setAttribute("list", "dl_players");
+    if (/^(team|opp|t1|t2)$/.test(key)) i.setAttribute("list", "dl_teams");
     i.addEventListener("input", () => onInput(i.value));
     d.append(l, i); parent.appendChild(d);
   }
@@ -109,7 +113,16 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); draw(); }
+  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); }
+  // Lets series-ui.js open a card with its details already filled in.
+  BPG.app = {
+    state: () => state, draw: () => draw(), persist,
+    open(tpl, values, big) {
+      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.values[tpl] = Object.assign({}, state.values[tpl] || {}, values, big ? { __big: big } : {});
+      persist(); renderAll();
+    },
+  };
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {

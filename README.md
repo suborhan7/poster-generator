@@ -43,6 +43,8 @@ Features on every card:
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
 | `js/quickfill.js` | Quick fill: reads one typed line and fills the form; holds the team short forms (PAK, SL, BAN…) | To teach it a new team or short form |
 | `js/caption.js` | Writes the caption and hashtags from the card | To change caption wording or the comment line |
+| `js/series.js` | Series mode: saved series, reading results, leaderboards, points table, series-score and match-preview designs | To change how stats are worked out or how those cards look |
+| `js/series-ui.js` | The Series box (create series, add matches, paste results, backup) | To change the Series box |
 | `manifest.webmanifest`, `sw.js`, `icons/` | Make the site installable as a phone app and work offline | Rarely |
 | `js/layouts.js` | The other designs (football, general, Borhan Rants) | When you want a new look |
 | `js/engine.js` | Drawing helpers shared by all designs | Rarely |
@@ -91,6 +93,23 @@ In `js/config.js`, add a line to `BPG.THEMES`:
 ```js
 pakistan: { label: "Pakistan green", bg: "#04301B", accent: "#FFFFFF" },
 ```
+
+## Series mode
+
+Pick **Series**, tap **+ New series**, type the name and teams (short names work). After each match open it and type or paste the result, one thing per line:
+
+```
+SL 182/8 (20)
+Udara 91(55) 8x4 5x6
+Shaheen Afridi 3/24 (4)
+PAK 183/7 (19.2)
+Babar Azam 52(38) 5x4 2x6
+POTM: Babar Azam
+```
+
+Football: `ARG 2-1 BRA`, then one goal per line like `Messi 67' ARG (Alvarez)`.
+
+Save it and you get buttons for that match's fifties, hundreds, 4/5-fors, goals and result card, already filled. The Series cards (series score or results, match preview, most runs, most wickets, points table, top scorers, assists) work themselves out. Data stays on your phone; use **Backup** now and then.
 
 ## Install it on your phone like an app
 

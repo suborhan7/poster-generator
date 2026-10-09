@@ -32,6 +32,12 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    seriesscore: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; if (s.teams.length > 2) return `${s.name}: results so far.`; const st = BPG.series.seriesLine(s); return `${s.name}: ${st.text.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}.`; },
+    preview: (v) => { const s = BPG.series && BPG.series.current(); const m = s && BPG.series.nextMatch(s, v("match")); return m ? `Match ${m.no}: ${m.t1} vs ${m.t2}${m.date ? ", " + m.date : ""}${m.time ? " at " + m.time + " (BD time)" : ""}${m.venue ? ", " + m.venue : ""}. Who's winning this one?` : ""; },
+    leaders: (v, t) => { const s = BPG.series && BPG.series.current(); if (!s) return ""; const S = BPG.series;
+      const list = t.stat === "runs" ? S.batting(s).map((x) => [x.name, x.runs]) : t.stat === "wkts" ? S.bowling(s).map((x) => [x.name, x.wkts]) : S.scorers(s, t.stat === "assists" ? "assists" : "goals").map((x) => [x.name, x.n]);
+      return `${v("title") || t.big} in ${s.name}:\n` + list.slice(0, parseInt(v("rows"), 10) || 5).map((x, i) => `${i + 1}. ${x[0]}: ${x[1]}`).join("\n"); },
+    points: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; return `${s.name} points table:\n` + BPG.series.table(s).map((r, i) => `${i + 1}. ${r.team}: ${r.pts} pts`).join("\n"); },
   };
 
   BPG.CTAS = {
@@ -45,8 +51,9 @@ window.BPG = window.BPG || {};
     const v = (id) => plain(val(id));
     const line = (LINES[t.layout] || (() => ""))(v, t, val)
       .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
-    const teams = [val("team"), val("opp"), val("t1"), val("t2")].map(plain).filter(Boolean);
-    const sport = t.cat === "football" ? "#Football" : t.cat === "cricket" ? "#Cricket" : "";
+    const sr = BPG.series && BPG.series.current();
+    const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2")]).map(plain).filter(Boolean);
+    const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
     const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
     const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
     return [line, opts.verdict ? `Borhan's verdict: ${plain(opts.verdict)}` : "", BPG.CTAS[opts.cta || "en"], tags].filter(Boolean).join("\n\n");
