@@ -376,9 +376,9 @@ BPG.createKit = function (ctx, env) {
     if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, g.W, bh); }
     ctx.restore();
     const from = textTop - 380, to = textTop + 40, gr = ctx.createLinearGradient(0, from, 0, to);
-    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.35, k.hexA(g.bg, 0.25)); gr.addColorStop(0.7, k.hexA(g.bg, 0.75)); gr.addColorStop(1, k.hexA(g.bg, 0.97));
+    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.35, k.hexA(g.bg, 0.25)); gr.addColorStop(0.7, k.hexA(g.bg, 0.75)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from);
-    ctx.fillStyle = k.hexA(g.bg, 0.97); ctx.fillRect(0, to, g.W, g.H - to);
+    ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
     const top = ctx.createLinearGradient(0, 0, 0, g.st + 140);
     top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);
@@ -606,6 +606,7 @@ BPG.createKit = function (ctx, env) {
 //   g.photo, g.photos[2]    uploaded photos ({ img, cut }) or null
 // Cricket designs live in cricket.js.
 window.BPG = window.BPG || {};
+const num = (v) => parseInt(String(v).replace(/[^\d-]/g, ""), 10) || 0;
 
 BPG.LAYOUTS = {
 
@@ -653,23 +654,27 @@ BPG.LAYOUTS = {
   fscore: {
     standard: true,
     draw(k, g) {
-      const ctx = k.ctx;
+      // Everything centred: headline, then  2  FT  1, team names under the numbers, scorers at the bottom.
+      const ctx = k.ctx, cx = g.W / 2, s1 = num(g.val("s1")), s2 = num(g.val("s2"));
+      const scorersY = g.footerY - 44, namesY = scorersY - 46, nb = namesY - 44, ns = 150;
+      const gap = 150, xs = [cx - gap, cx + gap];
       if (g.val("headline")) {
-        const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 76, k.D, 2, 44);
-        k.drawRich(lay, 52, g.statsTop + 10 - 200 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+        const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 64, k.D, 2, 40);
+        k.drawRich(lay, cx, nb - ns * 0.76 - 40 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "center");
       }
-      const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
       ctx.textAlign = "center";
-      [[g.val("s1"), g.val("t1")], [g.val("s2"), g.val("t2")]].forEach(([n, tm], i) => {
-        ctx.font = k.font(k.fit(String(n), g.W * 0.4, 210, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(n), xs[i], nb);
-        ctx.font = k.font(k.fit(String(tm).toUpperCase(), g.W * 0.42, 40, k.D), k.D); ctx.fillText(String(tm).toUpperCase(), xs[i], nb + 50);
+      [[g.val("s1"), g.val("t1"), s1 >= s2], [g.val("s2"), g.val("t2"), s2 >= s1]].forEach(([n, tm, won], i) => {
+        ctx.font = k.font(k.fit(String(n), 260, ns, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(n), xs[i], nb);
+        ctx.font = k.font(k.fit(String(tm).toUpperCase(), 360, 34, k.C, 700, 20), k.C, 700); k.spaced(6);
+        ctx.fillStyle = won ? g.accent : "rgba(255,255,255,0.7)"; ctx.fillText(String(tm).toUpperCase(), xs[i], namesY); k.spaced(0);
       });
-      ctx.fillStyle = g.accent; k.roundRect(g.W / 2 - 40, nb - 120, 80, 50, 25); ctx.fill();
-      ctx.font = k.font(32, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText("FT", g.W / 2, nb - 82);
-      ctx.font = k.font(26, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(g.val("potm"), g.W / 2, nb + 86, g.W - 112);
+      ctx.fillStyle = g.accent; k.roundRect(cx - 36, nb - ns * 0.38 - 22, 72, 44, 22); ctx.fill();
+      ctx.font = k.font(26, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText("FT", cx, nb - ns * 0.38 + 10);
+      if (g.val("potm")) { ctx.font = k.font(26, k.B, 500); ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.fillText(g.val("potm"), cx, scorersY, g.W - 112); }
       ctx.textAlign = "left";
     },
   },
+
 
   redcard: {
     standard: true,
