@@ -108,6 +108,17 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
+  // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
+  // align "right": the text ends at x; "left": it starts at x. y is the baseline.
+  k.wordmark = (g, x, y, align, size = 30) => {
+    const w = String(env.state().brand.name || "").toUpperCase().split(/\s+/).slice(0, 2);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
+    ctx.font = k.font(size, D); k.spaced(1);
+    const a = (w[0] || "") + " ", b = w[1] || "", wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+    const left = align === "right" ? x - wa - wb : x;
+    ctx.fillStyle = "#FFFFFF"; ctx.fillText(a, left, y); ctx.fillStyle = g.accent; ctx.fillText(b, left + wa, y);
+    k.spaced(0); ctx.restore();
+  };
   // The photo section: the photo fitted into the box from `top` to `bottom` and resting on its bottom edge.
   // Space around it is filled with a soft blurred copy of the same photo (not for cutouts).
   // The zoom and move sliders still work if you want to crop in.
@@ -157,10 +168,11 @@ BPG.createKit = function (ctx, env) {
       ctx.fillStyle = k.inkOn(accent); ctx.textBaseline = "middle";
       ctx.fillText(kick, 78, top + 49, W - 360); k.spaced(0);
     }
-    k.logoMark(g, W - 56 - 64, top + 14, 64);
+    k.logoMark(g, W - 56 - 56, top + 18, 56);
+    if (!logo) k.wordmark(g, W - 56 - 56 - 14, top + 58, "right");
     ctx.textBaseline = "alphabetic";
   };
-  // Bottom row: your verdict if you typed one, otherwise the page name.
+  // Bottom row: your verdict, if you typed one.
   k.footer = (g) => {
     const { W, footerY: y, accent } = g, s = env.state();
     const v = (s.verdict || "").trim();
@@ -172,8 +184,6 @@ BPG.createKit = function (ctx, env) {
       ctx.fillText(v, 56 + lw + 22, y + 2);
       return;
     }
-    ctx.font = k.font(24, C, 600); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.fillText(s.brand.handle || "", 56, y); k.spaced(0);
   };
 
   // ---- Text ----

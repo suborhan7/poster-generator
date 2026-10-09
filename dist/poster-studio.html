@@ -396,6 +396,17 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
+  // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
+  // align "right": the text ends at x; "left": it starts at x. y is the baseline.
+  k.wordmark = (g, x, y, align, size = 30) => {
+    const w = String(env.state().brand.name || "").toUpperCase().split(/\s+/).slice(0, 2);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
+    ctx.font = k.font(size, D); k.spaced(1);
+    const a = (w[0] || "") + " ", b = w[1] || "", wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+    const left = align === "right" ? x - wa - wb : x;
+    ctx.fillStyle = "#FFFFFF"; ctx.fillText(a, left, y); ctx.fillStyle = g.accent; ctx.fillText(b, left + wa, y);
+    k.spaced(0); ctx.restore();
+  };
   // The photo section: the photo fitted into the box from `top` to `bottom` and resting on its bottom edge.
   // Space around it is filled with a soft blurred copy of the same photo (not for cutouts).
   // The zoom and move sliders still work if you want to crop in.
@@ -445,10 +456,11 @@ BPG.createKit = function (ctx, env) {
       ctx.fillStyle = k.inkOn(accent); ctx.textBaseline = "middle";
       ctx.fillText(kick, 78, top + 49, W - 360); k.spaced(0);
     }
-    k.logoMark(g, W - 56 - 64, top + 14, 64);
+    k.logoMark(g, W - 56 - 56, top + 18, 56);
+    if (!logo) k.wordmark(g, W - 56 - 56 - 14, top + 58, "right");
     ctx.textBaseline = "alphabetic";
   };
-  // Bottom row: your verdict if you typed one, otherwise the page name.
+  // Bottom row: your verdict, if you typed one.
   k.footer = (g) => {
     const { W, footerY: y, accent } = g, s = env.state();
     const v = (s.verdict || "").trim();
@@ -460,8 +472,6 @@ BPG.createKit = function (ctx, env) {
       ctx.fillText(v, 56 + lw + 22, y + 2);
       return;
     }
-    ctx.font = k.font(24, C, 600); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.fillText(s.brand.handle || "", 56, y); k.spaced(0);
   };
 
   // ---- Text ----
@@ -643,7 +653,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx;
       if (g.val("headline")) {
         const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 110, k.D, 2, 50);
-        k.drawRich(lay, 52, g.blockTop + 116 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+        k.drawRich(lay, 52, g.statsTop + 10 - 290 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
       }
       const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
       ctx.textAlign = "center";
@@ -850,6 +860,7 @@ BPG.LAYOUTS = {
         ctx.beginPath(); ctx.moveTo(-15, 22); ctx.lineTo(-25, 39); ctx.lineTo(0, 24); ctx.fill(); ctx.shadowBlur = 0;
         ctx.font = k.font(34, k.D); ctx.fillStyle = "#14151A"; ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
         ctx.restore(); ctx.textAlign = "left";
+        k.wordmark(g, lx + 80, ly + 42, "left", 32);
       }
 
       // Photo credit
@@ -909,7 +920,7 @@ BPG.LAYOUTS = {
         ctx.fillStyle = i < lvl ? accent : "#3A3D45"; ctx.fillRect(bx + meterY * 0.18, meterY + 4 - bh, 24, bh); ctx.restore();
       }
       ctx.font = k.font(28, k.C, 700); k.spaced(2); ctx.fillStyle = cream; ctx.textAlign = "right";
-      ctx.fillText(s.verdict ? s.verdict : s.brand.handle || "", W - 56, meterY, W - 480); ctx.textAlign = "left"; k.spaced(0);
+      if (s.verdict) ctx.fillText(s.verdict, W - 56, meterY, W - 480); ctx.textAlign = "left"; k.spaced(0);
     },
   },
 };

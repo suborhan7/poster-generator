@@ -66,7 +66,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx;
       if (g.val("headline")) {
         const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 110, k.D, 2, 50);
-        k.drawRich(lay, 52, g.blockTop + 116 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+        k.drawRich(lay, 52, g.statsTop + 10 - 290 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
       }
       const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
       ctx.textAlign = "center";
@@ -273,6 +273,7 @@ BPG.LAYOUTS = {
         ctx.beginPath(); ctx.moveTo(-15, 22); ctx.lineTo(-25, 39); ctx.lineTo(0, 24); ctx.fill(); ctx.shadowBlur = 0;
         ctx.font = k.font(34, k.D); ctx.fillStyle = "#14151A"; ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
         ctx.restore(); ctx.textAlign = "left";
+        k.wordmark(g, lx + 80, ly + 42, "left", 32);
       }
 
       // Photo credit
@@ -332,7 +333,7 @@ BPG.LAYOUTS = {
         ctx.fillStyle = i < lvl ? accent : "#3A3D45"; ctx.fillRect(bx + meterY * 0.18, meterY + 4 - bh, 24, bh); ctx.restore();
       }
       ctx.font = k.font(28, k.C, 700); k.spaced(2); ctx.fillStyle = cream; ctx.textAlign = "right";
-      ctx.fillText(s.verdict ? s.verdict : s.brand.handle || "", W - 56, meterY, W - 480); ctx.textAlign = "left"; k.spaced(0);
+      if (s.verdict) ctx.fillText(s.verdict, W - 56, meterY, W - 480); ctx.textAlign = "left"; k.spaced(0);
     },
   },
 };
