@@ -150,8 +150,8 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, W = g.W;
       const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
       const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
-      if (!k.photoArea(g, panelTop + 120)) k.photoHint(g, (g.st + panelTop) / 2);
-      k.fadeBottom(g, panelTop - 120, panelTop + 40);
+      if (!k.photoArea(g, g.H)) k.photoHint(g, (g.st + panelTop) / 2);
+      else k.scrim(g, panelTop - 200, panelTop + 160);
       k.slash(g, panelTop + 10);
       k.header(g);
       if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);

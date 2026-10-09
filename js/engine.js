@@ -75,6 +75,13 @@ BPG.createKit = function (ctx, env) {
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
   };
+  // Darkens the photo towards the bottom so text can sit on top of it, without hiding the photo.
+  k.scrim = (g, from, to) => {
+    const gr = ctx.createLinearGradient(0, from, 0, to);
+    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.55, k.hexA(g.bg, 0.55)); gr.addColorStop(1, k.hexA(g.bg, 0.8));
+    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from);
+    ctx.fillStyle = k.hexA(g.bg, 0.8); ctx.fillRect(0, to, g.W, g.H - to);
+  };
   // The two diagonal accent lines that sit between photo and text.
   k.slash = (g, y) => {
     ctx.save(); ctx.strokeStyle = g.accent; ctx.lineWidth = 7;
@@ -158,11 +165,11 @@ BPG.createKit = function (ctx, env) {
     ctx.textAlign = prev;
   };
   k.bigText = (g, text, y, size) => {
-    const s = k.fit(text.toUpperCase(), g.W - 112, size || 200, D);
+    const s = k.fit(text.toUpperCase(), g.W - 112, size || 170, D);
     ctx.font = k.font(s, D); ctx.fillStyle = g.accent; ctx.fillText(text.toUpperCase(), 52, y); return s;
   };
   k.nameText = (g, text, y, size) => {
-    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 120, D);
+    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 108, D);
     ctx.font = k.font(s, D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(text).toUpperCase(), 54, y);
   };
   k.subText = (g, text, y) => {
@@ -173,7 +180,7 @@ BPG.createKit = function (ctx, env) {
   };
 
   // A row of stat columns: [["Runs", "52"], ["Balls", "38"], ...]
-  k.stats = (g, items, y, h = 130) => {
+  k.stats = (g, items, y, h = 116) => {
     const pad = 56, n = items.length; if (!n) return;
     const cw = (g.W - pad * 2) / n;
     items.forEach(([label, value], i) => {

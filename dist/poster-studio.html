@@ -363,6 +363,13 @@ BPG.createKit = function (ctx, env) {
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
   };
+  // Darkens the photo towards the bottom so text can sit on top of it, without hiding the photo.
+  k.scrim = (g, from, to) => {
+    const gr = ctx.createLinearGradient(0, from, 0, to);
+    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.55, k.hexA(g.bg, 0.55)); gr.addColorStop(1, k.hexA(g.bg, 0.8));
+    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from);
+    ctx.fillStyle = k.hexA(g.bg, 0.8); ctx.fillRect(0, to, g.W, g.H - to);
+  };
   // The two diagonal accent lines that sit between photo and text.
   k.slash = (g, y) => {
     ctx.save(); ctx.strokeStyle = g.accent; ctx.lineWidth = 7;
@@ -446,11 +453,11 @@ BPG.createKit = function (ctx, env) {
     ctx.textAlign = prev;
   };
   k.bigText = (g, text, y, size) => {
-    const s = k.fit(text.toUpperCase(), g.W - 112, size || 200, D);
+    const s = k.fit(text.toUpperCase(), g.W - 112, size || 170, D);
     ctx.font = k.font(s, D); ctx.fillStyle = g.accent; ctx.fillText(text.toUpperCase(), 52, y); return s;
   };
   k.nameText = (g, text, y, size) => {
-    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 120, D);
+    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 108, D);
     ctx.font = k.font(s, D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(text).toUpperCase(), 54, y);
   };
   k.subText = (g, text, y) => {
@@ -461,7 +468,7 @@ BPG.createKit = function (ctx, env) {
   };
 
   // A row of stat columns: [["Runs", "52"], ["Balls", "38"], ...]
-  k.stats = (g, items, y, h = 130) => {
+  k.stats = (g, items, y, h = 116) => {
     const pad = 56, n = items.length; if (!n) return;
     const cw = (g.W - pad * 2) / n;
     items.forEach(([label, value], i) => {
@@ -671,8 +678,8 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, W = g.W;
       const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
       const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
-      if (!k.photoArea(g, panelTop + 120)) k.photoHint(g, (g.st + panelTop) / 2);
-      k.fadeBottom(g, panelTop - 120, panelTop + 40);
+      if (!k.photoArea(g, g.H)) k.photoHint(g, (g.st + panelTop) / 2);
+      else k.scrim(g, panelTop - 200, panelTop + 160);
       k.slash(g, panelTop + 10);
       k.header(g);
       if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);
@@ -901,19 +908,19 @@ window.BPG = window.BPG || {};
   function photo(k, g, fadeFrom, fadeTo, grey) {
     const ctx = k.ctx, { W, bg } = g;
     if (g.photo) {
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, fadeTo); ctx.clip();
-      k.coverImg(g.photo.img, 0, 0, W, fadeTo);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, g.H); ctx.clip();
+      k.coverImg(g.photo.img, 0, 0, W, g.H);
       if (grey) {
-        ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, W, fadeTo);
-        ctx.globalCompositeOperation = "multiply"; ctx.globalAlpha = 0.35; ctx.fillStyle = g.accent; ctx.fillRect(0, 0, W, fadeTo);
+        ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, W, g.H);
+        ctx.globalCompositeOperation = "multiply"; ctx.globalAlpha = 0.35; ctx.fillStyle = g.accent; ctx.fillRect(0, 0, W, g.H);
       }
       ctx.restore();
-      if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, Math.min(0.9, g.shade)); ctx.fillRect(0, 0, W, fadeTo); }
+      if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, Math.min(0.9, g.shade)); ctx.fillRect(0, 0, W, g.H); }
     } else k.photoHint(g, g.st + (fadeFrom - g.st) / 2 + 60);
     const top = ctx.createLinearGradient(0, 0, 0, g.st + 200);
     top.addColorStop(0, k.hexA(bg, 0.7)); top.addColorStop(1, k.hexA(bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, W, g.st + 200);
-    k.fadeBottom(g, fadeFrom, fadeTo);
+    if (g.photo) k.scrim(g, fadeFrom, fadeTo + 160);
   }
 
   // Slanted colour band with a big word, plus an optional small line after it.
@@ -1551,9 +1558,9 @@ window.BPG = window.BPG || {};
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
     const th = THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" ? t.look || {} : {};
-    const footerY = p.bottom - 4, statsTop = footerY - 184, subBase = statsTop - 34, nameBase = subBase - 62, bigBase = nameBase - 128;
+    const footerY = p.bottom - 4, statsTop = footerY - 166, subBase = statsTop - 30, nameBase = subBase - 56, bigBase = nameBase - 112;
     const g = {
-      W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 190,
+      W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 170,
       accent: t.accent || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
@@ -1570,11 +1577,14 @@ window.BPG = window.BPG || {};
       ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
       ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
     }
-    if (!k.photoArea(g, g.blockTop + 260)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
-    k.fadeBottom(g, g.blockTop - 260, g.blockTop + 40);
+    if (!k.photoArea(g, g.H)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
+    if (g.photo) k.scrim(g, g.blockTop - 240, g.blockTop + 220);
     if (g.photo) k.slash(g, g.blockTop - 40);
     k.header(g);
+    // A soft shadow keeps the text readable on top of the photo.
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 18;
     layout.draw(k, g);
+    ctx.restore();
     k.footer(g);
   }
   BPG.draw = draw;

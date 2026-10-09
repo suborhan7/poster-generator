@@ -137,9 +137,9 @@ window.BPG = window.BPG || {};
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
     const th = THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" ? t.look || {} : {};
-    const footerY = p.bottom - 4, statsTop = footerY - 184, subBase = statsTop - 34, nameBase = subBase - 62, bigBase = nameBase - 128;
+    const footerY = p.bottom - 4, statsTop = footerY - 166, subBase = statsTop - 30, nameBase = subBase - 56, bigBase = nameBase - 112;
     const g = {
-      W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 190,
+      W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 170,
       accent: t.accent || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
@@ -156,11 +156,14 @@ window.BPG = window.BPG || {};
       ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
       ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
     }
-    if (!k.photoArea(g, g.blockTop + 260)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
-    k.fadeBottom(g, g.blockTop - 260, g.blockTop + 40);
+    if (!k.photoArea(g, g.H)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
+    if (g.photo) k.scrim(g, g.blockTop - 240, g.blockTop + 220);
     if (g.photo) k.slash(g, g.blockTop - 40);
     k.header(g);
+    // A soft shadow keeps the text readable on top of the photo.
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 18;
     layout.draw(k, g);
+    ctx.restore();
     k.footer(g);
   }
   BPG.draw = draw;

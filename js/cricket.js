@@ -16,19 +16,19 @@ window.BPG = window.BPG || {};
   function photo(k, g, fadeFrom, fadeTo, grey) {
     const ctx = k.ctx, { W, bg } = g;
     if (g.photo) {
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, fadeTo); ctx.clip();
-      k.coverImg(g.photo.img, 0, 0, W, fadeTo);
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, g.H); ctx.clip();
+      k.coverImg(g.photo.img, 0, 0, W, g.H);
       if (grey) {
-        ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, W, fadeTo);
-        ctx.globalCompositeOperation = "multiply"; ctx.globalAlpha = 0.35; ctx.fillStyle = g.accent; ctx.fillRect(0, 0, W, fadeTo);
+        ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, W, g.H);
+        ctx.globalCompositeOperation = "multiply"; ctx.globalAlpha = 0.35; ctx.fillStyle = g.accent; ctx.fillRect(0, 0, W, g.H);
       }
       ctx.restore();
-      if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, Math.min(0.9, g.shade)); ctx.fillRect(0, 0, W, fadeTo); }
+      if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, Math.min(0.9, g.shade)); ctx.fillRect(0, 0, W, g.H); }
     } else k.photoHint(g, g.st + (fadeFrom - g.st) / 2 + 60);
     const top = ctx.createLinearGradient(0, 0, 0, g.st + 200);
     top.addColorStop(0, k.hexA(bg, 0.7)); top.addColorStop(1, k.hexA(bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, W, g.st + 200);
-    k.fadeBottom(g, fadeFrom, fadeTo);
+    if (g.photo) k.scrim(g, fadeFrom, fadeTo + 160);
   }
 
   // Slanted colour band with a big word, plus an optional small line after it.
