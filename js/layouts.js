@@ -49,10 +49,10 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, big = g.big.toUpperCase();
       const s = k.bigText(g, big, g.bigBase, 220);
       ctx.font = k.font(s, k.D); const gw = ctx.measureText(big).width;
-      ctx.font = k.font(64, k.D); const mw = ctx.measureText(g.val("minute")).width;
-      if (52 + gw + 40 + mw + 40 < g.W - 56) {
-        ctx.fillStyle = "#FFFFFF"; k.roundRect(52 + gw + 30, g.bigBase - 92, mw + 40, 88, 12); ctx.fill();
-        ctx.fillStyle = "#0B0F18"; ctx.fillText(g.val("minute"), 52 + gw + 50, g.bigBase - 22);
+      ctx.font = k.font(44, k.D); const mw = ctx.measureText(g.val("minute")).width;
+      if (52 + gw + 30 + mw + 30 < g.W - 56) {
+        ctx.fillStyle = "#FFFFFF"; k.roundRect(52 + gw + 22, g.bigBase - 64, mw + 28, 60, 10); ctx.fill();
+        ctx.fillStyle = "#0B0F18"; ctx.fillText(g.val("minute"), 52 + gw + 36, g.bigBase - 16);
       }
       k.nameText(g, g.val("player"), g.nameBase);
       k.subText(g, `${g.val("team")} vs ${g.val("opp")}`, g.subBase);
@@ -65,18 +65,18 @@ BPG.LAYOUTS = {
     draw(k, g) {
       const ctx = k.ctx;
       if (g.val("headline")) {
-        const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 110, k.D, 2, 50);
-        k.drawRich(lay, 52, g.statsTop + 10 - 290 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+        const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 76, k.D, 2, 44);
+        k.drawRich(lay, 52, g.statsTop + 10 - 200 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
       }
       const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
       ctx.textAlign = "center";
       [[g.val("s1"), g.val("t1")], [g.val("s2"), g.val("t2")]].forEach(([n, tm], i) => {
-        ctx.font = k.font(k.fit(String(n), g.W * 0.4, 330, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(n), xs[i], nb);
-        ctx.font = k.font(k.fit(String(tm).toUpperCase(), g.W * 0.42, 58, k.D), k.D); ctx.fillText(String(tm).toUpperCase(), xs[i], nb + 72);
+        ctx.font = k.font(k.fit(String(n), g.W * 0.4, 210, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(n), xs[i], nb);
+        ctx.font = k.font(k.fit(String(tm).toUpperCase(), g.W * 0.42, 40, k.D), k.D); ctx.fillText(String(tm).toUpperCase(), xs[i], nb + 50);
       });
-      ctx.fillStyle = g.accent; k.roundRect(g.W / 2 - 50, nb - 190, 100, 64, 32); ctx.fill();
-      ctx.font = k.font(40, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText("FT", g.W / 2, nb - 141);
-      ctx.font = k.font(32, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(g.val("potm"), g.W / 2, nb + 118, g.W - 112);
+      ctx.fillStyle = g.accent; k.roundRect(g.W / 2 - 40, nb - 120, 80, 50, 25); ctx.fill();
+      ctx.font = k.font(32, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText("FT", g.W / 2, nb - 82);
+      ctx.font = k.font(26, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(g.val("potm"), g.W / 2, nb + 86, g.W - 112);
       ctx.textAlign = "left";
     },
   },
@@ -113,14 +113,14 @@ BPG.LAYOUTS = {
     standard: true,
     draw(k, g) {
       const ctx = k.ctx;
-      ctx.fillStyle = g.accent; ctx.fillRect(56, g.bigBase - 110, 420, 96);
-      ctx.font = k.font(78, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText(g.big.toUpperCase(), 80, g.bigBase - 30, 380);
-      const room = g.footerY - 150 - (g.bigBase + 30), hd = String(g.val("headline")).toUpperCase();
-      let r = k.layoutRich(hd, g.W - 112, 104, k.D, 3, 50);
+      ctx.fillStyle = g.accent; ctx.fillRect(56, g.bigBase - 70, 280, 62);
+      ctx.font = k.font(50, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText(g.big.toUpperCase(), 74, g.bigBase - 18, 250);
+      const room = g.footerY - 110 - (g.bigBase + 20), hd = String(g.val("headline")).toUpperCase();
+      let r = k.layoutRich(hd, g.W - 112, 76, k.D, 3, 44);
       while (r.lines.length * r.size > room && r.size > 50) r = k.layoutRich(hd, g.W - 112, r.size - 4, k.D, 3, 50);
-      k.drawRich(r, 54, g.bigBase + 30 + r.size, r.size, k.D, "#FFFFFF", g.accent, "left");
-      ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)";
-      ctx.fillText(g.val("detail"), 56, g.bigBase + 30 + r.lines.length * r.size + 66, g.W - 112);
+      k.drawRich(r, 54, g.bigBase + 20 + r.size, r.size, k.D, "#FFFFFF", g.accent, "left");
+      ctx.font = k.font(30, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.fillText(g.val("detail"), 56, g.bigBase + 20 + r.lines.length * r.size + 44, g.W - 112);
     },
   },
 
@@ -148,21 +148,21 @@ BPG.LAYOUTS = {
     standard: false,
     draw(k, g) {
       const ctx = k.ctx, W = g.W;
-      const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
-      const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
+      const q = k.layoutRich(g.val("quote"), W - 160, 36, k.B, 6, 26, 500);
+      const panelTop = g.footerY - 60 - q.lines.length * q.size * 1.3 - 190;
       if (!k.bleedPhoto(g, panelTop + 20)) k.photoHint(g, (g.st + panelTop) / 2);
       k.header(g);
-      if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);
+      if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 110, panelTop - 80, 110, g.accent);
       const nm = String(g.val("name")).toUpperCase();
       ctx.textAlign = "center";
-      ctx.font = k.font(k.fit(nm, W - 112, 120, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, W / 2, panelTop + 150);
-      const dy = panelTop + 215;
-      ctx.fillStyle = k.hexA("#FFFFFF", 0.5); ctx.fillRect(110, dy - 4, W / 2 - 200, 3); ctx.fillRect(W / 2 + 90, dy - 4, W / 2 - 200, 3);
-      ctx.font = k.font(110, k.D); ctx.fillStyle = g.accent; ctx.fillText("“ ”", W / 2, dy + 52);
-      k.drawRich(q, W / 2, panelTop + 300, q.size * 1.28, k.B, "#FFFFFF", g.accent, "center", 500);
+      ctx.font = k.font(k.fit(nm, W - 112, 76, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, W / 2, panelTop + 90);
+      const dy = panelTop + 130;
+      ctx.fillStyle = k.hexA("#FFFFFF", 0.5); ctx.fillRect(140, dy - 4, W / 2 - 200, 2); ctx.fillRect(W / 2 + 60, dy - 4, W / 2 - 200, 2);
+      ctx.font = k.font(70, k.D); ctx.fillStyle = g.accent; ctx.fillText("“ ”", W / 2, dy + 34);
+      k.drawRich(q, W / 2, panelTop + 196, q.size * 1.3, k.B, "#FFFFFF", g.accent, "center", 500);
       if (g.val("context")) {
-        ctx.font = k.font(32, k.C, 700); k.spaced(4); ctx.fillStyle = k.hexA("#FFFFFF", 0.6);
-        ctx.fillText(String(g.val("context")).toUpperCase(), W / 2, panelTop + 300 + q.lines.length * q.size * 1.28 + 20); k.spaced(0);
+        ctx.font = k.font(24, k.C, 700); k.spaced(4); ctx.fillStyle = k.hexA("#FFFFFF", 0.6);
+        ctx.fillText(String(g.val("context")).toUpperCase(), W / 2, panelTop + 196 + q.lines.length * q.size * 1.3 + 10); k.spaced(0);
       }
       ctx.textAlign = "left";
       k.footer(g);
@@ -263,18 +263,7 @@ BPG.LAYOUTS = {
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
       if (!k.bleedPhoto(g, textTop - 10)) { ctx.fillStyle = panel; ctx.fillRect(0, 0, W, photoBottom); k.photoHint(g, photoBottom / 2); }
 
-      // Small logo in the top corner
-      const logo = BPG.logoImage(), lx = 40, ly = Math.max(28, st - 20);
-      if (logo) { const sc = 72 / Math.max(logo.width, logo.height); ctx.drawImage(logo, lx, ly, logo.width * sc, logo.height * sc); }
-      else {
-        ctx.save(); ctx.translate(lx + 32, ly + 28); ctx.rotate(-0.08);
-        ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 12;
-        ctx.fillStyle = accent; k.roundRect(-32, -25, 64, 50, 9); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(-15, 22); ctx.lineTo(-25, 39); ctx.lineTo(0, 24); ctx.fill(); ctx.shadowBlur = 0;
-        ctx.font = k.font(34, k.D); ctx.fillStyle = "#14151A"; ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
-        ctx.restore(); ctx.textAlign = "left";
-        k.wordmark(g, lx + 80, ly + 42, "left", 32);
-      }
+      const ly = Math.max(28, st - 20);
 
       // Photo credit
       if (g.val("credit")) {
@@ -333,7 +322,8 @@ BPG.LAYOUTS = {
         ctx.fillStyle = i < lvl ? accent : "#3A3D45"; ctx.fillRect(bx + meterY * 0.18, meterY + 4 - bh, 24, bh); ctx.restore();
       }
       ctx.font = k.font(28, k.C, 700); k.spaced(2); ctx.fillStyle = cream; ctx.textAlign = "right";
-      if (s.verdict) ctx.fillText(s.verdict, W - 56, meterY, W - 480); ctx.textAlign = "left"; k.spaced(0);
+      if (s.verdict) ctx.fillText(s.verdict, W - 56 - 270, meterY, W - 760); ctx.textAlign = "left"; k.spaced(0);
+      k.brandCorner(g, meterY);
     },
   },
 };

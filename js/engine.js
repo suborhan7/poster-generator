@@ -108,12 +108,18 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
+  // Logo + name, small, in the bottom-right corner. y is the baseline of the bottom row.
+  k.brandCorner = (g, y) => {
+    const size = 40;
+    k.logoMark(g, g.W - 56 - size, y - size + 4, size);
+    if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+  };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.
-  k.wordmark = (g, x, y, align, size = 30) => {
+  k.wordmark = (g, x, y, align, size = 22) => {
     const w = String(env.state().brand.name || "").toUpperCase().split(/\s+/).slice(0, 2);
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
-    ctx.font = k.font(size, D); k.spaced(1);
+    ctx.font = k.font(size, C, 700); k.spaced(Math.round(size * 0.18));
     const a = (w[0] || "") + " ", b = w[1] || "", wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
     const left = align === "right" ? x - wa - wb : x;
     ctx.fillStyle = "#FFFFFF"; ctx.fillText(a, left, y); ctx.fillStyle = g.accent; ctx.fillText(b, left + wa, y);
@@ -157,28 +163,27 @@ BPG.createKit = function (ctx, env) {
     ctx.beginPath(); ctx.moveTo(0, y + 62); ctx.lineTo(g.W, y - 28); ctx.stroke(); ctx.restore();
   };
 
-  // Top row: just the small logo and name on the right.
+  // Top row: kept empty so the photo stays clean.
   k.header = (g) => {
     const { W, st: top, accent } = g, s = env.state(), logo = env.logo();
-    k.logoMark(g, W - 56 - 56, top + 18, 56);
-    if (!logo) k.wordmark(g, W - 56 - 56 - 14, top + 58, "right");
+    // Nothing sits on top of the photo: the logo and name live in the bottom-right corner (see footer).
     ctx.textBaseline = "alphabetic";
   };
   // Bottom row: your verdict, if you typed one.
   k.footer = (g) => {
     const { W, footerY: y, accent } = g, s = env.state();
     // The match tag, if you typed one, sits small at the bottom right so it never covers the photo.
-    const kick = (s.kicker || "").trim().toUpperCase();
+    k.brandCorner(g, y);
+    const kick = (s.kicker || "").trim().toUpperCase(), v = (s.verdict || "").trim();
     if (kick) {
-      ctx.font = k.font(22, C, 700); k.spaced(4); ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.textAlign = "right";
-      ctx.fillText(kick, W - 56, y, W * 0.4); ctx.textAlign = "left"; k.spaced(0);
+      ctx.font = k.font(20, C, 700); k.spaced(4); ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.fillText(kick, 56, v ? y - 40 : y, W * 0.5); k.spaced(0);
     }
-    const v = (s.verdict || "").trim();
     if (v) {
       ctx.font = k.font(30, C, 700); k.spaced(4); ctx.fillStyle = accent;
       const lab = BPG.BRAND.verdictLabel; ctx.fillText(lab, 56, y);
       const lw = ctx.measureText(lab).width; k.spaced(0);
-      ctx.font = k.font(k.fit(v, W - 56 - lw - 22 - (kick ? W * 0.42 : 0), 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
+      ctx.font = k.font(k.fit(v, W - 56 - lw - 22 - 300, 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
       ctx.fillText(v, 56 + lw + 22, y + 2);
       return;
     }
@@ -222,30 +227,30 @@ BPG.createKit = function (ctx, env) {
     ctx.textAlign = prev;
   };
   k.bigText = (g, text, y, size) => {
-    const s = k.fit(text.toUpperCase(), g.W - 112, size || 170, D);
+    const s = k.fit(text.toUpperCase(), g.W - 112, Math.min(size || 120, 120), D);
     ctx.font = k.font(s, D); ctx.fillStyle = g.accent; ctx.fillText(text.toUpperCase(), 52, y); return s;
   };
   k.nameText = (g, text, y, size) => {
-    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 108, D);
+    const s = k.fit(String(text).toUpperCase(), g.W - 112, Math.min(size || 72, 72), D);
     ctx.font = k.font(s, D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(text).toUpperCase(), 54, y);
   };
   k.subText = (g, text, y) => {
-    ctx.font = k.font(44, C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)"; ctx.fillText(text, 56, y, g.W - 112);
+    ctx.font = k.font(30, C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)"; ctx.fillText(text, 56, y, g.W - 112);
   };
   k.label = (text, x, y, color, size = 48) => {
     ctx.font = k.font(size, C, 700); k.spaced(4); ctx.fillStyle = color; ctx.fillText(String(text).toUpperCase(), x, y); k.spaced(0);
   };
 
   // A row of stat columns: [["Runs", "52"], ["Balls", "38"], ...]
-  k.stats = (g, items, y, h = 116) => {
+  k.stats = (g, items, y, h = 84) => {
     const pad = 56, n = items.length; if (!n) return;
     const cw = (g.W - pad * 2) / n;
     items.forEach(([label, value], i) => {
       const x = pad + i * cw;
       if (i) { ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fillRect(x, y + 14, 2, h - 28); }
       ctx.textAlign = "center";
-      ctx.font = k.font(k.fit(String(value), cw - 24, 76, D), D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(value), x + cw / 2, y + h * 0.58);
-      ctx.font = k.font(26, C, 700); k.spaced(3); ctx.fillStyle = g.accent;
+      ctx.font = k.font(k.fit(String(value), cw - 24, 52, D), D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(value), x + cw / 2, y + h * 0.58);
+      ctx.font = k.font(20, C, 700); k.spaced(3); ctx.fillStyle = g.accent;
       ctx.fillText(String(label).toUpperCase(), x + cw / 2, y + h * 0.9, cw - 16); k.spaced(0);
       ctx.textAlign = "left";
     });
