@@ -65,7 +65,7 @@ window.BPG = window.BPG || {};
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
   function renderFields() {
     const box = $("fields"), t = T[state.tpl]; box.innerHTML = "";
-    addField(box, "f_kicker", "Top-left tag (optional, leave empty to hide)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
+    addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => setVal(id, v)));

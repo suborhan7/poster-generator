@@ -157,17 +157,9 @@ BPG.createKit = function (ctx, env) {
     ctx.beginPath(); ctx.moveTo(0, y + 62); ctx.lineTo(g.W, y - 28); ctx.stroke(); ctx.restore();
   };
 
-  // Top row: match tag pill on the left, handle or logo on the right.
+  // Top row: just the small logo and name on the right.
   k.header = (g) => {
     const { W, st: top, accent } = g, s = env.state(), logo = env.logo();
-    const kick = (s.kicker || "").toUpperCase();
-    if (kick) {
-      ctx.font = k.font(36, C, 700); k.spaced(3);
-      const w = Math.min(ctx.measureText(kick).width, W - 360);
-      ctx.fillStyle = accent; k.roundRect(56, top + 18, w + 44, 58, 29); ctx.fill();
-      ctx.fillStyle = k.inkOn(accent); ctx.textBaseline = "middle";
-      ctx.fillText(kick, 78, top + 49, W - 360); k.spaced(0);
-    }
     k.logoMark(g, W - 56 - 56, top + 18, 56);
     if (!logo) k.wordmark(g, W - 56 - 56 - 14, top + 58, "right");
     ctx.textBaseline = "alphabetic";
@@ -175,12 +167,18 @@ BPG.createKit = function (ctx, env) {
   // Bottom row: your verdict, if you typed one.
   k.footer = (g) => {
     const { W, footerY: y, accent } = g, s = env.state();
+    // The match tag, if you typed one, sits small at the bottom right so it never covers the photo.
+    const kick = (s.kicker || "").trim().toUpperCase();
+    if (kick) {
+      ctx.font = k.font(22, C, 700); k.spaced(4); ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.textAlign = "right";
+      ctx.fillText(kick, W - 56, y, W * 0.4); ctx.textAlign = "left"; k.spaced(0);
+    }
     const v = (s.verdict || "").trim();
     if (v) {
       ctx.font = k.font(30, C, 700); k.spaced(4); ctx.fillStyle = accent;
       const lab = BPG.BRAND.verdictLabel; ctx.fillText(lab, 56, y);
       const lw = ctx.measureText(lab).width; k.spaced(0);
-      ctx.font = k.font(k.fit(v, W - 56 - lw - 90, 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
+      ctx.font = k.font(k.fit(v, W - 56 - lw - 22 - (kick ? W * 0.42 : 0), 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
       ctx.fillText(v, 56 + lw + 22, y + 2);
       return;
     }
