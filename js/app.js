@@ -94,7 +94,7 @@ window.BPG = window.BPG || {};
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
   ["zoom", "offx", "offy", "shade"].forEach((id) => $(id).addEventListener("input", draw));
-  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0.15; draw(); });
+  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0; draw(); });
 
   // ---------- Photos ----------
   function loadImage(file) {
@@ -156,9 +156,7 @@ window.BPG = window.BPG || {};
       ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
       ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
     }
-    if (!k.photoArea(g, g.H)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
-    if (g.photo) k.scrim(g, g.blockTop - 240, g.blockTop + 220);
-    if (g.photo) k.slash(g, g.blockTop - 40);
+    if (!k.fitPhoto(g, 0, g.blockTop - 8)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
     k.header(g);
     // A soft shadow keeps the text readable on top of the photo.
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 18;

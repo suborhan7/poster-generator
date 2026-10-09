@@ -15,6 +15,7 @@ window.BPG = window.BPG || {};
   // grey: 0 to 1 takes the colour out (used for wickets and ducks).
   function photo(k, g, fadeFrom, fadeTo, grey) {
     const ctx = k.ctx, { W, bg } = g;
+    if (k.fitPhoto(g, 0, fadeTo - 70, grey)) return;
     if (g.photo) {
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, g.H); ctx.clip();
       k.coverImg(g.photo.img, 0, 0, W, g.H);
@@ -134,6 +135,7 @@ window.BPG = window.BPG || {};
 
   // Printed-dot texture that grows towards the bottom right.
   function halftone(k, x, y, w, h, color, alpha) {
+    return; // switched off: the text panel stays clean
     const ctx = k.ctx, step = 22; ctx.save(); ctx.fillStyle = k.hexA(color, alpha);
     for (let py = y; py < y + h; py += step) for (let px = x; px < x + w; px += step) {
       const t = ((px - x) / w + (py - y) / h) / 2, r = step * 0.42 * t;
@@ -148,7 +150,7 @@ window.BPG = window.BPG || {};
     const s = k.fit(t, g.W * 0.96, 820, k.D, "", 100);
     ctx.font = k.font(s, k.D); ctx.textAlign = "center";
     if (behind) { ctx.fillStyle = g.photo ? g.accent : k.hexA(g.accent, 0.16); ctx.fillText(t, g.W / 2, base); }
-    else { ctx.lineWidth = 5; ctx.strokeStyle = k.hexA(g.accent, 0.85); ctx.strokeText(t, g.W / 2, base); }
+    // over a normal photo the number is left out, so it never covers the player
     ctx.textAlign = "left";
   }
 

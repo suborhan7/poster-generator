@@ -75,6 +75,29 @@ BPG.createKit = function (ctx, env) {
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
   };
+  // The photo section: the photo fitted into the box from `top` to `bottom` and resting on its bottom edge.
+  // Space around it is filled with a soft blurred copy of the same photo (not for cutouts).
+  // The zoom and move sliders still work if you want to crop in.
+  k.fitPhoto = (g, top, bottom, grey) => {
+    if (!g.photo) return false;
+    const img = g.photo.img, a = env.adjust(), bh = bottom - top;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, top, g.W, bh); ctx.clip();
+    if (!g.photo.cut) {
+      const cs = Math.max(g.W / img.width, bh / img.height) * 1.1, cw = img.width * cs, ch = img.height * cs;
+      if ("filter" in ctx) { ctx.filter = "blur(36px) brightness(0.45)"; ctx.drawImage(img, (g.W - cw) / 2, top + (bh - ch) / 2, cw, ch); ctx.filter = "none"; }
+      else { ctx.globalAlpha = 0.25; ctx.drawImage(img, (g.W - cw) / 2, top + (bh - ch) / 2, cw, ch); ctx.globalAlpha = 1; }
+    }
+    // Fill the section edge to edge when that only trims a little; otherwise show the whole photo.
+    const fill = Math.max(g.W / img.width, bh / img.height), fit = Math.min(g.W / img.width, bh / img.height);
+    const s = (fit / fill > 0.78 ? fill : fit) * a.zoom, w = img.width * s, h = img.height * s;
+    const x = (g.W - w) / 2 + (a.offx / 100) * g.W, y = top + Math.max(0, bh - h) + (h > bh ? (bh - h) * 0.3 : 0) + (a.offy / 100) * bh;
+    ctx.drawImage(img, x, y, w, h);
+    if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, top, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
+    if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, top, g.W, bh); }
+    ctx.restore();
+    ctx.fillStyle = g.accent; ctx.fillRect(0, bottom - 6, g.W, 6);
+    return true;
+  };
   // Darkens the photo towards the bottom so text can sit on top of it, without hiding the photo.
   k.scrim = (g, from, to) => {
     const gr = ctx.createLinearGradient(0, from, 0, to);

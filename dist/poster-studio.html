@@ -107,7 +107,7 @@ img { max-width: 100%; }
         <div class="field wide"><label for="photo1">Player photo (a cutout PNG looks best)</label><input id="photo1" type="file" accept="image/*"></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
         <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
-        <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0.15"></div>
+        <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0"></div>
         <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
         <div class="field"><label for="offy">Move up / down</label><input id="offy" type="range" min="-50" max="50" step="1" value="0"></div>
         <div class="field wide"><button class="ghost" id="resetPhoto" type="button">Reset photo position</button></div>
@@ -363,6 +363,29 @@ BPG.createKit = function (ctx, env) {
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
   };
+  // The photo section: the photo fitted into the box from `top` to `bottom` and resting on its bottom edge.
+  // Space around it is filled with a soft blurred copy of the same photo (not for cutouts).
+  // The zoom and move sliders still work if you want to crop in.
+  k.fitPhoto = (g, top, bottom, grey) => {
+    if (!g.photo) return false;
+    const img = g.photo.img, a = env.adjust(), bh = bottom - top;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, top, g.W, bh); ctx.clip();
+    if (!g.photo.cut) {
+      const cs = Math.max(g.W / img.width, bh / img.height) * 1.1, cw = img.width * cs, ch = img.height * cs;
+      if ("filter" in ctx) { ctx.filter = "blur(36px) brightness(0.45)"; ctx.drawImage(img, (g.W - cw) / 2, top + (bh - ch) / 2, cw, ch); ctx.filter = "none"; }
+      else { ctx.globalAlpha = 0.25; ctx.drawImage(img, (g.W - cw) / 2, top + (bh - ch) / 2, cw, ch); ctx.globalAlpha = 1; }
+    }
+    // Fill the section edge to edge when that only trims a little; otherwise show the whole photo.
+    const fill = Math.max(g.W / img.width, bh / img.height), fit = Math.min(g.W / img.width, bh / img.height);
+    const s = (fit / fill > 0.78 ? fill : fit) * a.zoom, w = img.width * s, h = img.height * s;
+    const x = (g.W - w) / 2 + (a.offx / 100) * g.W, y = top + Math.max(0, bh - h) + (h > bh ? (bh - h) * 0.3 : 0) + (a.offy / 100) * bh;
+    ctx.drawImage(img, x, y, w, h);
+    if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, top, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
+    if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, top, g.W, bh); }
+    ctx.restore();
+    ctx.fillStyle = g.accent; ctx.fillRect(0, bottom - 6, g.W, 6);
+    return true;
+  };
   // Darkens the photo towards the bottom so text can sit on top of it, without hiding the photo.
   k.scrim = (g, from, to) => {
     const gr = ctx.createLinearGradient(0, from, 0, to);
@@ -594,7 +617,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx;
       if (g.val("headline")) {
         const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 110, k.D, 2, 50);
-        k.drawRich(lay, 52, g.blockTop + 100 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+        k.drawRich(lay, 52, g.blockTop + 116 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
       }
       const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
       ctx.textAlign = "center";
@@ -678,9 +701,7 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, W = g.W;
       const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
       const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
-      if (!k.photoArea(g, g.H)) k.photoHint(g, (g.st + panelTop) / 2);
-      else k.scrim(g, panelTop - 200, panelTop + 160);
-      k.slash(g, panelTop + 10);
+      if (!k.fitPhoto(g, 0, panelTop - 10)) k.photoHint(g, (g.st + panelTop) / 2);
       k.header(g);
       if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);
       const nm = String(g.val("name")).toUpperCase();
@@ -757,12 +778,12 @@ BPG.LAYOUTS = {
     standard: false,
     draw(k, g) {
       const ctx = k.ctx, hl = g.val("headline");
-      if (!k.photoArea(g, g.H)) k.photoHint(g, g.H / 2);
-      if (hl) k.fadeBottom(g, g.H * 0.55, g.sb - 120);
+      const lay = hl ? k.layoutRich(String(hl).toUpperCase(), g.W - 112, 130, k.D, 2, 60) : null;
+      const pb = lay ? g.footerY - 90 - lay.lines.length * lay.size * 1.02 : g.H;
+      if (!k.fitPhoto(g, 0, pb)) k.photoHint(g, g.H / 2);
       ctx.lineWidth = 10; ctx.strokeStyle = g.accent; ctx.strokeRect(28, 28, g.W - 56, g.H - 56);
       k.header(g);
-      if (hl) {
-        const lay = k.layoutRich(String(hl).toUpperCase(), g.W - 112, 130, k.D, 2, 60);
+      if (lay) {
         k.drawRich(lay, 54, g.footerY - 60 - (lay.lines.length - 1) * lay.size * 1.02, lay.size * 1.02, k.D, "#FFFFFF", g.accent, "left");
       }
       k.footer(g);
@@ -781,29 +802,22 @@ BPG.LAYOUTS = {
       const meterY = H > 1500 ? sb - 30 : H - 70;
       const body = g.val("body") ? k.layoutRich(g.val("body"), W - 112, 34, k.B, 3, 26, 500) : null;
       const stats = String(g.val("stats")).split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0] && x[1]).slice(0, 4);
-      const statH = 118, maxText = (meterY - barTop) * 0.46;
+      const statH = 118, maxText = (meterY - barTop) * 0.34;
       let hl, textH;
-      for (let size = 104; ; size -= 6) {
+      for (let size = 96; ; size -= 6) {
         hl = k.layoutRich(String(g.val("headline")).toUpperCase(), W - 112, size, k.D, 3, 54);
         textH = hl.lines.length * hl.size * 0.98 + (body ? 16 + body.lines.length * body.size * 1.4 : 0) + (stats.length ? 30 + statH : 0);
         if (textH <= maxText || size <= 60) break;
       }
-      const textTop = meterY - 64 - textH, ph = 104, pillTop = textTop - 30 - ph;
+      const textTop = meterY - 64 - textH, ph = 104, pillTop = textTop - 50 - ph;
       const photoBottom = textTop;
 
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-      if (g.photo) {
-        k.coverImg(g.photo.img, 0, 0, W, H);
-        if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, g.shade); ctx.fillRect(0, 0, W, H); }
-        k.scrim(g, pillTop - 260, textTop + 140);
-      } else {
-        ctx.fillStyle = panel; ctx.fillRect(0, barTop + barH, W, pillTop - barTop - barH);
-        k.photoHint(g, (barTop + barH + pillTop) / 2);
-      }
-      const topShade = ctx.createLinearGradient(0, 0, 0, barTop + barH + 120);
-      topShade.addColorStop(0, k.hexA(bg, 0.85)); topShade.addColorStop(1, k.hexA(bg, 0));
-      ctx.fillStyle = topShade; ctx.fillRect(0, 0, W, barTop + barH + 120);
       const barBottom = barTop + barH;
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      if (!k.fitPhoto(g, barBottom, pillTop + 82)) {
+        ctx.fillStyle = panel; ctx.fillRect(0, barBottom, W, pillTop + 82 - barBottom);
+        k.photoHint(g, (barBottom + pillTop) / 2);
+      }
       ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
 
       // Brand bar
@@ -910,6 +924,7 @@ window.BPG = window.BPG || {};
   // grey: 0 to 1 takes the colour out (used for wickets and ducks).
   function photo(k, g, fadeFrom, fadeTo, grey) {
     const ctx = k.ctx, { W, bg } = g;
+    if (k.fitPhoto(g, 0, fadeTo - 70, grey)) return;
     if (g.photo) {
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, g.H); ctx.clip();
       k.coverImg(g.photo.img, 0, 0, W, g.H);
@@ -1029,6 +1044,7 @@ window.BPG = window.BPG || {};
 
   // Printed-dot texture that grows towards the bottom right.
   function halftone(k, x, y, w, h, color, alpha) {
+    return; // switched off: the text panel stays clean
     const ctx = k.ctx, step = 22; ctx.save(); ctx.fillStyle = k.hexA(color, alpha);
     for (let py = y; py < y + h; py += step) for (let px = x; px < x + w; px += step) {
       const t = ((px - x) / w + (py - y) / h) / 2, r = step * 0.42 * t;
@@ -1043,7 +1059,7 @@ window.BPG = window.BPG || {};
     const s = k.fit(t, g.W * 0.96, 820, k.D, "", 100);
     ctx.font = k.font(s, k.D); ctx.textAlign = "center";
     if (behind) { ctx.fillStyle = g.photo ? g.accent : k.hexA(g.accent, 0.16); ctx.fillText(t, g.W / 2, base); }
-    else { ctx.lineWidth = 5; ctx.strokeStyle = k.hexA(g.accent, 0.85); ctx.strokeText(t, g.W / 2, base); }
+    // over a normal photo the number is left out, so it never covers the player
     ctx.textAlign = "left";
   }
 
@@ -1518,7 +1534,7 @@ window.BPG = window.BPG || {};
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
   ["zoom", "offx", "offy", "shade"].forEach((id) => $(id).addEventListener("input", draw));
-  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0.15; draw(); });
+  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0; draw(); });
 
   // ---------- Photos ----------
   function loadImage(file) {
@@ -1580,9 +1596,7 @@ window.BPG = window.BPG || {};
       ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
       ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
     }
-    if (!k.photoArea(g, g.H)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
-    if (g.photo) k.scrim(g, g.blockTop - 240, g.blockTop + 220);
-    if (g.photo) k.slash(g, g.blockTop - 40);
+    if (!k.fitPhoto(g, 0, g.blockTop - 8)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
     k.header(g);
     // A soft shadow keeps the text readable on top of the photo.
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 18;
