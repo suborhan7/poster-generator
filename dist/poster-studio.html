@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Borhan Poster Studio</title>
 <meta name="theme-color" content="#0B1426">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Borhan Studio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
@@ -36,7 +38,17 @@ html, body { background: var(--bg); color: var(--ink); }
 body { font-family: var(--font-body); font-size: 15px; padding-inline: 16px; padding-block: 16px 32px; }
 * { box-sizing: border-box; }
 .wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
-@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+.wrap > .rail { grid-column: 1; grid-row: 1 / span 2; }
+.wrap > .stage { grid-column: 2; grid-row: 1 / span 2; }
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* Wide screens: form | poster | caption, so nothing sits empty. */
+@media (min-width: 1180px) {
+  header.top { max-width: 1560px; }
+  .wrap { max-width: 1560px; grid-template-columns: minmax(0, 400px) minmax(0, 1fr) minmax(0, 320px); }
+  .wrap > .side { grid-column: 3; grid-row: 1; position: sticky; top: 12px; }
+}
+@media (min-width: 861px) and (max-width: 1179px) { .wrap > .side { grid-column: 1; grid-row: 3; } }
+@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } .wrap > .rail, .wrap > .stage, .wrap > .side { grid-column: 1; grid-row: auto; } }
 header.top { max-width: 1240px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 header.top h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: .01em; margin: 0; text-transform: uppercase; text-wrap: balance; }
 header.top p { margin: 0; color: var(--muted); }
@@ -77,9 +89,16 @@ canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); b
 /* Keep the preview in view while editing, so slider changes show as you drag. */
 @media (max-width: 860px) {
   .stage { order: -1; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; gap: 8px; }
-  canvas#poster { max-height: 34vh; }
-  .actions .primary { padding: 10px 16px; font-size: 14px; }
-  .actions .ghost { padding: 8px 12px; font-size: 13px; }
+  canvas#poster { max-height: 31vh; }
+  #platforms button { padding: 4px 10px; font-size: 13px; }
+  .actions { flex-wrap: nowrap; width: 100%; gap: 6px; }
+  .actions button { flex: 1; padding: 9px 6px; font-size: 13px; letter-spacing: 0; white-space: nowrap; }
+  .actions .primary { font-size: 14px; }
+  .status:empty { display: none; }
+  header.top { margin-bottom: 4px; }
+  header.top h1 { font-size: 22px; }
+  header.top p { display: none; }
+  .wrap { gap: 14px; }
 }
 .save-sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
 .save-sheet img { max-width: 100%; max-height: calc(100vh - 120px); border-radius: 8px; }
@@ -91,12 +110,20 @@ details[open] summary { margin-bottom: 12px; }
 body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
+
+.ver { margin-left: auto; font-size: 12px; color: var(--muted); }
+.side textarea { width: 100%; font: 400 14px/1.45 var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 10px; resize: vertical; min-height: 160px; }
+.row2 { display: flex; gap: 8px; }
+.row2 .primary { flex: 1; }
+.wide-btn { width: 100%; }
+.seg#ctas button { padding: 5px 11px; font-size: 13px; }
 </style>
 </head>
 <body>
 <header class="top">
   <h1>Borhan Poster Studio</h1>
   <p>Pick a card, type the details, add a photo, download or share.</p>
+  <span class="ver" id="ver"></span>
 </header>
 
 <div class="wrap">
@@ -147,12 +174,32 @@ img { max-width: 100%; }
     <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
     <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
     <div class="actions">
-      <button class="primary" id="download" type="button">Download PNG</button>
-      <button class="ghost" id="share" type="button">Share to app</button>
-      <button class="ghost" id="showImg" type="button">Show image to save</button>
+      <button class="primary" id="download" type="button">Download</button>
+      <button class="ghost" id="share" type="button">Share</button>
+      <button class="ghost" id="showImg" type="button">Show image</button>
     </div>
     <div class="status" id="status" role="status"></div>
   </div>
+
+  <aside class="side">
+    <section class="box">
+      <span class="label">Caption &amp; hashtags</span>
+      <p class="hint">Written from the card. Edit it if you like, then copy and paste into your post.</p>
+      <div class="seg" id="ctas" role="group" aria-label="Comment line language"></div>
+      <textarea id="caption" rows="8" aria-label="Caption"></textarea>
+      <div class="row2">
+        <button class="primary" id="copyCaption" type="button">Copy caption</button>
+        <button class="ghost" id="resetCaption" type="button">Rewrite</button>
+      </div>
+    </section>
+    <section class="box">
+      <span class="label">Post everywhere</span>
+      <button class="ghost wide-btn" id="allSizes" type="button">Download both sizes (4:5 and 9:16)</button>
+      <p class="hint">4:5 works for Instagram and Facebook posts. 9:16 is for TikTok, Reels and Stories.</p>
+      <button class="ghost wide-btn" id="install" type="button" hidden>Install as an app</button>
+      <p class="hint" id="installHint"></p>
+    </section>
+  </aside>
 </div>
 
 
@@ -167,6 +214,9 @@ img { max-width: 100%; }
 // Brand defaults, colour themes and platform sizes.
 // This is the file to edit when you change your brand or add a team colour theme.
 window.BPG = window.BPG || {};
+
+// Shown at the top of the page, so you can tell if your phone has the latest version.
+BPG.VERSION = "9 Oct 2026 · v14";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -1634,6 +1684,63 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Caption and hashtags written from the card's details, ready to copy into Instagram, Facebook or TikTok.
+// BPG.caption(template, val, extra) returns the text. Edit the lines below to change the wording.
+window.BPG = window.BPG || {};
+
+(() => {
+  const plain = (s) => String(s || "").replace(/\*([^*]+)\*/g, "$1").replace(/\s+/g, " ").trim();
+  const n = (v) => parseInt(String(v).split("/")[0].replace(/[^\d]/g, ""), 10) || 0;
+  const tag = (s) => { const t = plain(s).replace(/[^\p{L}\p{N}]+/gu, ""); return t ? "#" + t : ""; };
+  const short = (s) => (BPG.teamShort && BPG.teamName && BPG.teamName(s) ? BPG.teamShort(BPG.teamName(s)) : plain(s).slice(0, 3).toUpperCase());
+
+  // One line per card type. v(id) reads a field.
+  const LINES = {
+    batting: (v, t) => `${t.milestone === "100" ? "💯" : "🔥"} ${v("player")} brings up a ${t.milestone === "100" ? "hundred" : "fifty"} against ${v("opp")}! ${v("runs")} off ${v("balls")} balls (${v("fours")}x4, ${v("sixes")}x6).`,
+    knock: (v) => `${v("player")}: ${v("runs")} off ${v("balls")} against ${v("opp")}. ${v("fours")} fours, ${v("sixes")} sixes.`,
+    wicket: (v) => `GONE! ${v("batter")} out for ${v("runs")} (${v("balls")}), ${v("how")}. ${v("score")}.`,
+    bowling: (v) => `🔥 ${v("player")} takes ${v("wkts")}/${v("runs")} in ${v("overs")} overs against ${v("opp")}.`,
+    over: (v) => `Over ${v("over")} from ${v("player")}: ${v("balls")}`,
+    scoreupd: (v) => `${v("status")}: ${v("team")} ${v("score")} (${v("overs")} ov). ${v("detail")}`,
+    innings: (v) => `Innings break. ${v("team")} ${v("score")} (${v("overs")} ov), target ${n(v("score")) + 1}. Top scorer ${v("topbat")}, best bowler ${v("topbowl")}.`,
+    result: (v) => `${v("headline")}! ${v("t1")} ${v("s1")} beat ${v("t2")} ${v("s2")}. Player of the match: ${v("potm")}.`,
+    form: (v) => `${v("player")}, ${v("title")}: ${v("scores")}`,
+    toss: (v) => `${v("player")} ${v("stamp")}. ${v("detail")}`,
+    goal: (v) => `⚽ GOAL! ${v("player")} scores for ${v("team")} (${v("minute")}). ${v("score")}. Assist: ${v("assist")}.`,
+    fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
+    redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
+    rating: (v) => `${v("player")} vs ${v("opp")}: ${v("rating")}/10. ${v("stats")}`,
+    reaction: (v) => `${v("headline")}\n\n${v("body")}`,
+    status: (v) => `${v("player")}: ${v("stamp")}. ${v("detail")}`,
+    hottake: (v) => `Hot take: ${v("quote")}`,
+    quote: (v) => `"${v("quote")}" ${v("name")}, ${v("context")}.`,
+    toplist: (v, t, raw) => `${v("title")}\n${String(raw("items")).split("\n").filter((l) => l.trim()).map((l, i) => `${i + 1}. ${l.split("|").reverse().map((x) => x.trim()).join(": ")}`).join("\n")}`,
+    versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
+    breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
+    frame: (v) => `${v("headline")}`,
+  };
+
+  BPG.CTAS = {
+    en: "What's your take? Comment below 👇",
+    bn: "আপনার মতামত কমেন্টে জানান 👇",
+    banglish: "Apnar ki mone hoy? Comment e janan 👇",
+    none: "",
+  };
+
+  BPG.caption = (t, val, opts = {}) => {
+    const v = (id) => plain(val(id));
+    const line = (LINES[t.layout] || (() => ""))(v, t, val)
+      .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
+    const teams = [val("team"), val("opp"), val("t1"), val("t2")].map(plain).filter(Boolean);
+    const sport = t.cat === "football" ? "#Football" : t.cat === "cricket" ? "#Cricket" : "";
+    const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
+    const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
+    return [line, opts.verdict ? `Borhan's verdict: ${plain(opts.verdict)}` : "", BPG.CTAS[opts.cta || "en"], tags].filter(Boolean).join("\n\n");
+  };
+})();
+
+</script>
+<script>
 // The form, the live preview and the download/share buttons.
 window.BPG = window.BPG || {};
 
@@ -1645,7 +1752,7 @@ window.BPG = window.BPG || {};
   const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
   const state = {
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
-    values: {}, kicker: "", verdict: "", theme: "brand", brand: { ...BPG.BRAND },
+    values: {}, kicker: "", verdict: "", cta: "en", theme: "brand", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null };
   let logoImg = null;
@@ -1745,7 +1852,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { renderCats(); renderTypes(); renderFields(); draw(); }
+  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); draw(); }
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
@@ -1790,7 +1897,8 @@ window.BPG = window.BPG || {};
   }
 
   // ---------- Drawing ----------
-  function draw() {
+  function draw() { drawCard(); if (BPG.ready) updateCaption(); }
+  function drawCard() {
     const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
@@ -1823,6 +1931,25 @@ window.BPG = window.BPG || {};
     k.footer(g);
   }
   BPG.draw = draw;
+
+  // ---------- Caption ----------
+  let captionEdited = false;
+  const captionText = () => BPG.caption(T[state.tpl], val, { cta: state.cta, verdict: state.verdict });
+  function updateCaption() { if (!captionEdited) $("caption").value = captionText(); }
+  function renderCtas() {
+    $("ctas").innerHTML = "";
+    [["en", "English"], ["bn", "বাংলা"], ["banglish", "Banglish"], ["none", "No question"]].forEach(([key, label]) => button($("ctas"), label, state.cta === key, () => {
+      state.cta = key; persist(); captionEdited = false; renderCtas(); updateCaption();
+    }));
+  }
+  $("caption").addEventListener("input", () => { captionEdited = true; });
+  $("resetCaption").addEventListener("click", () => { captionEdited = false; updateCaption(); });
+  $("copyCaption").addEventListener("click", async () => {
+    const box = $("caption");
+    try { await navigator.clipboard.writeText(box.value); $("copyCaption").textContent = "Copied ✓"; }
+    catch (e) { box.focus(); box.select(); $("copyCaption").textContent = "Selected, press copy"; }
+    setTimeout(() => { $("copyCaption").textContent = "Copy caption"; }, 1800);
+  });
 
   // ---------- Export ----------
   const status = (m) => { $("status").textContent = m; };
@@ -1862,8 +1989,41 @@ window.BPG = window.BPG || {};
   $("saveSheet").addEventListener("click", (e) => { if (e.target.id === "saveSheet") $("saveSheet").hidden = true; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("saveSheet").hidden = true; });
 
+  // Both sizes in one tap: 4:5 for Instagram/Facebook, 9:16 for TikTok/Reels/Stories.
+  async function saveBlob(blob, name) {
+    if (claudeDownloads) { try { await claudeDownloads.save({ filename: name, data: blob }); return true; } catch (e) { return false; } }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000); return true;
+  }
+  $("allSizes").addEventListener("click", async () => {
+    const was = state.platform, files = [];
+    for (const plat of ["instagram", "tiktok"]) {
+      state.platform = plat; const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename(), { type: "image/png" }));
+    }
+    state.platform = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared both sizes."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status("Saved both sizes.");
+  });
+
+  // ---------- Install as an app ----------
+  let installEvent = null;
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; $("install").hidden = false; });
+  $("install").addEventListener("click", async () => { if (!installEvent) return; installEvent.prompt(); await installEvent.userChoice; installEvent = null; $("install").hidden = true; });
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (!standalone && /iphone|ipad/i.test(navigator.userAgent)) $("installHint").textContent = "On iPhone: tap Share, then Add to Home Screen, to use this like an app.";
+  if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  $("ver").textContent = BPG.VERSION ? "Version " + BPG.VERSION : "";
+
   // ---------- Start ----------
-  renderBrand(); renderPlatforms(); renderAll(); setLogo();
+  BPG.ready = true;
+  renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
     ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'"].map((f) => document.fonts.load(f)))
     : Promise.resolve();

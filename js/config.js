@@ -2,6 +2,9 @@
 // This is the file to edit when you change your brand or add a team colour theme.
 window.BPG = window.BPG || {};
 
+// Shown at the top of the page, so you can tell if your phone has the latest version.
+BPG.VERSION = "9 Oct 2026 · v14";
+
 BPG.BRAND = {
   handle: "@borhanrants",
   name: "BORHAN RANTS ABOUT SPORTS",

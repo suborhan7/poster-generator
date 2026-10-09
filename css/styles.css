@@ -25,7 +25,17 @@ html, body { background: var(--bg); color: var(--ink); }
 body { font-family: var(--font-body); font-size: 15px; padding-inline: 16px; padding-block: 16px 32px; }
 * { box-sizing: border-box; }
 .wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
-@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+.wrap > .rail { grid-column: 1; grid-row: 1 / span 2; }
+.wrap > .stage { grid-column: 2; grid-row: 1 / span 2; }
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* Wide screens: form | poster | caption, so nothing sits empty. */
+@media (min-width: 1180px) {
+  header.top { max-width: 1560px; }
+  .wrap { max-width: 1560px; grid-template-columns: minmax(0, 400px) minmax(0, 1fr) minmax(0, 320px); }
+  .wrap > .side { grid-column: 3; grid-row: 1; position: sticky; top: 12px; }
+}
+@media (min-width: 861px) and (max-width: 1179px) { .wrap > .side { grid-column: 1; grid-row: 3; } }
+@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } .wrap > .rail, .wrap > .stage, .wrap > .side { grid-column: 1; grid-row: auto; } }
 header.top { max-width: 1240px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 header.top h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: .01em; margin: 0; text-transform: uppercase; text-wrap: balance; }
 header.top p { margin: 0; color: var(--muted); }
@@ -66,9 +76,16 @@ canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); b
 /* Keep the preview in view while editing, so slider changes show as you drag. */
 @media (max-width: 860px) {
   .stage { order: -1; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; gap: 8px; }
-  canvas#poster { max-height: 34vh; }
-  .actions .primary { padding: 10px 16px; font-size: 14px; }
-  .actions .ghost { padding: 8px 12px; font-size: 13px; }
+  canvas#poster { max-height: 31vh; }
+  #platforms button { padding: 4px 10px; font-size: 13px; }
+  .actions { flex-wrap: nowrap; width: 100%; gap: 6px; }
+  .actions button { flex: 1; padding: 9px 6px; font-size: 13px; letter-spacing: 0; white-space: nowrap; }
+  .actions .primary { font-size: 14px; }
+  .status:empty { display: none; }
+  header.top { margin-bottom: 4px; }
+  header.top h1 { font-size: 22px; }
+  header.top p { display: none; }
+  .wrap { gap: 14px; }
 }
 .save-sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
 .save-sheet img { max-width: 100%; max-height: calc(100vh - 120px); border-radius: 8px; }
@@ -80,3 +97,10 @@ details[open] summary { margin-bottom: 12px; }
 body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
+
+.ver { margin-left: auto; font-size: 12px; color: var(--muted); }
+.side textarea { width: 100%; font: 400 14px/1.45 var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 10px; resize: vertical; min-height: 160px; }
+.row2 { display: flex; gap: 8px; }
+.row2 .primary { flex: 1; }
+.wide-btn { width: 100%; }
+.seg#ctas button { padding: 5px 11px; font-size: 13px; }

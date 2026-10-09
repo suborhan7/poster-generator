@@ -19,6 +19,8 @@ def inline_script(match):
 
 
 html = re.sub(r'<script src="(js/[^"]+)"></script>', inline_script, html)
+# The single file has no manifest or icons next to it, so drop those links.
+html = re.sub(r'<link rel="(manifest|icon|apple-touch-icon)"[^>]*>\n?', "", html)
 
 out = root / "dist" / "poster-studio.html"
 out.parent.mkdir(exist_ok=True)

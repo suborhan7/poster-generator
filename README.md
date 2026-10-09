@@ -42,6 +42,8 @@ Features on every card:
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
 | `js/quickfill.js` | Quick fill: reads one typed line and fills the form; holds the team short forms (PAK, SL, BAN…) | To teach it a new team or short form |
+| `js/caption.js` | Writes the caption and hashtags from the card | To change caption wording or the comment line |
+| `manifest.webmanifest`, `sw.js`, `icons/` | Make the site installable as a phone app and work offline | Rarely |
 | `js/layouts.js` | The other designs (football, general, Borhan Rants) | When you want a new look |
 | `js/engine.js` | Drawing helpers shared by all designs | Rarely |
 | `js/app.js` | The form, preview, download and share | Rarely |
@@ -89,6 +91,14 @@ In `js/config.js`, add a line to `BPG.THEMES`:
 ```js
 pakistan: { label: "Pakistan green", bg: "#04301B", accent: "#FFFFFF" },
 ```
+
+## Install it on your phone like an app
+
+Open the GitHub Pages or Vercel link on your phone, then:
+- **Android (Chrome):** tap **Install as an app** in the studio, or ⋮ menu → *Add to Home screen*.
+- **iPhone (Safari):** Share → *Add to Home Screen*.
+
+It opens full screen from its own icon, works offline, and always picks up the newest version when you're online. The version number at the top tells you which one you have.
 
 ## Tips
 

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Borhan Poster Studio</title>
 <meta name="theme-color" content="#0B1426">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Borhan Studio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
@@ -14,6 +19,7 @@
 <header class="top">
   <h1>Borhan Poster Studio</h1>
   <p>Pick a card, type the details, add a photo, download or share.</p>
+  <span class="ver" id="ver"></span>
 </header>
 
 <div class="wrap">
@@ -64,12 +70,32 @@
     <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
     <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
     <div class="actions">
-      <button class="primary" id="download" type="button">Download PNG</button>
-      <button class="ghost" id="share" type="button">Share to app</button>
-      <button class="ghost" id="showImg" type="button">Show image to save</button>
+      <button class="primary" id="download" type="button">Download</button>
+      <button class="ghost" id="share" type="button">Share</button>
+      <button class="ghost" id="showImg" type="button">Show image</button>
     </div>
     <div class="status" id="status" role="status"></div>
   </div>
+
+  <aside class="side">
+    <section class="box">
+      <span class="label">Caption &amp; hashtags</span>
+      <p class="hint">Written from the card. Edit it if you like, then copy and paste into your post.</p>
+      <div class="seg" id="ctas" role="group" aria-label="Comment line language"></div>
+      <textarea id="caption" rows="8" aria-label="Caption"></textarea>
+      <div class="row2">
+        <button class="primary" id="copyCaption" type="button">Copy caption</button>
+        <button class="ghost" id="resetCaption" type="button">Rewrite</button>
+      </div>
+    </section>
+    <section class="box">
+      <span class="label">Post everywhere</span>
+      <button class="ghost wide-btn" id="allSizes" type="button">Download both sizes (4:5 and 9:16)</button>
+      <p class="hint">4:5 works for Instagram and Facebook posts. 9:16 is for TikTok, Reels and Stories.</p>
+      <button class="ghost wide-btn" id="install" type="button" hidden>Install as an app</button>
+      <p class="hint" id="installHint"></p>
+    </section>
+  </aside>
 </div>
 
 
@@ -86,6 +112,7 @@
 <script src="js/layouts.js"></script>
 <script src="js/cricket.js"></script>
 <script src="js/quickfill.js"></script>
+<script src="js/caption.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

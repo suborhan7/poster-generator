@@ -9,7 +9,7 @@ window.BPG = window.BPG || {};
   const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
   const state = {
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
-    values: {}, kicker: "", verdict: "", theme: "brand", brand: { ...BPG.BRAND },
+    values: {}, kicker: "", verdict: "", cta: "en", theme: "brand", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null };
   let logoImg = null;
@@ -109,7 +109,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { renderCats(); renderTypes(); renderFields(); draw(); }
+  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); draw(); }
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
@@ -154,7 +154,8 @@ window.BPG = window.BPG || {};
   }
 
   // ---------- Drawing ----------
-  function draw() {
+  function draw() { drawCard(); if (BPG.ready) updateCaption(); }
+  function drawCard() {
     const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
@@ -187,6 +188,25 @@ window.BPG = window.BPG || {};
     k.footer(g);
   }
   BPG.draw = draw;
+
+  // ---------- Caption ----------
+  let captionEdited = false;
+  const captionText = () => BPG.caption(T[state.tpl], val, { cta: state.cta, verdict: state.verdict });
+  function updateCaption() { if (!captionEdited) $("caption").value = captionText(); }
+  function renderCtas() {
+    $("ctas").innerHTML = "";
+    [["en", "English"], ["bn", "বাংলা"], ["banglish", "Banglish"], ["none", "No question"]].forEach(([key, label]) => button($("ctas"), label, state.cta === key, () => {
+      state.cta = key; persist(); captionEdited = false; renderCtas(); updateCaption();
+    }));
+  }
+  $("caption").addEventListener("input", () => { captionEdited = true; });
+  $("resetCaption").addEventListener("click", () => { captionEdited = false; updateCaption(); });
+  $("copyCaption").addEventListener("click", async () => {
+    const box = $("caption");
+    try { await navigator.clipboard.writeText(box.value); $("copyCaption").textContent = "Copied ✓"; }
+    catch (e) { box.focus(); box.select(); $("copyCaption").textContent = "Selected, press copy"; }
+    setTimeout(() => { $("copyCaption").textContent = "Copy caption"; }, 1800);
+  });
 
   // ---------- Export ----------
   const status = (m) => { $("status").textContent = m; };
@@ -226,8 +246,41 @@ window.BPG = window.BPG || {};
   $("saveSheet").addEventListener("click", (e) => { if (e.target.id === "saveSheet") $("saveSheet").hidden = true; });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("saveSheet").hidden = true; });
 
+  // Both sizes in one tap: 4:5 for Instagram/Facebook, 9:16 for TikTok/Reels/Stories.
+  async function saveBlob(blob, name) {
+    if (claudeDownloads) { try { await claudeDownloads.save({ filename: name, data: blob }); return true; } catch (e) { return false; } }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000); return true;
+  }
+  $("allSizes").addEventListener("click", async () => {
+    const was = state.platform, files = [];
+    for (const plat of ["instagram", "tiktok"]) {
+      state.platform = plat; const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename(), { type: "image/png" }));
+    }
+    state.platform = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared both sizes."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status("Saved both sizes.");
+  });
+
+  // ---------- Install as an app ----------
+  let installEvent = null;
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; $("install").hidden = false; });
+  $("install").addEventListener("click", async () => { if (!installEvent) return; installEvent.prompt(); await installEvent.userChoice; installEvent = null; $("install").hidden = true; });
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (!standalone && /iphone|ipad/i.test(navigator.userAgent)) $("installHint").textContent = "On iPhone: tap Share, then Add to Home Screen, to use this like an app.";
+  if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  $("ver").textContent = BPG.VERSION ? "Version " + BPG.VERSION : "";
+
   // ---------- Start ----------
-  renderBrand(); renderPlatforms(); renderAll(); setLogo();
+  BPG.ready = true;
+  renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
     ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'"].map((f) => document.fonts.load(f)))
     : Promise.resolve();
