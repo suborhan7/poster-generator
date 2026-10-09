@@ -63,8 +63,30 @@ window.BPG = window.BPG || {};
     d.append(l, i); parent.appendChild(d);
   }
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
+  // One line in, every field filled: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL".
+  function quickBox(parent, t, example) {
+    const d = document.createElement("div"); d.className = "field wide quick";
+    const l = document.createElement("label"); l.htmlFor = "f_quick"; l.textContent = "Quick fill: type it in one line, short team names work";
+    const row = document.createElement("div"); row.className = "quick-row";
+    const i = document.createElement("input"); i.type = "text"; i.id = "f_quick"; i.placeholder = example; i.autocomplete = "off";
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
+    const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
+    const go = () => {
+      const { values, labels } = BPG.quickApply(t, i.value);
+      if (!labels.length) { note.textContent = "Couldn't read that. Try: " + example; return; }
+      state.values[state.tpl] = { ...(state.values[state.tpl] || {}), ...values }; persist();
+      renderFields(); draw();
+      const n = $("f_quick").parentNode.nextSibling; $("f_quick").value = i.value;
+      n.textContent = "Filled " + labels.join(", ") + ". Check the rest below.";
+    };
+    b.onclick = go;
+    i.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); go(); } });
+    row.append(i, b); d.append(l, row, note); parent.appendChild(d);
+  }
   function renderFields() {
     const box = $("fields"), t = T[state.tpl]; box.innerHTML = "";
+    const ex = BPG.quickExample(t);
+    if (ex) quickBox(box, t, ex);
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));

@@ -73,7 +73,7 @@ BPG.createKit = function (ctx, env) {
   k.fadeBottom = (g, from, to) => {
     const gr = ctx.createLinearGradient(0, from, 0, to);
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
-    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
+    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to - 2, g.W, g.H - to + 2); // overlap by 2px so no seam shows
   };
   // Photo across the whole card, fading smoothly from the photo into dark where the text starts (textTop).
   k.bleedPhoto = (g, textTop, grey) => {
@@ -87,10 +87,10 @@ BPG.createKit = function (ctx, env) {
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
     if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, g.W, bh); }
     ctx.restore();
-    const from = textTop - 380, to = textTop + 40, gr = ctx.createLinearGradient(0, from, 0, to);
+    const from = Math.round(textTop - 380), to = Math.round(textTop + 40), gr = ctx.createLinearGradient(0, from, 0, to);
     gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(0.35, k.hexA(g.bg, 0.25)); gr.addColorStop(0.7, k.hexA(g.bg, 0.75)); gr.addColorStop(1, k.hexA(g.bg, 1));
     ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from);
-    ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
+    ctx.fillStyle = g.bg; ctx.fillRect(0, to - 2, g.W, g.H - to + 2); // overlap by 2px so no seam shows
     const top = ctx.createLinearGradient(0, 0, 0, g.st + 140);
     top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);

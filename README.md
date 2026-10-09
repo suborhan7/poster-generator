@@ -41,6 +41,7 @@ Features on every card:
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/quickfill.js` | Quick fill: reads one typed line and fills the form; holds the team short forms (PAK, SL, BAN…) | To teach it a new team or short form |
 | `js/layouts.js` | The other designs (football, general, Borhan Rants) | When you want a new look |
 | `js/engine.js` | Drawing helpers shared by all designs | Rarely |
 | `js/app.js` | The form, preview, download and share | Rarely |
@@ -90,6 +91,8 @@ pakistan: { label: "Pakistan green", bg: "#04301B", accent: "#FFFFFF" },
 ```
 
 ## Tips
+
+- **Quick fill:** on cricket and football cards, type the whole thing in one line, like `Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL` or `Mustafizur 5/23 (8.3) BAN vs SA`, and press Enter. Short team names become full names.
 
 - Prepare both result cards (win and loss) before the last over, so you can post first.
 - Use cutout PNGs of players (remove.bg or Canva's background remover) for the best look.
