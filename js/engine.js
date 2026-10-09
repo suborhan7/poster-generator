@@ -89,7 +89,7 @@ BPG.createKit = function (ctx, env) {
     }
     // Fill the section edge to edge when that only trims a little; otherwise show the whole photo.
     const fill = Math.max(g.W / img.width, bh / img.height), fit = Math.min(g.W / img.width, bh / img.height);
-    const s = (fit / fill > 0.78 ? fill : fit) * a.zoom, w = img.width * s, h = img.height * s;
+    const s = (fit / fill > 0.6 ? fill : fit) * a.zoom, w = img.width * s, h = img.height * s;
     const x = (g.W - w) / 2 + (a.offx / 100) * g.W, y = top + Math.max(0, bh - h) + (h > bh ? (bh - h) * 0.3 : 0) + (a.offy / 100) * bh;
     ctx.drawImage(img, x, y, w, h);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, top, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
