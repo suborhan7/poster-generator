@@ -21,7 +21,7 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | Group | Cards |
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
-| Cricket | Fifty, Century, Knock (X off Y, adds a DUCK stamp on 0), Wicket, Five-wicket haul, Brilliant over, Bad over, Score update, Innings break, Match result, Recent form, Toss |
+| Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss |
 | Football | Goal, Full-time score, Red card, Player rating |
 | General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Breaking news, Photo frame |
 
@@ -30,7 +30,7 @@ Features on every card:
 - Put `*stars*` around words to colour them, as in `*TIGERS WIN* BY 5 WICKETS`.
 - Your verdict line goes at the bottom of any card.
 - Colour themes include Tigers green, Bangladesh red, Argentina, Brazil, Night and Alert.
-- Strike rate, economy, over totals and chase targets are worked out for you.
+- Strike rate, economy, run rate, required rate, batting average, over totals and the fours/sixes/running split are worked out for you.
 - With a cutout PNG (transparent background), the big milestone number sits behind the player.
 - Your inputs and brand settings are remembered in your browser.
 
@@ -40,7 +40,8 @@ Features on every card:
 | --- | --- | --- |
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
-| `js/layouts.js` | The designs (how each card is drawn) | When you want a new look |
+| `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/layouts.js` | The other designs (football, general, Borhan Rants) | When you want a new look |
 | `js/engine.js` | Drawing helpers shared by all designs | Rarely |
 | `js/app.js` | The form, preview, download and share | Rarely |
 | `css/styles.css` | Look of the tool itself (not the posters) | Rarely |

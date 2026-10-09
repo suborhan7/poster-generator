@@ -27,11 +27,11 @@ BPG.TEMPLATES = {
 
   // ---------------- Cricket ----------------
   fifty: { cat: "cricket", name: "Fifty", layout: "batting", milestone: "50", big: "FIFTY",
-    hint: "Strike rate is worked out for you. With a cutout photo, the big 50 sits behind the player.",
-    fields: [["player","Player","Towhid Hridoy"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","52"],["balls","Balls","38"],["fours","4s","5"],["sixes","6s","2"]] },
+    hint: "Strike rate and the fours/sixes/running split are worked out for you. With a cutout photo, the big 50 sits behind the player.",
+    fields: [["player","Player","Towhid Hridoy"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","52*"],["balls","Balls","38"],["fours","4s","5"],["sixes","6s","2"]] },
   century: { cat: "cricket", name: "Century", layout: "batting", milestone: "100", big: "HUNDRED", accent: "#F5C542",
     hint: "Strike rate is worked out for you. With a cutout photo, the big 100 sits behind the player.",
-    fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","104"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
+    fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","104*"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
   knock: { cat: "cricket", name: "Knock (X off Y)", layout: "knock",
     hint: "A 0 without * gets a DUCK stamp automatically.",
     fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","82"],["balls","Balls","41"],["fours","4s","8"],["sixes","6s","4"]] },
@@ -53,11 +53,11 @@ BPG.TEMPLATES = {
     fields: [["team","Batting team","Bangladesh"],["score","Score","286/7"],["overs","Overs","50"],["topbat","Top scorer","Hridoy 84 (79)"],["topbowl","Top bowler","Rabada 3/45"]] },
   cresult: { cat: "cricket", name: "Match result", layout: "result", subLabel: "PLAYER OF THE MATCH",
     hint: "Put *stars* around words to colour them.",
-    fields: [["headline","Result headline","*TIGERS WIN* BY 5 WICKETS",true],["t1","Team 1","Bangladesh"],["s1","Team 1 score","287/5 (48.2)"],["t2","Team 2","South Africa"],["s2","Team 2 score","286/7 (50)"],["potm","Player of the match","Towhid Hridoy",true]] },
+    fields: [["headline","Result headline","*TIGERS WIN* BY 5 WICKETS",true],["t1","Winning team","Bangladesh"],["s1","Winning team score","287/5 (48.2)"],["t2","Losing team","South Africa"],["s2","Losing team score","286/7 (50)"],["potm","Player of the match","Towhid Hridoy",true]] },
   form: { cat: "cricket", name: "Recent form", layout: "form",
     hint: "Scores of 50 or more turn your accent colour.",
     fields: [["player","Player","Shadman Islam"],["title","Title","Last 12 Test innings"],["scores","Scores, newest first (score + opponent, comma between)","80 IRE, 35 IRE, 78 IRE, 13 PAK, 10 PAK, 20 ZIM, 9 ZIM, 20 AUS, 25* AUS, 0 AUS, 1 AUS, 67 AFG",true,"area"]] },
-  toss: { cat: "cricket", name: "Toss", layout: "status", coin: true,
+  toss: { cat: "cricket", name: "Toss", layout: "toss",
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
 
