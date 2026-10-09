@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Borhan Poster Studio</title>
+<meta name="theme-color" content="#0B1426">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>Borhan Poster Studio</h1>
+  <p>Pick a card, type the details, add a photo, download or share.</p>
+</header>
+
+<div class="wrap">
+  <div class="rail">
+    <section class="box">
+      <span class="label">Sport</span>
+      <div class="seg" id="cats"></div>
+      <span class="label">Card type</span>
+      <div class="types" id="types"></div>
+    </section>
+
+    <section class="box">
+      <span class="label">Details</span>
+      <div class="fields" id="fields"></div>
+      <p class="hint" id="tplHint"></p>
+    </section>
+
+    <section class="box">
+      <span class="label">Photo</span>
+      <div class="fields">
+        <div class="field wide"><label for="photo1">Player photo (a cutout PNG looks best)</label><input id="photo1" type="file" accept="image/*"></div>
+        <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
+        <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
+        <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0.15"></div>
+        <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
+        <div class="field"><label for="offy">Move up / down</label><input id="offy" type="range" min="-50" max="50" step="1" value="0"></div>
+        <div class="field wide"><button class="ghost" id="resetPhoto" type="button">Reset photo position</button></div>
+      </div>
+    </section>
+
+    <section class="box">
+      <details id="brandBox">
+        <summary>Brand settings</summary>
+        <div class="fields">
+          <div class="field wide"><label for="b_theme">Colour theme</label><select id="b_theme"></select></div>
+          <div class="field"><label for="b_handle">Handle</label><input id="b_handle" type="text"></div>
+          <div class="field"><label for="b_name">Page name</label><input id="b_name" type="text"></div>
+          <div class="field"><label for="b_accent">Accent colour</label><input id="b_accent" type="color"></div>
+          <div class="field"><label for="b_bg">Background colour</label><input id="b_bg" type="color"></div>
+          <div class="field wide"><label for="b_logo">Logo (optional, replaces the handle and the BR badge)</label><input id="b_logo" type="file" accept="image/*"></div>
+          <div class="field wide"><button class="ghost" id="b_clearLogo" type="button">Remove logo</button></div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <div class="stage">
+    <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
+    <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
+    <div class="actions">
+      <button class="primary" id="download" type="button">Download PNG</button>
+      <button class="ghost" id="share" type="button">Share to app</button>
+      <button class="ghost" id="showImg" type="button">Show image to save</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <img id="saveImg" alt="Finished poster. Long-press or right-click to save." hidden>
+  </div>
+</div>
+
+
+<!-- Load order matters: settings, cards, toolkit, designs, then the app. -->
+<script src="js/config.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/layouts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+// Card types shown in the menu.
+// Each card picks a `layout` (the design, defined in layouts.js) and lists its input fields.
+//
+// Field shorthand: [id, label, example value, wide?, "area" for a multi-line box]
+// Optional card settings:
+//   big      the big headline word (editable in the form)
+//   accent   force a colour for this card (e.g. red for a red card)
+//   hint     a tip shown under the form
+//   anything else is passed to the layout (e.g. milestone, coin)
+//
+// To add a new card that reuses an existing design, copy an entry, give it a new key and change it.
+window.BPG = window.BPG || {};
+
+BPG.TEMPLATES = {
+  // ---------------- Borhan Rants (your own style) ----------------
+  // `look` colours apply when the theme is "Your brand"; pick another theme to recolour.
+  reaction: { cat: "rants", name: "Match reaction", layout: "reaction", look: { accent: "#FF5A1F", bg: "#0E0F12" },
+    hint: "Rant meter is 0 to 5. Stats are Label: value, comma between. Put *stars* around words to colour them. Add a photo credit when you can.",
+    fields: [["tag","Tag","Innings break"],["credit","Photo credit (optional)",""],["team","Team short name","SL"],["score","Score","182/8"],["line1","Pill line 1","1st T20I · 20 overs"],["line2","Pill line 2","PAK need 183"],
+      ["headline","Headline","182 – and *29* of them were gifts",true],["body","Body text","Lahiru Udara's 91 off 55 did the damage, but Pakistan helped. Now they chase 183.",true,"area"],
+      ["stats","Stat boxes (optional)","Wides: 18, Byes: 7, Leg byes: 3, No-ball: 1",true],["rant","Rant meter (0–5)","4"]] },
+  reactionTest: { cat: "rants", name: "Day report", layout: "reaction", look: { accent: "#FF5A1F", bg: "#0E0F12" },
+    hint: "Leave stat boxes empty and the photo grows to fill the space.",
+    fields: [["tag","Tag","Match reaction"],["credit","Photo credit (optional)",""],["team","Team short name","BAN"],["score","Score","317/8"],["line1","Pill line 1","1st Test vs AFG"],["line2","Pill line 2","Stumps · Day 1"],
+      ["headline","Headline","221/2 to 225/5. *Classic Bangladesh.*",true],["body","Body text","Tanzid's 83 off 71 set it up. Then three wickets fell for 4 runs, Mushfiqur with a 7-ball duck. Liton's 53 dragged us to 317/8.",true,"area"],
+      ["stats","Stat boxes (optional)","",true],["rant","Rant meter (0–5)","4"]] },
+
+  // ---------------- Cricket ----------------
+  fifty: { cat: "cricket", name: "Fifty", layout: "batting", milestone: "50", big: "FIFTY",
+    hint: "Strike rate is worked out for you. With a cutout photo, the big 50 sits behind the player.",
+    fields: [["player","Player","Towhid Hridoy"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","52"],["balls","Balls","38"],["fours","4s","5"],["sixes","6s","2"]] },
+  century: { cat: "cricket", name: "Century", layout: "batting", milestone: "100", big: "HUNDRED", accent: "#F5C542",
+    hint: "Strike rate is worked out for you. With a cutout photo, the big 100 sits behind the player.",
+    fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","104"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
+  knock: { cat: "cricket", name: "Knock (X off Y)", layout: "knock",
+    hint: "A 0 without * gets a DUCK stamp automatically.",
+    fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","82"],["balls","Balls","41"],["fours","4s","8"],["sixes","6s","4"]] },
+  wicket: { cat: "cricket", name: "Wicket", layout: "wicket", big: "GONE!",
+    fields: [["batter","Batter out","Temba Bavuma"],["runs","Batter's runs","41"],["balls","Balls faced","55"],["how","How out","c Litton b Taskin"],["bowler","Bowler","Taskin Ahmed"],["score","Team score now","142/4 (31.2)"]] },
+  fifer: { cat: "cricket", name: "Five-wicket haul", layout: "bowling", milestone: "5", big: "FIVE-FOR",
+    hint: "Economy is worked out for you from runs and overs.",
+    fields: [["player","Bowler","Mustafizur Rahman"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["wkts","Wickets","5"],["runs","Runs given","23"],["overs","Overs","8.3"]] },
+  goodover: { cat: "cricket", name: "Brilliant over", layout: "over", big: "WHAT AN OVER!", accent: "#3DDC84",
+    hint: "Use W for a wicket, 0 to 6 for runs, wd or nb for extras. Runs and wickets are counted for you.",
+    fields: [["player","Bowler","Taskin Ahmed"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["over","Over number","19"],["balls","The 6 balls (space between)","W 0 0 W 1 0",true]] },
+  badover: { cat: "cricket", name: "Bad over", layout: "over", big: "EXPENSIVE OVER", accent: "#FF5A4E",
+    hint: "Use W for a wicket, 0 to 6 for runs, wd or nb for extras. Runs and wickets are counted for you.",
+    fields: [["player","Bowler","Shoriful Islam"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["over","Over number","48"],["balls","The 6 balls (space between)","6 4 wd 6 1 4",true]] },
+  scoreupd: { cat: "cricket", name: "Score update", layout: "scoreupd",
+    fields: [["status","Status","STUMPS, DAY 1",true],["abbr","Team short name","BAN"],["team","Team","Bangladesh"],["score","Score","317/8"],["overs","Overs","84.0"],["detail","Extra line (optional)","Mushfiqur 96* at the crease",true]] },
+  innings: { cat: "cricket", name: "Innings break", layout: "innings",
+    hint: "The target is worked out from the score.",
+    fields: [["team","Batting team","Bangladesh"],["score","Score","286/7"],["overs","Overs","50"],["topbat","Top scorer","Hridoy 84 (79)"],["topbowl","Top bowler","Rabada 3/45"]] },
+  cresult: { cat: "cricket", name: "Match result", layout: "result", subLabel: "PLAYER OF THE MATCH",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["headline","Result headline","*TIGERS WIN* BY 5 WICKETS",true],["t1","Team 1","Bangladesh"],["s1","Team 1 score","287/5 (48.2)"],["t2","Team 2","South Africa"],["s2","Team 2 score","286/7 (50)"],["potm","Player of the match","Towhid Hridoy",true]] },
+  form: { cat: "cricket", name: "Recent form", layout: "form",
+    hint: "Scores of 50 or more turn your accent colour.",
+    fields: [["player","Player","Shadman Islam"],["title","Title","Last 12 Test innings"],["scores","Scores, newest first (score + opponent, comma between)","80 IRE, 35 IRE, 78 IRE, 13 PAK, 10 PAK, 20 ZIM, 9 ZIM, 20 AUS, 25* AUS, 0 AUS, 1 AUS, 67 AFG",true,"area"]] },
+  toss: { cat: "cricket", name: "Toss", layout: "status", coin: true,
+    hint: "Put *stars* around words to colour them.",
+    fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
+
+  // ---------------- Football ----------------
+  goal: { cat: "football", name: "Goal", layout: "goal", big: "GOAL!",
+    fields: [["player","Scorer","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["minute","Minute","67'"],["score","Score now","Argentina 1-0 Brazil",true],["assist","Assist","Julián Álvarez"]] },
+  fresult: { cat: "football", name: "Full-time score", layout: "fscore",
+    hint: "Put *stars* around words in the headline to colour them.",
+    fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
+  redcard: { cat: "football", name: "Red card", layout: "redcard", big: "RED CARD", accent: "#FF3B3B",
+    fields: [["player","Player","Casemiro"],["team","Team","Brazil"],["opp","Opponent","Argentina"],["minute","Minute","58'"],["reason","Reason","Second yellow",true]] },
+  rating: { cat: "football", name: "Player rating", layout: "rating",
+    fields: [["player","Player","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["rating","Rating out of 10","9.2"],["stats","Key stats (Label: value, comma between)","Goals: 1, Assists: 1, Key passes: 5",true]] },
+
+  // ---------------- General ----------------
+  statuscard: { cat: "general", name: "Status (In the XI, ruled out…)", layout: "status",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["player","Player","Nayeem Hasan",true],["stamp","Status","*IN THE XI*",true],["detail","Detail line","Only Test | AFG v BAN in UAE 2026",true]] },
+  hottake: { cat: "general", name: "Hot take", layout: "hottake", big: "HOT TAKE",
+    fields: [["quote","Your take","Shakib is still the greatest cricketer Bangladesh has ever produced",true,"area"],["by","Signed","Borhan"]] },
+  quote: { cat: "general", name: "Quote", layout: "quote", photo2: "Small circle photo (optional)",
+    hint: "Put *stars* around the words to highlight. Add a small circle photo for context.",
+    fields: [["name","Who said it","Najmul Hossain Shanto"],["context","Context","to the media"],["quote","Quote","We had a *good series* against Australia, but that is past. This is a new condition, so we have to *plan accordingly*.",true,"area"]] },
+  top: { cat: "general", name: "Top list", layout: "toplist",
+    hint: "Up to 5 lines. The photo sits faded behind the list.",
+    fields: [["title","Title","MOST ODI RUNS FOR *BANGLADESH*",true],["items","One per line: value | name","8,357 | Tamim Iqbal\n7,795 | Mushfiqur Rahim\n7,570 | Shakib Al Hasan",true,"area"]] },
+  versus: { cat: "general", name: "Who's better?", layout: "versus", photo2: "Second player photo",
+    hint: "Photo 1 goes on the left, photo 2 on the right.",
+    fields: [["p1","Player 1","Messi"],["p2","Player 2","Ronaldo"],["question","Question","WHO'S THE GOAT?",true]] },
+  breaking: { cat: "general", name: "Breaking news", layout: "breaking", big: "BREAKING", accent: "#FF3B3B",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["headline","Headline","Mushfiqur Rahim *announces ODI retirement*",true,"area"],["detail","Detail line","Ends a 19-year career with the Tigers",true]] },
+  frame: { cat: "general", name: "Photo frame", layout: "frame",
+    fields: [["headline","Headline (optional)","SCENES IN MIRPUR",true]] },
+};

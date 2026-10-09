@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Borhan Poster Studio</title>
+<meta name="theme-color" content="#0B1426">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
+<style>
+/* Layout: a control rail on the left, the live poster on the right; stacks to one column on phones. */
+:root {
+  --bg: #f3f4f7;
+  --panel: #ffffff;
+  --ink: #12151c;
+  --muted: #5b6272;
+  --line: #dfe2ea;
+  --accent: #1d4ed8;
+  --accent-ink: #ffffff;
+  --chip: #eef0f5;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", "Hind Siliguri", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1015; --panel: #171a22; --ink: #eceef3; --muted: #9aa1b2; --line: #2a2f3b;
+    --accent: #7aa2ff; --accent-ink: #0e1015; --chip: #222633; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1015; --panel: #171a22; --ink: #eceef3; --muted: #9aa1b2; --line: #2a2f3b;
+  --accent: #7aa2ff; --accent-ink: #0e1015; --chip: #222633; color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-body); font-size: 15px; padding-inline: 16px; padding-block: 16px 32px; }
+* { box-sizing: border-box; }
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+header.top { max-width: 1240px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+header.top h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: .01em; margin: 0; text-transform: uppercase; text-wrap: balance; }
+header.top p { margin: 0; color: var(--muted); }
+.rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.label { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .types button {
+  font: 600 14px var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid transparent;
+  border-radius: 999px; padding: 7px 14px; cursor: pointer;
+}
+.types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.types button { border-radius: 8px; text-align: left; padding: 9px 11px; }
+.seg button[aria-pressed="true"], .types button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.field input, .field textarea, .field select {
+  font: 500 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+.field textarea { resize: vertical; min-height: 64px; }
+.field input[type="range"] { padding: 0; accent-color: var(--accent); }
+.field input[type="color"] { height: 38px; padding: 3px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; flex-direction: column; gap: 12px; align-items: center; min-width: 0; }
+@media (max-width: 860px) { .stage { position: static; order: -1; } canvas#poster { max-height: 55vh; } }
+canvas#poster { width: auto; max-width: 100%; max-height: 78vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.primary { font: 700 16px var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 12px 22px; cursor: pointer; }
+.ghost { font: 600 14px var(--font-body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+.status { font-size: 13px; color: var(--muted); min-height: 1.2em; text-align: center; }
+#saveImg { max-width: min(100%, 360px); border-radius: 6px; }
+details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; color: var(--muted); }
+details[open] summary { margin-bottom: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Borhan Poster Studio</h1>
+  <p>Pick a card, type the details, add a photo, download or share.</p>
+</header>
+
+<div class="wrap">
+  <div class="rail">
+    <section class="box">
+      <span class="label">Sport</span>
+      <div class="seg" id="cats"></div>
+      <span class="label">Card type</span>
+      <div class="types" id="types"></div>
+    </section>
+
+    <section class="box">
+      <span class="label">Details</span>
+      <div class="fields" id="fields"></div>
+      <p class="hint" id="tplHint"></p>
+    </section>
+
+    <section class="box">
+      <span class="label">Photo</span>
+      <div class="fields">
+        <div class="field wide"><label for="photo1">Player photo (a cutout PNG looks best)</label><input id="photo1" type="file" accept="image/*"></div>
+        <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
+        <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
+        <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0.15"></div>
+        <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
+        <div class="field"><label for="offy">Move up / down</label><input id="offy" type="range" min="-50" max="50" step="1" value="0"></div>
+        <div class="field wide"><button class="ghost" id="resetPhoto" type="button">Reset photo position</button></div>
+      </div>
+    </section>
+
+    <section class="box">
+      <details id="brandBox">
+        <summary>Brand settings</summary>
+        <div class="fields">
+          <div class="field wide"><label for="b_theme">Colour theme</label><select id="b_theme"></select></div>
+          <div class="field"><label for="b_handle">Handle</label><input id="b_handle" type="text"></div>
+          <div class="field"><label for="b_name">Page name</label><input id="b_name" type="text"></div>
+          <div class="field"><label for="b_accent">Accent colour</label><input id="b_accent" type="color"></div>
+          <div class="field"><label for="b_bg">Background colour</label><input id="b_bg" type="color"></div>
+          <div class="field wide"><label for="b_logo">Logo (optional, replaces the handle and the BR badge)</label><input id="b_logo" type="file" accept="image/*"></div>
+          <div class="field wide"><button class="ghost" id="b_clearLogo" type="button">Remove logo</button></div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <div class="stage">
+    <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
+    <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
+    <div class="actions">
+      <button class="primary" id="download" type="button">Download PNG</button>
+      <button class="ghost" id="share" type="button">Share to app</button>
+      <button class="ghost" id="showImg" type="button">Show image to save</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <img id="saveImg" alt="Finished poster. Long-press or right-click to save." hidden>
+  </div>
+</div>
+
+
+<!-- Load order matters: settings, cards, toolkit, designs, then the app. -->
+<script>
+// Brand defaults, colour themes and platform sizes.
+// This is the file to edit when you change your brand or add a team colour theme.
+window.BPG = window.BPG || {};
+
+BPG.BRAND = {
+  handle: "@borhanrants",
+  name: "BORHAN RANTS ABOUT SPORTS",
+  verdictLabel: "BORHAN'S VERDICT",
+  accent: "#FFD23F",
+  bg: "#0B1426",
+  logo: null,
+};
+
+// Add a theme: copy a line, give it a new key, label and two colours.
+BPG.THEMES = {
+  brand: { label: "Your brand" },
+  tigers: { label: "Tigers green", bg: "#062A1E", accent: "#F2C14E" },
+  redgreen: { label: "Bangladesh red", bg: "#0A2E1F", accent: "#F2414B" },
+  argentina: { label: "Argentina sky", bg: "#0C2340", accent: "#75AADB" },
+  brazil: { label: "Brazil gold", bg: "#063B22", accent: "#FFDF00" },
+  night: { label: "Night white", bg: "#101114", accent: "#FFFFFF" },
+  alert: { label: "Alert red", bg: "#1A0B0F", accent: "#FF3B3B" },
+};
+
+// top / bottom = the safe zone where text is allowed (TikTok covers the edges with its buttons).
+BPG.PLATFORMS = {
+  instagram: { label: "Instagram 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
+  facebook: { label: "Facebook 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
+  tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
+};
+
+BPG.CATS = { rants: "Borhan Rants", cricket: "Cricket", football: "Football", general: "General" };
+
+// Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
+BPG.FONTS = {
+  display: '"Anton", "Hind Siliguri", Impact, sans-serif',
+  condensed: '"Barlow Condensed", "Hind Siliguri", "Arial Narrow", sans-serif',
+  body: '"Barlow", "Hind Siliguri", sans-serif',
+};
+
+</script>
+<script>
+// Card types shown in the menu.
+// Each card picks a `layout` (the design, defined in layouts.js) and lists its input fields.
+//
+// Field shorthand: [id, label, example value, wide?, "area" for a multi-line box]
+// Optional card settings:
+//   big      the big headline word (editable in the form)
+//   accent   force a colour for this card (e.g. red for a red card)
+//   hint     a tip shown under the form
+//   anything else is passed to the layout (e.g. milestone, coin)
+//
+// To add a new card that reuses an existing design, copy an entry, give it a new key and change it.
+window.BPG = window.BPG || {};
+
+BPG.TEMPLATES = {
+  // ---------------- Borhan Rants (your own style) ----------------
+  // `look` colours apply when the theme is "Your brand"; pick another theme to recolour.
+  reaction: { cat: "rants", name: "Match reaction", layout: "reaction", look: { accent: "#FF5A1F", bg: "#0E0F12" },
+    hint: "Rant meter is 0 to 5. Stats are Label: value, comma between. Put *stars* around words to colour them. Add a photo credit when you can.",
+    fields: [["tag","Tag","Innings break"],["credit","Photo credit (optional)",""],["team","Team short name","SL"],["score","Score","182/8"],["line1","Pill line 1","1st T20I · 20 overs"],["line2","Pill line 2","PAK need 183"],
+      ["headline","Headline","182 – and *29* of them were gifts",true],["body","Body text","Lahiru Udara's 91 off 55 did the damage, but Pakistan helped. Now they chase 183.",true,"area"],
+      ["stats","Stat boxes (optional)","Wides: 18, Byes: 7, Leg byes: 3, No-ball: 1",true],["rant","Rant meter (0–5)","4"]] },
+  reactionTest: { cat: "rants", name: "Day report", layout: "reaction", look: { accent: "#FF5A1F", bg: "#0E0F12" },
+    hint: "Leave stat boxes empty and the photo grows to fill the space.",
+    fields: [["tag","Tag","Match reaction"],["credit","Photo credit (optional)",""],["team","Team short name","BAN"],["score","Score","317/8"],["line1","Pill line 1","1st Test vs AFG"],["line2","Pill line 2","Stumps · Day 1"],
+      ["headline","Headline","221/2 to 225/5. *Classic Bangladesh.*",true],["body","Body text","Tanzid's 83 off 71 set it up. Then three wickets fell for 4 runs, Mushfiqur with a 7-ball duck. Liton's 53 dragged us to 317/8.",true,"area"],
+      ["stats","Stat boxes (optional)","",true],["rant","Rant meter (0–5)","4"]] },
+
+  // ---------------- Cricket ----------------
+  fifty: { cat: "cricket", name: "Fifty", layout: "batting", milestone: "50", big: "FIFTY",
+    hint: "Strike rate is worked out for you. With a cutout photo, the big 50 sits behind the player.",
+    fields: [["player","Player","Towhid Hridoy"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","52"],["balls","Balls","38"],["fours","4s","5"],["sixes","6s","2"]] },
+  century: { cat: "cricket", name: "Century", layout: "batting", milestone: "100", big: "HUNDRED", accent: "#F5C542",
+    hint: "Strike rate is worked out for you. With a cutout photo, the big 100 sits behind the player.",
+    fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs","104"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
+  knock: { cat: "cricket", name: "Knock (X off Y)", layout: "knock",
+    hint: "A 0 without * gets a DUCK stamp automatically.",
+    fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","82"],["balls","Balls","41"],["fours","4s","8"],["sixes","6s","4"]] },
+  wicket: { cat: "cricket", name: "Wicket", layout: "wicket", big: "GONE!",
+    fields: [["batter","Batter out","Temba Bavuma"],["runs","Batter's runs","41"],["balls","Balls faced","55"],["how","How out","c Litton b Taskin"],["bowler","Bowler","Taskin Ahmed"],["score","Team score now","142/4 (31.2)"]] },
+  fifer: { cat: "cricket", name: "Five-wicket haul", layout: "bowling", milestone: "5", big: "FIVE-FOR",
+    hint: "Economy is worked out for you from runs and overs.",
+    fields: [["player","Bowler","Mustafizur Rahman"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["wkts","Wickets","5"],["runs","Runs given","23"],["overs","Overs","8.3"]] },
+  goodover: { cat: "cricket", name: "Brilliant over", layout: "over", big: "WHAT AN OVER!", accent: "#3DDC84",
+    hint: "Use W for a wicket, 0 to 6 for runs, wd or nb for extras. Runs and wickets are counted for you.",
+    fields: [["player","Bowler","Taskin Ahmed"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["over","Over number","19"],["balls","The 6 balls (space between)","W 0 0 W 1 0",true]] },
+  badover: { cat: "cricket", name: "Bad over", layout: "over", big: "EXPENSIVE OVER", accent: "#FF5A4E",
+    hint: "Use W for a wicket, 0 to 6 for runs, wd or nb for extras. Runs and wickets are counted for you.",
+    fields: [["player","Bowler","Shoriful Islam"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["over","Over number","48"],["balls","The 6 balls (space between)","6 4 wd 6 1 4",true]] },
+  scoreupd: { cat: "cricket", name: "Score update", layout: "scoreupd",
+    fields: [["status","Status","STUMPS, DAY 1",true],["abbr","Team short name","BAN"],["team","Team","Bangladesh"],["score","Score","317/8"],["overs","Overs","84.0"],["detail","Extra line (optional)","Mushfiqur 96* at the crease",true]] },
+  innings: { cat: "cricket", name: "Innings break", layout: "innings",
+    hint: "The target is worked out from the score.",
+    fields: [["team","Batting team","Bangladesh"],["score","Score","286/7"],["overs","Overs","50"],["topbat","Top scorer","Hridoy 84 (79)"],["topbowl","Top bowler","Rabada 3/45"]] },
+  cresult: { cat: "cricket", name: "Match result", layout: "result", subLabel: "PLAYER OF THE MATCH",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["headline","Result headline","*TIGERS WIN* BY 5 WICKETS",true],["t1","Team 1","Bangladesh"],["s1","Team 1 score","287/5 (48.2)"],["t2","Team 2","South Africa"],["s2","Team 2 score","286/7 (50)"],["potm","Player of the match","Towhid Hridoy",true]] },
+  form: { cat: "cricket", name: "Recent form", layout: "form",
+    hint: "Scores of 50 or more turn your accent colour.",
+    fields: [["player","Player","Shadman Islam"],["title","Title","Last 12 Test innings"],["scores","Scores, newest first (score + opponent, comma between)","80 IRE, 35 IRE, 78 IRE, 13 PAK, 10 PAK, 20 ZIM, 9 ZIM, 20 AUS, 25* AUS, 0 AUS, 1 AUS, 67 AFG",true,"area"]] },
+  toss: { cat: "cricket", name: "Toss", layout: "status", coin: true,
+    hint: "Put *stars* around words to colour them.",
+    fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
+
+  // ---------------- Football ----------------
+  goal: { cat: "football", name: "Goal", layout: "goal", big: "GOAL!",
+    fields: [["player","Scorer","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["minute","Minute","67'"],["score","Score now","Argentina 1-0 Brazil",true],["assist","Assist","Julián Álvarez"]] },
+  fresult: { cat: "football", name: "Full-time score", layout: "fscore",
+    hint: "Put *stars* around words in the headline to colour them.",
+    fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
+  redcard: { cat: "football", name: "Red card", layout: "redcard", big: "RED CARD", accent: "#FF3B3B",
+    fields: [["player","Player","Casemiro"],["team","Team","Brazil"],["opp","Opponent","Argentina"],["minute","Minute","58'"],["reason","Reason","Second yellow",true]] },
+  rating: { cat: "football", name: "Player rating", layout: "rating",
+    fields: [["player","Player","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["rating","Rating out of 10","9.2"],["stats","Key stats (Label: value, comma between)","Goals: 1, Assists: 1, Key passes: 5",true]] },
+
+  // ---------------- General ----------------
+  statuscard: { cat: "general", name: "Status (In the XI, ruled out…)", layout: "status",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["player","Player","Nayeem Hasan",true],["stamp","Status","*IN THE XI*",true],["detail","Detail line","Only Test | AFG v BAN in UAE 2026",true]] },
+  hottake: { cat: "general", name: "Hot take", layout: "hottake", big: "HOT TAKE",
+    fields: [["quote","Your take","Shakib is still the greatest cricketer Bangladesh has ever produced",true,"area"],["by","Signed","Borhan"]] },
+  quote: { cat: "general", name: "Quote", layout: "quote", photo2: "Small circle photo (optional)",
+    hint: "Put *stars* around the words to highlight. Add a small circle photo for context.",
+    fields: [["name","Who said it","Najmul Hossain Shanto"],["context","Context","to the media"],["quote","Quote","We had a *good series* against Australia, but that is past. This is a new condition, so we have to *plan accordingly*.",true,"area"]] },
+  top: { cat: "general", name: "Top list", layout: "toplist",
+    hint: "Up to 5 lines. The photo sits faded behind the list.",
+    fields: [["title","Title","MOST ODI RUNS FOR *BANGLADESH*",true],["items","One per line: value | name","8,357 | Tamim Iqbal\n7,795 | Mushfiqur Rahim\n7,570 | Shakib Al Hasan",true,"area"]] },
+  versus: { cat: "general", name: "Who's better?", layout: "versus", photo2: "Second player photo",
+    hint: "Photo 1 goes on the left, photo 2 on the right.",
+    fields: [["p1","Player 1","Messi"],["p2","Player 2","Ronaldo"],["question","Question","WHO'S THE GOAT?",true]] },
+  breaking: { cat: "general", name: "Breaking news", layout: "breaking", big: "BREAKING", accent: "#FF3B3B",
+    hint: "Put *stars* around words to colour them.",
+    fields: [["headline","Headline","Mushfiqur Rahim *announces ODI retirement*",true,"area"],["detail","Detail line","Ends a 19-year career with the Tigers",true]] },
+  frame: { cat: "general", name: "Photo frame", layout: "frame",
+    fields: [["headline","Headline (optional)","SCENES IN MIRPUR",true]] },
+};
+
+</script>
+<script>
+// Drawing toolkit shared by every layout. You rarely need to edit this file.
+// layouts.js receives this kit as `k` and uses its helpers to draw cards.
+window.BPG = window.BPG || {};
+
+BPG.createKit = function (ctx, env) {
+  const F = BPG.FONTS, D = F.display, C = F.condensed;
+  const k = { ctx, D, C, B: F.body };
+
+  k.font = (size, fam, weight) => `${weight || ""} ${size}px ${fam}`.trim();
+  k.spaced = (px) => { try { ctx.letterSpacing = px + "px"; } catch (e) {} };
+
+  // Shrink text until it fits maxW; returns the size used.
+  k.fit = (text, maxW, size, fam, weight, min) => {
+    let s = size;
+    ctx.font = k.font(s, fam, weight);
+    while (ctx.measureText(text).width > maxW && s > (min || 24)) { s -= 4; ctx.font = k.font(s, fam, weight); }
+    return s;
+  };
+
+  k.hexA = (hex, a) => {
+    const h = hex.replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
+  // Dark or white text, whichever reads on this colour.
+  k.inkOn = (hex) => {
+    const n = parseInt(hex.replace("#", ""), 16);
+    const l = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+    return l > 150 ? "#0B0F18" : "#FFFFFF";
+  };
+  k.roundRect = (x, y, w, h, r) => {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  };
+
+  // Photo filling a box, using the zoom / move sliders.
+  k.coverImg = (img, x, y, w, h, useSliders = true) => {
+    const a = useSliders ? env.adjust() : { zoom: 1, offx: 0, offy: 0 };
+    const s = Math.max(w / img.width, h / img.height) * a.zoom;
+    const dw = img.width * s, dh = img.height * s;
+    ctx.drawImage(img, x + (w - dw) / 2 + (a.offx / 100) * w, y + (h - dh) / 2 + (a.offy / 100) * h, dw, dh);
+  };
+  k.circlePhoto = (img, cx, cy, r, ring) => {
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    const s = Math.max((2 * r) / img.width, (2 * r) / img.height);
+    ctx.drawImage(img, cx - (img.width * s) / 2, cy - (img.height * s) / 2, img.width * s, img.height * s); ctx.restore();
+    if (ring) { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 10; ctx.strokeStyle = ring; ctx.stroke(); }
+  };
+  // Draws the main photo into the top `h` pixels, then darkens it by the slider plus `extraShade`.
+  k.photoArea = (g, h, extraShade = 0) => {
+    if (!g.photo) return false;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, h); ctx.clip();
+    k.coverImg(g.photo.img, 0, 0, g.W, h); ctx.restore();
+    const shade = env.adjust().shade + extraShade;
+    if (shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, shade)); ctx.fillRect(0, 0, g.W, h); }
+    return true;
+  };
+  k.photoHint = (g, y) => {
+    ctx.font = k.font(34, C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.fillText("Add a player photo", g.W / 2, y); ctx.textAlign = "left";
+  };
+
+  k.background = (g) => {
+    const { W, H, bg, accent } = g;
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    const gr = ctx.createRadialGradient(W * 0.85, H * 0.15, 0, W * 0.85, H * 0.15, W * 0.9);
+    gr.addColorStop(0, k.hexA(accent, 0.28)); gr.addColorStop(1, k.hexA(accent, 0));
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.045)"; ctx.lineWidth = 18;
+    for (let i = -H; i < W + H; i += 64) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i - H * 0.6, H); ctx.stroke(); }
+    ctx.restore();
+  };
+  // Fades the photo into the background colour from `from` to `to`, solid below.
+  k.fadeBottom = (g, from, to) => {
+    const gr = ctx.createLinearGradient(0, from, 0, to);
+    gr.addColorStop(0, k.hexA(g.bg, 0)); gr.addColorStop(1, k.hexA(g.bg, 1));
+    ctx.fillStyle = gr; ctx.fillRect(0, from, g.W, to - from); ctx.fillStyle = g.bg; ctx.fillRect(0, to, g.W, g.H - to);
+  };
+  // The two diagonal accent lines that sit between photo and text.
+  k.slash = (g, y) => {
+    ctx.save(); ctx.strokeStyle = g.accent; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(0, y + 40); ctx.lineTo(g.W, y - 50); ctx.stroke();
+    ctx.globalAlpha = 0.45; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, y + 62); ctx.lineTo(g.W, y - 28); ctx.stroke(); ctx.restore();
+  };
+
+  // Top row: match tag pill on the left, handle or logo on the right.
+  k.header = (g) => {
+    const { W, st: top, accent } = g, s = env.state(), logo = env.logo();
+    const kick = (s.kicker || "").toUpperCase();
+    if (kick) {
+      ctx.font = k.font(36, C, 700); k.spaced(3);
+      const w = Math.min(ctx.measureText(kick).width, W - 360);
+      ctx.fillStyle = accent; k.roundRect(56, top + 18, w + 44, 58, 29); ctx.fill();
+      ctx.fillStyle = k.inkOn(accent); ctx.textBaseline = "middle";
+      ctx.fillText(kick, 78, top + 49, W - 360); k.spaced(0);
+    }
+    if (logo) {
+      const sc = 96 / Math.max(logo.width, logo.height);
+      ctx.drawImage(logo, W - 56 - logo.width * sc, top, logo.width * sc, logo.height * sc);
+    } else {
+      ctx.font = k.font(36, C, 700); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      ctx.fillText(s.brand.handle || "", W - 56, top + 49); ctx.textAlign = "left";
+    }
+    ctx.textBaseline = "alphabetic";
+  };
+  // Bottom row: your verdict if you typed one, otherwise the page name.
+  k.footer = (g) => {
+    const { W, footerY: y, accent } = g, s = env.state();
+    ctx.fillStyle = accent; ctx.fillRect(56, y - 22, 22, 22);
+    const v = (s.verdict || "").trim();
+    if (v) {
+      ctx.font = k.font(30, C, 700); k.spaced(4); ctx.fillStyle = accent;
+      const lab = BPG.BRAND.verdictLabel; ctx.fillText(lab, 92, y);
+      const lw = ctx.measureText(lab).width; k.spaced(0);
+      ctx.font = k.font(k.fit(v, W - 92 - lw - 90, 40, C, 700, 22), C, 700); ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(v, 92 + lw + 22, y + 2);
+      return;
+    }
+    ctx.font = k.font(28, C, 700); k.spaced(5); ctx.fillStyle = "rgba(255,255,255,0.78)";
+    ctx.fillText((s.brand.name || "").toUpperCase(), 92, y); k.spaced(0);
+  };
+
+  // ---- Text ----
+  // Rich text: words wrapped in *stars* are drawn in the accent colour.
+  k.richWords = (text) => {
+    const out = []; let hl = false;
+    String(text).split(/\s+/).filter(Boolean).forEach((w) => {
+      const starts = w.startsWith("*"), ends = w.endsWith("*") && w.length > 1;
+      if (starts) hl = true;
+      out.push({ w: w.replace(/\*/g, ""), hl });
+      if (ends || (starts && w.length > 1 && w.slice(1).includes("*"))) hl = false;
+    });
+    return out;
+  };
+  // Wraps rich text into at most maxLines, shrinking the font as needed.
+  k.layoutRich = (text, maxW, size, fam, maxLines, min, weight) => {
+    const words = k.richWords(text);
+    for (let s = size; ; s -= 4) {
+      ctx.font = k.font(s, fam, weight);
+      const sp = ctx.measureText(" ").width, lines = [[]]; let cur = 0;
+      words.forEach((wd) => {
+        const ww = ctx.measureText(wd.w).width;
+        if (cur && cur + sp + ww > maxW) { lines.push([]); cur = 0; }
+        lines[lines.length - 1].push(wd); cur += (cur ? sp : 0) + ww;
+      });
+      if (lines.length <= maxLines || s <= (min || 30)) return { size: s, lines };
+    }
+  };
+  k.drawRich = (lay, x, y, lineH, fam, base, hi, align, weight) => {
+    ctx.font = k.font(lay.size, fam, weight); k.spaced(0);
+    const prev = ctx.textAlign; ctx.textAlign = "left";
+    const sp = ctx.measureText(" ").width;
+    lay.lines.forEach((ln, i) => {
+      const total = ln.reduce((a, wd, j) => a + ctx.measureText(wd.w).width + (j ? sp : 0), 0);
+      let cx = align === "center" ? x - total / 2 : x;
+      ln.forEach((wd) => { ctx.fillStyle = wd.hl ? hi : base; ctx.fillText(wd.w, cx, y + i * lineH); cx += ctx.measureText(wd.w).width + sp; });
+    });
+    ctx.textAlign = prev;
+  };
+  k.bigText = (g, text, y, size) => {
+    const s = k.fit(text.toUpperCase(), g.W - 112, size || 200, D);
+    ctx.font = k.font(s, D); ctx.fillStyle = g.accent; ctx.fillText(text.toUpperCase(), 52, y); return s;
+  };
+  k.nameText = (g, text, y, size) => {
+    const s = k.fit(String(text).toUpperCase(), g.W - 112, size || 120, D);
+    ctx.font = k.font(s, D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(text).toUpperCase(), 54, y);
+  };
+  k.subText = (g, text, y) => {
+    ctx.font = k.font(44, C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)"; ctx.fillText(text, 56, y, g.W - 112);
+  };
+  k.label = (text, x, y, color, size = 48) => {
+    ctx.font = k.font(size, C, 700); k.spaced(4); ctx.fillStyle = color; ctx.fillText(String(text).toUpperCase(), x, y); k.spaced(0);
+  };
+
+  // A row of stat columns: [["Runs", "52"], ["Balls", "38"], ...]
+  k.stats = (g, items, y, h = 130) => {
+    const pad = 56, n = items.length; if (!n) return;
+    const cw = (g.W - pad * 2) / n;
+    items.forEach(([label, value], i) => {
+      const x = pad + i * cw;
+      if (i) { ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fillRect(x, y + 14, 2, h - 28); }
+      ctx.textAlign = "center";
+      ctx.font = k.font(k.fit(String(value), cw - 24, 76, D), D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(value), x + cw / 2, y + h * 0.58);
+      ctx.font = k.font(26, C, 700); k.spaced(3); ctx.fillStyle = g.accent;
+      ctx.fillText(String(label).toUpperCase(), x + cw / 2, y + h * 0.9, cw - 16); k.spaced(0);
+      ctx.textAlign = "left";
+    });
+  };
+  // A rotated outlined stamp, like "GONE!" or "DUCK".
+  k.stamp = (text, cx, cy, size, color, angle = -0.16) => {
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle);
+    ctx.font = k.font(size, D); const tw = ctx.measureText(text).width;
+    ctx.lineWidth = Math.max(6, size / 18); ctx.strokeStyle = color; k.roundRect(-tw / 2 - size * 0.18, -size * 0.92, tw + size * 0.36, size * 1.12, 16); ctx.stroke();
+    ctx.fillStyle = color; ctx.textAlign = "center"; ctx.fillText(text, 0, 0); ctx.restore();
+  };
+
+  // ---- Cricket maths ----
+  k.oversToBalls = (o) => { const [a, b] = String(o).split("."); return (parseInt(a) || 0) * 6 + (parseInt(b) || 0); };
+  k.parseOver = (s) => {
+    const balls = String(s).trim().split(/\s+/).filter(Boolean);
+    let runs = 0, wk = 0;
+    balls.forEach((b) => {
+      const t = b.toLowerCase();
+      if (t === "w") wk++;
+      else if (t === "wd" || t === "nb") runs += 1;
+      else if (/^(wd|nb)\d+$/.test(t)) runs += 1 + parseInt(t.slice(2));
+      else if (!isNaN(parseInt(t))) runs += parseInt(t);
+    });
+    return { balls, runs, wk };
+  };
+  k.overBalls = (g, balls, y) => {
+    const { W, accent } = g;
+    const n = Math.max(balls.length, 6), gap = 16, d = Math.min(130, (W - 112 - gap * (n - 1)) / n);
+    balls.forEach((b, i) => {
+      const cx = 56 + d / 2 + i * (d + gap), cy = y + d / 2, t = b.toUpperCase();
+      ctx.beginPath(); ctx.arc(cx, cy, d / 2, 0, Math.PI * 2);
+      let fill = "rgba(255,255,255,0.10)", ink = "#FFFFFF", stroke = null;
+      if (t === "W" || t === "6") { fill = accent; ink = k.inkOn(accent); }
+      else if (t === "4") { fill = "rgba(255,255,255,0)"; stroke = accent; }
+      ctx.fillStyle = fill; ctx.fill();
+      if (stroke) { ctx.lineWidth = 6; ctx.strokeStyle = stroke; ctx.stroke(); }
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const label = t === "0" ? "•" : t;
+      ctx.font = k.font(k.fit(label, d - 22, d * 0.5, D), D); ctx.fillStyle = ink; ctx.fillText(label, cx, cy + 3);
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    });
+  };
+
+  return k;
+};
+
+</script>
+<script>
+// Card designs. Each layout is one entry in BPG.LAYOUTS.
+//
+//   standard: true  → the app draws the background, photo (top part), fade, top row and bottom row for you,
+//                     and your draw(k, g) only adds the middle text.
+//   standard: false → draw(k, g) draws everything after the background (full control).
+//   giant(g)        → optional: big number drawn behind a cutout player (standard layouts only).
+//
+// `k` is the toolkit from engine.js, `g` is everything about the current card:
+//   g.W, g.H                size of the poster
+//   g.st, g.sb              top and bottom of the safe zone
+//   g.blockTop, g.bigBase, g.nameBase, g.subBase, g.statsTop, g.footerY   standard text rows (y positions)
+//   g.accent, g.bg          colours
+//   g.val("id")             what the user typed in a field
+//   g.big                   the big headline word
+//   g.t                     the card definition from templates.js
+//   g.photo, g.photos[2]    uploaded photos ({ img, cut }) or null
+window.BPG = window.BPG || {};
+
+BPG.LAYOUTS = {
+  batting: {
+    standard: true,
+    giant: (g) => g.t.milestone,
+    draw(k, g) {
+      const runs = parseFloat(g.val("runs")) || 0, balls = parseFloat(g.val("balls")) || 0;
+      k.bigText(g, g.big, g.bigBase);
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")}`, g.subBase);
+      k.stats(g, [["Runs", g.val("runs") + "*"], ["Balls", g.val("balls")], ["4s", g.val("fours")], ["6s", g.val("sixes")], ["Strike rate", balls ? (runs / balls * 100).toFixed(1) : "-"]], g.statsTop);
+    },
+  },
+
+  bowling: {
+    standard: true,
+    giant: (g) => g.val("wkts"),
+    draw(k, g) {
+      const b = k.oversToBalls(g.val("overs")), r = parseFloat(g.val("runs")) || 0;
+      k.bigText(g, g.big, g.bigBase);
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")}`, g.subBase);
+      k.stats(g, [["Figures", `${g.val("wkts")}/${g.val("runs")}`], ["Overs", g.val("overs")], ["Economy", b ? (r / (b / 6)).toFixed(2) : "-"]], g.statsTop);
+    },
+  },
+
+  knock: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, runs = String(g.val("runs")), rn = parseInt(runs) || 0, balls = parseFloat(g.val("balls")) || 0;
+      ctx.font = k.font(60, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF";
+      ctx.fillText(String(g.val("player")).toUpperCase(), 56, g.bigBase - 95, g.W - 112); k.spaced(0);
+      const lay = k.layoutRich(`${runs} *OFF* ${g.val("balls")}`, g.W - 112, 240, k.D, 1, 60);
+      k.drawRich(lay, 52, g.nameBase + 20, lay.size, k.D, "#FFFFFF", g.accent, "left");
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")}`, g.nameBase + 74);
+      if (rn === 0 && !runs.includes("*")) k.stamp("DUCK", g.W - 230, g.blockTop - 60, 120, g.accent, -0.18);
+      k.stats(g, [["4s", g.val("fours")], ["6s", g.val("sixes")], ["Strike rate", balls ? (rn / balls * 100).toFixed(1) : "-"]], g.statsTop + 6, 124);
+    },
+  },
+
+  wicket: {
+    standard: true,
+    draw(k, g) {
+      const big = g.big.toUpperCase();
+      k.stamp(big, g.W * 0.62, g.blockTop - 120, k.fit(big, g.W * 0.7, 230, k.D), g.accent);
+      k.label("WICKET", 56, g.bigBase - 30, g.accent);
+      k.nameText(g, g.val("batter"), g.nameBase);
+      k.subText(g, g.val("how"), g.subBase);
+      k.stats(g, [["Runs", g.val("runs")], ["Balls", g.val("balls")], ["Bowler", String(g.val("bowler")).split(" ").slice(-1)[0]], ["Score", String(g.val("score")).split(" ")[0]]], g.statsTop);
+    },
+  },
+
+  over: {
+    standard: true,
+    draw(k, g) {
+      const o = k.parseOver(g.val("balls"));
+      k.bigText(g, g.big, g.bigBase, 170);
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `Over ${g.val("over")} · ${o.runs} run${o.runs === 1 ? "" : "s"}${o.wk ? ` · ${o.wk} wicket${o.wk > 1 ? "s" : ""}` : ""} · vs ${g.val("opp")}`, g.subBase);
+      k.overBalls(g, o.balls, g.statsTop + 4);
+    },
+  },
+
+  innings: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, target = (parseInt(String(g.val("score")).split("/")[0]) || 0) + 1;
+      ctx.font = k.font(k.fit("TARGET " + target, g.W - 112, 210, k.D), k.D);
+      ctx.fillStyle = "#FFFFFF"; ctx.fillText("TARGET ", 52, g.bigBase);
+      const tw = ctx.measureText("TARGET ").width; ctx.fillStyle = g.accent; ctx.fillText(String(target), 52 + tw, g.bigBase);
+      k.nameText(g, `${g.val("team")} ${g.val("score")}`, g.nameBase);
+      k.subText(g, `${g.val("overs")} overs · innings break`, g.subBase);
+      k.stats(g, [["Top scorer", g.val("topbat")], ["Top bowler", g.val("topbowl")]], g.statsTop);
+    },
+  },
+
+  scoreupd: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, ts = 220, ty = g.bigBase - 10;
+      k.label(g.val("status"), 56, g.bigBase - 50, g.accent, 54);
+      ctx.fillStyle = g.accent; k.roundRect(56, ty, ts, ts, 28); ctx.fill();
+      const ab = String(g.val("abbr")).toUpperCase();
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(ab, ts - 40, 120, k.D), k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText(ab, 56 + ts / 2, ty + ts / 2 + 44);
+      ctx.textAlign = "right";
+      const sc = String(g.val("score")); ctx.font = k.font(k.fit(sc, g.W - 112 - ts - 60, 230, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(sc, g.W - 56, ty + 175);
+      ctx.font = k.font(46, k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillText(`IN ${g.val("overs")} OVERS`, g.W - 56, ty + 238); k.spaced(0);
+      ctx.textAlign = "left";
+      const tm = String(g.val("team")).toUpperCase();
+      ctx.font = k.font(k.fit(tm, ts + 120, 40, k.C, 700), k.C, 700); ctx.fillStyle = "#FFFFFF"; ctx.fillText(tm, 56, ty + ts + 50);
+      if (g.val("detail")) { ctx.font = k.font(42, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)"; ctx.fillText(g.val("detail"), 56, g.footerY - 64, g.W - 112); }
+    },
+  },
+
+  result: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx;
+      const r = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 150, k.D, 2, 60);
+      const rowsTop = g.nameBase - 120;
+      k.drawRich(r, 52, rowsTop - 40 - (r.lines.length - 1) * r.size, r.size, k.D, "#FFFFFF", g.accent, "left");
+      [[g.val("t1"), g.val("s1")], [g.val("t2"), g.val("s2")]].forEach(([tm, sc], i) => {
+        const y = rowsTop + 20 + i * 104;
+        ctx.fillStyle = "rgba(255,255,255,0.08)"; ctx.fillRect(56, y, g.W - 112, 92);
+        ctx.font = k.font(k.fit(String(tm).toUpperCase(), g.W * 0.5, 62, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(tm).toUpperCase(), 80, y + 70);
+        ctx.font = k.font(k.fit(String(sc), g.W * 0.4, 62, k.D), k.D); ctx.fillStyle = g.accent; ctx.textAlign = "right"; ctx.fillText(String(sc), g.W - 80, y + 70); ctx.textAlign = "left";
+      });
+      k.label(g.t.subLabel || "PLAYER OF THE MATCH", 56, g.statsTop + 70, g.accent, 30);
+      ctx.font = k.font(46, k.C, 600); ctx.fillStyle = "#FFFFFF"; ctx.fillText(g.val("potm"), 56, g.statsTop + 122, g.W - 112);
+    },
+  },
+
+  form: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx;
+      const items = String(g.val("scores")).split(",").map((x) => x.trim()).filter(Boolean).slice(0, 12)
+        .map((x) => { const m = x.split(/\s+/); return { s: m[0], o: (m[1] || "").toUpperCase() }; });
+      const perRow = Math.min(6, Math.max(items.length, 1)), rows = Math.ceil(items.length / perRow), cw = (g.W - 112) / perRow, rh = 200;
+      const gTop = g.statsTop - 20 - rows * rh;
+      ctx.fillStyle = k.hexA(g.bg, 0.55); ctx.fillRect(0, gTop - 10, g.W, rows * rh + 20);
+      items.forEach((it, i) => {
+        const x = 56 + (i % perRow) * cw + cw / 2, y = gTop + Math.floor(i / perRow) * rh, good = (parseInt(it.s) || 0) >= 50;
+        ctx.textAlign = "center";
+        ctx.font = k.font(32, k.C, 700); k.spaced(3); ctx.fillStyle = k.hexA("#FFFFFF", 0.6); ctx.fillText(it.o, x, y + 44); k.spaced(0);
+        ctx.font = k.font(k.fit(it.s, cw - 16, 120, k.D), k.D); ctx.fillStyle = good ? g.accent : "#FFFFFF"; ctx.fillText(it.s, x, y + 165);
+        if (good) { ctx.fillStyle = g.accent; ctx.fillRect(x - 30, y + 182, 60, 6); }
+        ctx.textAlign = "left";
+      });
+      const lay = k.layoutRich(`${String(g.val("player")).toUpperCase()} *| ${String(g.val("title")).toUpperCase()}*`, g.W - 112, 64, k.D, 1, 30);
+      k.drawRich(lay, 54, g.statsTop + 70, lay.size, k.D, "#FFFFFF", g.accent, "left");
+    },
+  },
+
+  status: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, top = g.blockTop + 20;
+      if (g.val("player")) { ctx.font = k.font(60, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(g.val("player")).toUpperCase(), 56, top + 50, g.W - 112); k.spaced(0); }
+      const stTop = top + 80, txt = String(g.val("stamp")).toUpperCase();
+      let lay = k.layoutRich(txt, g.W - 112, 200, k.D, 2, 60);
+      while (lay.lines.length * lay.size > g.footerY - 120 - stTop && lay.size > 60) lay = k.layoutRich(txt, g.W - 112, lay.size - 6, k.D, 2, 60);
+      k.drawRich(lay, 52, stTop + lay.size * 0.88, lay.size, k.D, "#FFFFFF", g.accent, "left");
+      if (g.val("detail")) {
+        ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(String(g.val("detail")).toUpperCase(), 56, Math.min(g.footerY - 62, stTop + lay.lines.length * lay.size + 46), g.W - 112);
+      }
+      if (g.t.coin) {
+        const cx = g.W - 190, cy = g.blockTop - 90, r = 110;
+        const gr = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, r);
+        gr.addColorStop(0, "#FFE9A3"); gr.addColorStop(1, "#C9962B");
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = gr; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, r - 16, 0, Math.PI * 2); ctx.lineWidth = 5; ctx.strokeStyle = "rgba(120,80,10,0.6)"; ctx.stroke();
+        ctx.textAlign = "center"; ctx.font = k.font(64, k.D); ctx.fillStyle = "#6B4A0E"; ctx.fillText("TOSS", cx, cy + 24); ctx.textAlign = "left";
+      }
+    },
+  },
+
+  goal: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, big = g.big.toUpperCase();
+      const s = k.bigText(g, big, g.bigBase, 220);
+      ctx.font = k.font(s, k.D); const gw = ctx.measureText(big).width;
+      ctx.font = k.font(64, k.D); const mw = ctx.measureText(g.val("minute")).width;
+      if (52 + gw + 40 + mw + 40 < g.W - 56) {
+        ctx.fillStyle = "#FFFFFF"; k.roundRect(52 + gw + 30, g.bigBase - 92, mw + 40, 88, 12); ctx.fill();
+        ctx.fillStyle = "#0B0F18"; ctx.fillText(g.val("minute"), 52 + gw + 50, g.bigBase - 22);
+      }
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")}`, g.subBase);
+      k.stats(g, [["Score", String(g.val("score")).replace(/^[^\d]*?(\d+\s*-\s*\d+).*$/, "$1")], ["Minute", g.val("minute")], ["Assist", String(g.val("assist")).split(" ").slice(-1)[0] || "-"]], g.statsTop);
+    },
+  },
+
+  fscore: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx;
+      if (g.val("headline")) {
+        const lay = k.layoutRich(String(g.val("headline")).toUpperCase(), g.W - 112, 110, k.D, 2, 50);
+        k.drawRich(lay, 52, g.blockTop + 100 - (lay.lines.length - 1) * lay.size, lay.size, k.D, "#FFFFFF", g.accent, "left");
+      }
+      const nb = g.statsTop + 10, xs = [g.W * 0.27, g.W * 0.73];
+      ctx.textAlign = "center";
+      [[g.val("s1"), g.val("t1")], [g.val("s2"), g.val("t2")]].forEach(([n, tm], i) => {
+        ctx.font = k.font(k.fit(String(n), g.W * 0.4, 330, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(n), xs[i], nb);
+        ctx.font = k.font(k.fit(String(tm).toUpperCase(), g.W * 0.42, 58, k.D), k.D); ctx.fillText(String(tm).toUpperCase(), xs[i], nb + 72);
+      });
+      ctx.fillStyle = g.accent; k.roundRect(g.W / 2 - 50, nb - 190, 100, 64, 32); ctx.fill();
+      ctx.font = k.font(40, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText("FT", g.W / 2, nb - 141);
+      ctx.font = k.font(32, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(g.val("potm"), g.W / 2, nb + 118, g.W - 112);
+      ctx.textAlign = "left";
+    },
+  },
+
+  redcard: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx, big = g.big.toUpperCase();
+      const s = k.bigText(g, big, g.bigBase, 200);
+      ctx.font = k.font(s, k.D); const gw = ctx.measureText(big).width;
+      if (52 + gw + 120 < g.W - 56) {
+        ctx.save(); ctx.translate(52 + gw + 80, g.bigBase - s * 0.42); ctx.rotate(0.18);
+        ctx.fillStyle = g.accent; k.roundRect(-38, -s * 0.42, 76, s * 0.84, 8); ctx.fill(); ctx.restore();
+      }
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")} · ${g.val("reason")}`, g.subBase);
+      k.stats(g, [["Minute", g.val("minute")], ["Team", g.val("team")]], g.statsTop);
+    },
+  },
+
+  rating: {
+    standard: true,
+    giant: (g) => g.val("rating"),
+    draw(k, g) {
+      k.bigText(g, g.val("rating") + "/10", g.bigBase, 200);
+      k.nameText(g, g.val("player"), g.nameBase);
+      k.subText(g, `${g.val("team")} vs ${g.val("opp")} · player rating`, g.subBase);
+      const items = String(g.val("stats")).split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0]).slice(0, 4).map(([a, b]) => [a, b || ""]);
+      k.stats(g, items, g.statsTop);
+    },
+  },
+
+  breaking: {
+    standard: true,
+    draw(k, g) {
+      const ctx = k.ctx;
+      ctx.fillStyle = g.accent; ctx.fillRect(56, g.bigBase - 110, 420, 96);
+      ctx.font = k.font(78, k.D); ctx.fillStyle = k.inkOn(g.accent); ctx.fillText(g.big.toUpperCase(), 80, g.bigBase - 30, 380);
+      const room = g.footerY - 150 - (g.bigBase + 30), hd = String(g.val("headline")).toUpperCase();
+      let r = k.layoutRich(hd, g.W - 112, 104, k.D, 3, 50);
+      while (r.lines.length * r.size > room && r.size > 50) r = k.layoutRich(hd, g.W - 112, r.size - 4, k.D, 3, 50);
+      k.drawRich(r, 54, g.bigBase + 30 + r.size, r.size, k.D, "#FFFFFF", g.accent, "left");
+      ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.fillText(g.val("detail"), 56, g.bigBase + 30 + r.lines.length * r.size + 66, g.W - 112);
+    },
+  },
+
+  // ---------- Full-control layouts ----------
+
+  hottake: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx;
+      k.photoArea(g, g.H, 0.45);
+      k.header(g);
+      const top = g.st + 140;
+      ctx.font = k.font(300, k.D); ctx.fillStyle = g.accent; ctx.fillText("“", 40, top + 220);
+      k.label(g.big, 210, top + 70, g.accent, 42);
+      const avail = g.sb - 200 - (top + 260);
+      const lay = k.layoutRich(String(g.val("quote")).toUpperCase(), g.W - 112, 120, k.D, Math.max(3, Math.floor(avail / 90)), 48);
+      k.drawRich(lay, 54, top + 260 + lay.size * 0.8, lay.size * 1.05, k.D, "#FFFFFF", g.accent, "left");
+      ctx.font = k.font(48, k.C, 700); ctx.fillStyle = g.accent;
+      ctx.fillText("— " + g.val("by"), 56, top + 260 + lay.lines.length * lay.size * 1.05 + lay.size * 0.8 + 50);
+      k.footer(g);
+    },
+  },
+
+  quote: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, W = g.W;
+      const q = k.layoutRich(g.val("quote"), W - 160, 50, k.B, 7, 32, 500);
+      const panelTop = g.footerY - 80 - q.lines.length * q.size * 1.28 - 300;
+      if (!k.photoArea(g, panelTop + 120)) k.photoHint(g, (g.st + panelTop) / 2);
+      k.fadeBottom(g, panelTop - 120, panelTop + 40);
+      k.slash(g, panelTop + 10);
+      k.header(g);
+      if (g.photos[2]) k.circlePhoto(g.photos[2].img, 56 + 150, panelTop - 120, 150, g.accent);
+      const nm = String(g.val("name")).toUpperCase();
+      ctx.textAlign = "center";
+      ctx.font = k.font(k.fit(nm, W - 112, 120, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, W / 2, panelTop + 150);
+      const dy = panelTop + 215;
+      ctx.fillStyle = k.hexA("#FFFFFF", 0.5); ctx.fillRect(110, dy - 4, W / 2 - 200, 3); ctx.fillRect(W / 2 + 90, dy - 4, W / 2 - 200, 3);
+      ctx.font = k.font(110, k.D); ctx.fillStyle = g.accent; ctx.fillText("“ ”", W / 2, dy + 52);
+      k.drawRich(q, W / 2, panelTop + 300, q.size * 1.28, k.B, "#FFFFFF", g.accent, "center", 500);
+      if (g.val("context")) {
+        ctx.font = k.font(32, k.C, 700); k.spaced(4); ctx.fillStyle = k.hexA("#FFFFFF", 0.6);
+        ctx.fillText(String(g.val("context")).toUpperCase(), W / 2, panelTop + 300 + q.lines.length * q.size * 1.28 + 20); k.spaced(0);
+      }
+      ctx.textAlign = "left";
+      k.footer(g);
+    },
+  },
+
+  toplist: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, W = g.W;
+      k.photoArea(g, g.H, 0.55);
+      k.header(g);
+      const tl = k.layoutRich(String(g.val("title")).toUpperCase(), W - 112, 110, k.D, 3, 50);
+      k.drawRich(tl, 54, g.st + 230, tl.size * 1.02, k.D, "#FFFFFF", g.accent, "left");
+      const rows = String(g.val("items")).split("\n").map((r) => r.split("|").map((x) => x.trim())).filter((r) => r[0]).slice(0, 5);
+      const top = g.st + 230 + tl.lines.length * tl.size * 1.02 + 30, avail = g.footerY - 70 - top;
+      const rh = Math.min(230, avail / Math.max(rows.length, 1));
+      rows.forEach(([v, n], i) => {
+        const y = top + i * rh;
+        ctx.fillStyle = "rgba(255,255,255,0.07)"; ctx.fillRect(56, y + 10, W - 112, rh - 20);
+        ctx.fillStyle = g.accent; ctx.fillRect(56, y + 10, 12, rh - 20);
+        ctx.font = k.font(rh * 0.5, k.D); ctx.fillStyle = k.hexA(g.accent, 0.9); ctx.fillText(String(i + 1), 100, y + rh * 0.68);
+        ctx.font = k.font(k.fit(String(v), W * 0.42, rh * 0.5, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), 100 + rh * 0.42, y + rh * 0.68);
+        const nm = String(n || "").toUpperCase();
+        ctx.font = k.font(k.fit(nm, W * 0.36, 52, k.C, 700), k.C, 700); ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.textAlign = "right"; ctx.fillText(nm, W - 92, y + rh * 0.64); ctx.textAlign = "left";
+      });
+      k.footer(g);
+    },
+  },
+
+  versus: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H, st, sb, accent, bg } = g, half = W / 2, ph = sb - 330;
+      [1, 2].forEach((n) => {
+        const x = n === 1 ? 0 : half, p = n === 1 ? g.photo : g.photos[2];
+        ctx.save(); ctx.beginPath(); ctx.rect(x, 0, half, ph); ctx.clip();
+        if (p) { k.coverImg(p.img, x, 0, half, ph); ctx.fillStyle = k.hexA(bg, g.shade); ctx.fillRect(x, 0, half, ph); }
+        else { ctx.font = k.font(30, k.C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillText(`Add photo ${n}`, x + half / 2, ph / 2); ctx.textAlign = "left"; }
+        ctx.restore();
+      });
+      k.fadeBottom(g, ph - 380, ph + 10);
+      ctx.fillStyle = accent; ctx.fillRect(half - 4, st + 110, 8, ph - st - 200);
+      ctx.beginPath(); ctx.arc(half, ph - 330, 92, 0, Math.PI * 2); ctx.fill();
+      ctx.font = k.font(96, k.D); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = k.inkOn(accent); ctx.fillText("VS", half, ph - 324);
+      ctx.textBaseline = "alphabetic";
+      [[g.val("p1"), half / 2], [g.val("p2"), half + half / 2]].forEach(([nm, cx]) => {
+        const t = String(nm).toUpperCase();
+        ctx.font = k.font(k.fit(t, half - 80, 110, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(t, cx, ph - 110);
+      });
+      ctx.textAlign = "left";
+      k.header(g);
+      const q = String(g.val("question")).toUpperCase();
+      ctx.font = k.font(k.fit(q, W - 112, 130, k.D), k.D); ctx.fillStyle = accent; ctx.textAlign = "center"; ctx.fillText(q, half, g.footerY - 90); ctx.textAlign = "left";
+      k.footer(g);
+      void H;
+    },
+  },
+
+  frame: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, hl = g.val("headline");
+      if (!k.photoArea(g, g.H)) k.photoHint(g, g.H / 2);
+      if (hl) k.fadeBottom(g, g.H * 0.55, g.sb - 120);
+      ctx.lineWidth = 10; ctx.strokeStyle = g.accent; ctx.strokeRect(28, 28, g.W - 56, g.H - 56);
+      k.header(g);
+      if (hl) {
+        const lay = k.layoutRich(String(hl).toUpperCase(), g.W - 112, 130, k.D, 2, 60);
+        k.drawRich(lay, 54, g.footerY - 60 - (lay.lines.length - 1) * lay.size * 1.02, lay.size * 1.02, k.D, "#FFFFFF", g.accent, "left");
+      }
+      k.footer(g);
+    },
+  },
+
+  // Your own "Match reaction" style: brand bar, score pill, big take, rant meter.
+  reaction: {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H, st, sb, accent, bg } = g, s = BPG.state();
+      const cream = "#F2EFE8", muted = "#C4C7CE", panel = "#1B1D23";
+
+      // Text first, so the photo can take whatever space is left.
+      const barTop = H > 1500 ? st - 30 : 0, barH = 128, barBottom = barTop + barH;
+      const meterY = H > 1500 ? sb - 30 : H - 70;
+      const body = g.val("body") ? k.layoutRich(g.val("body"), W - 112, 38, k.B, 4, 26, 400) : null;
+      const stats = String(g.val("stats")).split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0] && x[1]).slice(0, 4);
+      const minPhoto = H > 1500 ? 620 : 440;
+      let hl, textH;
+      for (let size = 130; ; size -= 6) {
+        hl = k.layoutRich(String(g.val("headline")).toUpperCase(), W - 112, size, k.D, 3, 56);
+        textH = 56 + hl.lines.length * hl.size * 0.98 + (body ? 20 + body.lines.length * body.size * 1.45 : 0) + (stats.length ? 36 + 150 : 0);
+        if (meterY - 90 - textH >= barBottom + minPhoto || size <= 62) break;
+      }
+      const photoBottom = Math.max(barBottom + minPhoto * 0.8, Math.min(H * 0.66, meterY - 90 - textH));
+
+      // Photo band
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      if (g.photo) {
+        ctx.save(); ctx.beginPath(); ctx.rect(0, barBottom, W, photoBottom - barBottom); ctx.clip();
+        k.coverImg(g.photo.img, 0, barBottom, W, photoBottom - barBottom);
+        if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, g.shade); ctx.fillRect(0, barBottom, W, photoBottom - barBottom); }
+        ctx.restore();
+      } else {
+        ctx.fillStyle = panel; ctx.fillRect(0, barBottom, W, photoBottom - barBottom);
+        k.photoHint(g, (barBottom + photoBottom) / 2 - 60);
+      }
+      ctx.fillStyle = accent; ctx.fillRect(0, photoBottom, W, 9);
+
+      // Brand bar
+      ctx.fillStyle = bg; ctx.fillRect(0, barTop, W, barH);
+      const logo = BPG.logoImage();
+      let x = 58; const cy = barTop + barH / 2;
+      if (logo) { const sc = 76 / Math.max(logo.width, logo.height); ctx.drawImage(logo, x, cy - (logo.height * sc) / 2, logo.width * sc, logo.height * sc); x += logo.width * sc + 22; }
+      else {
+        ctx.save(); ctx.translate(x + 38, cy - 4); ctx.rotate(-0.08);
+        ctx.fillStyle = accent; k.roundRect(-38, -30, 76, 60, 10); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-18, 26); ctx.lineTo(-30, 46); ctx.lineTo(0, 28); ctx.fill();
+        ctx.font = k.font(40, k.D); ctx.fillStyle = "#14151A"; ctx.textAlign = "center"; ctx.fillText("BR", 0, 15);
+        ctx.strokeStyle = accent; ctx.lineWidth = 4; ctx.lineCap = "round";
+        [[44, -30, 54, -42], [48, -18, 62, -20]].forEach(([a, b, c, d]) => { ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke(); });
+        ctx.restore(); ctx.textAlign = "left"; x += 112;
+      }
+      const words = String(s.brand.name || "").toUpperCase().split(/\s+/);
+      ctx.font = k.font(46, k.D); ctx.fillStyle = cream; ctx.fillText(words[0] || "", x, cy + 17); x += ctx.measureText((words[0] || "") + " ").width;
+      ctx.fillStyle = accent; ctx.fillText(words[1] || "", x, cy + 17); x += ctx.measureText((words[1] || "") + " ").width;
+      ctx.font = k.font(30, k.C, 600); k.spaced(6); ctx.fillStyle = muted; ctx.fillText(words.slice(2).join(" "), x + 4, cy + 15, W - x - 360); k.spaced(0);
+
+      // Tag (slanted)
+      const tag = String(g.val("tag")).toUpperCase();
+      if (tag) {
+        ctx.font = k.font(36, k.C, "italic 700"); k.spaced(5);
+        const tw = ctx.measureText(tag).width + 70, tx = W - 58 - tw, ty = cy - 30;
+        ctx.fillStyle = accent; ctx.beginPath(); ctx.moveTo(tx + 10, ty); ctx.lineTo(tx + tw, ty); ctx.lineTo(tx + tw - 10, ty + 60); ctx.lineTo(tx, ty + 60); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#14151A"; ctx.fillText(tag, tx + 34, ty + 43); k.spaced(0);
+      }
+
+      // Photo credit
+      if (g.val("credit")) {
+        ctx.font = k.font(24, k.B, 500); const cw = ctx.measureText("Photo: " + g.val("credit")).width + 28;
+        ctx.fillStyle = "rgba(10,10,12,0.85)"; ctx.fillRect(W - 40 - cw, barBottom + 20, cw, 44);
+        ctx.fillStyle = "#FFFFFF"; ctx.fillText("Photo: " + g.val("credit"), W - 40 - cw + 14, barBottom + 50);
+      }
+
+      // Score pill
+      if (g.val("score")) {
+        const py = photoBottom - 175, ph = 118, team = String(g.val("team")).toUpperCase(), score = String(g.val("score"));
+        ctx.save(); ctx.transform(1, 0, -0.12, 1, 0, 0);
+        ctx.font = k.font(84, k.D); const w1 = ctx.measureText(team + " ").width, w2 = ctx.measureText(score).width;
+        const bw = w1 + w2 + 70, px = 62 + py * 0.12;
+        ctx.fillStyle = "#0E0F12"; ctx.fillRect(px, py, bw, ph);
+        ctx.fillStyle = cream; ctx.fillText(team, px + 36, py + 92);
+        ctx.fillStyle = accent; ctx.fillText(score, px + 36 + w1, py + 92);
+        const l1 = String(g.val("line1")).toUpperCase(), l2 = String(g.val("line2")).toUpperCase();
+        if (l1 || l2) {
+          ctx.font = k.font(32, k.C, "italic 700"); k.spaced(4);
+          const lw = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 60;
+          ctx.fillStyle = accent; ctx.fillRect(px + bw, py, lw, ph);
+          ctx.fillStyle = "#14151A"; ctx.fillText(l1, px + bw + 30, py + 50); ctx.fillText(l2, px + bw + 30, py + 92); k.spaced(0);
+        }
+        ctx.restore();
+      }
+
+      // Headline, body, stats
+      let y = photoBottom + 56 + hl.size * 0.82;
+      k.drawRich(hl, 54, y, hl.size * 0.98, k.D, cream, accent, "left");
+      y += (hl.lines.length - 1) * hl.size * 0.98;
+      if (body) { y += 20 + body.size * 1.2; k.drawRich(body, 56, y, body.size * 1.45, k.B, muted, accent, "left", 400); y += (body.lines.length - 1) * body.size * 1.45; }
+      if (stats.length) {
+        const top = y + 36, gap = 22, bw = (W - 112 - gap * (stats.length - 1)) / stats.length;
+        stats.forEach(([lab, v], i) => {
+          const bx = 56 + i * (bw + gap);
+          ctx.fillStyle = panel; ctx.fillRect(bx, top, bw, 150);
+          ctx.textAlign = "center";
+          ctx.font = k.font(k.fit(v, bw - 30, 86, k.D), k.D); ctx.fillStyle = accent; ctx.fillText(v, bx + bw / 2, top + 92);
+          ctx.font = k.font(28, k.C, 700); k.spaced(4); ctx.fillStyle = muted; ctx.fillText(lab.toUpperCase(), bx + bw / 2, top + 132, bw - 20); k.spaced(0);
+          ctx.textAlign = "left";
+        });
+      }
+
+      // Rant meter + handle
+      ctx.font = k.font(34, k.C, 700); k.spaced(6); ctx.fillStyle = muted; ctx.fillText("RANT METER", 56, meterY); k.spaced(0);
+      const lvl = Math.max(0, Math.min(5, parseInt(g.val("rant")) || 0));
+      for (let i = 0; i < 5; i++) {
+        const bh = 20 + i * 14, bx = 300 + i * 46;
+        ctx.save(); ctx.transform(1, 0, -0.18, 1, 0, 0);
+        ctx.fillStyle = i < lvl ? accent : "#3A3D45"; ctx.fillRect(bx + meterY * 0.18, meterY + 8 - bh, 34, bh); ctx.restore();
+      }
+      ctx.font = k.font(36, k.C, 700); k.spaced(2); ctx.fillStyle = cream; ctx.textAlign = "right";
+      ctx.fillText(s.verdict ? s.verdict : s.brand.handle || "", W - 56, meterY, W - 600); ctx.textAlign = "left"; k.spaced(0);
+    },
+  },
+};
+
+</script>
+<script>
+// The form, the live preview and the download/share buttons.
+window.BPG = window.BPG || {};
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const T = BPG.TEMPLATES, L = BPG.LAYOUTS, THEMES = BPG.THEMES, PLATFORMS = BPG.PLATFORMS;
+  const cv = $("poster"), ctx = cv.getContext("2d");
+
+  const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
+  const state = {
+    cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
+    values: {}, kicker: "BAN vs SA · 1st ODI", verdict: "", theme: "brand", brand: { ...BPG.BRAND },
+  };
+  const photos = { 1: null, 2: null };
+  let logoImg = null;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem("bpg_state") || "null");
+    if (saved) Object.assign(state, saved, { brand: { ...BPG.BRAND, ...(saved.brand || {}) } });
+  } catch (e) {}
+  if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
+  if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
+  const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
+
+  BPG.state = () => state;
+  BPG.logoImage = () => logoImg;
+  const adjust = () => ({ zoom: parseFloat($("zoom").value), offx: parseFloat($("offx").value), offy: parseFloat($("offy").value), shade: parseFloat($("shade").value) });
+  const k = BPG.createKit(ctx, { state: () => state, logo: () => logoImg, adjust });
+
+  const val = (id) => {
+    const v = state.values[state.tpl] && state.values[state.tpl][id];
+    if (v !== undefined) return v;
+    const f = T[state.tpl].fields.find((x) => x[0] === id);
+    return f ? f[2] : "";
+  };
+
+  // ---------- Form ----------
+  function button(parent, label, pressed, onClick) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(pressed)); b.onclick = onClick;
+    parent.appendChild(b);
+  }
+  function renderCats() {
+    $("cats").innerHTML = "";
+    Object.entries(BPG.CATS).forEach(([key, label]) => button($("cats"), label, state.cat === key, () => {
+      state.cat = key; state.tpl = firstOf(key); persist(); renderAll();
+    }));
+  }
+  function renderTypes() {
+    $("types").innerHTML = "";
+    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
+      state.tpl = key; persist(); renderAll();
+    }));
+  }
+  function addField(parent, id, label, value, wide, type, onInput) {
+    const d = document.createElement("div");
+    d.className = "field" + (wide ? " wide" : "");
+    const l = document.createElement("label"); l.htmlFor = id; l.textContent = label;
+    const i = document.createElement(type === "area" ? "textarea" : "input");
+    if (type !== "area") i.type = "text";
+    i.id = id; i.value = value;
+    i.addEventListener("input", () => onInput(i.value));
+    d.append(l, i); parent.appendChild(d);
+  }
+  function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
+  function renderFields() {
+    const box = $("fields"), t = T[state.tpl]; box.innerHTML = "";
+    addField(box, "f_kicker", "Match / tag line (top left pill)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
+    addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
+    if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
+    t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => setVal(id, v)));
+    $("photo2Wrap").hidden = !t.photo2;
+    $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("tplHint").textContent = t.hint || "";
+    $("tplHint").hidden = !t.hint;
+  }
+  function renderPlatforms() {
+    $("platforms").innerHTML = "";
+    Object.entries(PLATFORMS).forEach(([key, p]) => button($("platforms"), p.label, state.platform === key, () => {
+      state.platform = key; persist(); renderPlatforms(); draw();
+    }));
+  }
+  function renderBrand() {
+    $("b_handle").value = state.brand.handle; $("b_name").value = state.brand.name;
+    $("b_accent").value = state.brand.accent; $("b_bg").value = state.brand.bg;
+    const sel = $("b_theme"); sel.innerHTML = "";
+    Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
+    sel.value = THEMES[state.theme] ? state.theme : "brand";
+  }
+  function renderAll() { renderCats(); renderTypes(); renderFields(); draw(); }
+
+  $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
+  ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
+    state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
+  }));
+  ["zoom", "offx", "offy", "shade"].forEach((id) => $(id).addEventListener("input", draw));
+  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0.15; draw(); });
+
+  // ---------- Photos ----------
+  function loadImage(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = r.result; };
+      r.onerror = rej; r.readAsDataURL(file);
+    });
+  }
+  // A PNG with see-through corners counts as a cutout (the big number then goes behind the player).
+  function isCutout(img) {
+    try {
+      const c = document.createElement("canvas"); c.width = 24; c.height = 24;
+      const x = c.getContext("2d"); x.drawImage(img, 0, 0, 24, 24);
+      const d = x.getImageData(0, 0, 24, 24).data;
+      return [0, 23, 24 * 23, 24 * 24 - 1, 12, 24 * 12].filter((p) => d[p * 4 + 3] < 200).length >= 2;
+    } catch (e) { return false; }
+  }
+  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = await loadImage(f); photos[n] = { img, cut: isCutout(img) }; draw();
+  }));
+  $("b_logo").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const img = await loadImage(f);
+    const c = document.createElement("canvas"), s = Math.min(1, 240 / Math.max(img.width, img.height));
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    state.brand.logo = c.toDataURL("image/png"); persist(); setLogo();
+  });
+  $("b_clearLogo").addEventListener("click", () => { state.brand.logo = null; logoImg = null; persist(); draw(); });
+  function setLogo() {
+    if (!state.brand.logo) { logoImg = null; draw(); return; }
+    const i = new Image(); i.onload = () => { logoImg = i; draw(); }; i.src = state.brand.logo;
+  }
+
+  // ---------- Drawing ----------
+  function draw() {
+    const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
+    if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
+    if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
+    const th = THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" ? t.look || {} : {};
+    const footerY = p.bottom - 4, statsTop = footerY - 184, subBase = statsTop - 34, nameBase = subBase - 62, bigBase = nameBase - 128;
+    const g = {
+      W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 190,
+      accent: t.accent || look.accent || th.accent || state.brand.accent,
+      bg: look.bg || th.bg || state.brand.bg,
+      t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
+    };
+
+    ctx.clearRect(0, 0, g.W, g.H);
+    ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; k.spaced(0);
+    k.background(g);
+    if (!layout.standard) { layout.draw(k, g); return; }
+
+    const giant = layout.giant && layout.giant(g);
+    if (giant && (!g.photo || g.photo.cut)) {
+      ctx.font = k.font(k.fit(String(giant), g.W * 0.96, t.layout === "rating" ? 520 : 760, k.D), k.D); ctx.textAlign = "center";
+      ctx.fillStyle = k.hexA(g.accent, g.photo ? 0.92 : 0.16);
+      ctx.fillText(String(giant), g.W / 2, g.blockTop + 120); ctx.textAlign = "left";
+    }
+    if (!k.photoArea(g, g.blockTop + 260)) k.photoHint(g, g.st + (g.blockTop - g.st) / 2 + 60);
+    k.fadeBottom(g, g.blockTop - 260, g.blockTop + 40);
+    if (g.photo) k.slash(g, g.blockTop - 40);
+    k.header(g);
+    layout.draw(k, g);
+    k.footer(g);
+  }
+  BPG.draw = draw;
+
+  // ---------- Export ----------
+  const status = (m) => { $("status").textContent = m; };
+  const filename = () => `borhan-${state.tpl}-${state.platform}-${new Date().toISOString().slice(0, 10)}.png`;
+  const toBlob = () => new Promise((res) => { draw(); cv.toBlob(res, "image/png"); });
+  let claudeDownloads = null;
+  if (window.claude && window.claude.use) window.claude.use("downloads").then((d) => { claudeDownloads = d; }).catch(() => {});
+
+  $("download").addEventListener("click", async () => {
+    const blob = await toBlob();
+    if (!blob) { status("Couldn't create the image. Try a smaller photo."); return; }
+    if (claudeDownloads) {
+      try { await claudeDownloads.save({ filename: filename(), data: blob }); status("Saved " + filename()); return; }
+      catch (e) { if (e && e.code === "declined") { status("Download cancelled."); return; } }
+    }
+    try {
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = filename(); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      status("Downloaded " + filename());
+    } catch (e) { showImage(); status("Long-press or right-click the image below to save it."); }
+  });
+
+  // On phones this opens the share sheet, so you can post straight to Instagram, TikTok or Facebook.
+  $("share").addEventListener("click", async () => {
+    const blob = await toBlob();
+    const file = new File([blob], filename(), { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); status("Shared."); }
+      catch (e) { if (e.name !== "AbortError") { showImage(); status("Sharing isn't available here. Long-press the image below to save it."); } }
+    } else { showImage(); status("Sharing isn't available in this browser. Long-press or right-click the image below to save it."); }
+  });
+  function showImage() { draw(); $("saveImg").src = cv.toDataURL("image/png"); $("saveImg").hidden = false; }
+  $("showImg").addEventListener("click", () => { showImage(); status("Long-press (phone) or right-click (computer) the image to save it."); });
+
+  // ---------- Start ----------
+  renderBrand(); renderPlatforms(); renderAll(); setLogo();
+  const fonts = document.fonts && document.fonts.load
+    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'"].map((f) => document.fonts.load(f)))
+    : Promise.resolve();
+  fonts.then(draw, draw);
+})();
+
+</script>
+</body>
+</html>
