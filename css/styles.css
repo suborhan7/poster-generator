@@ -58,13 +58,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .field input[type="color"] { height: 38px; padding: 3px; }
 .hint { font-size: 13px; color: var(--muted); margin: 0; }
 .stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; flex-direction: column; gap: 12px; align-items: center; min-width: 0; }
-@media (max-width: 860px) { .stage { position: static; order: -1; } canvas#poster { max-height: 55vh; } }
-canvas#poster { width: auto; max-width: 100%; max-height: 78vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
+canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .primary { font: 700 16px var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 12px 22px; cursor: pointer; }
 .ghost { font: 600 14px var(--font-body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
 .status { font-size: 13px; color: var(--muted); min-height: 1.2em; text-align: center; }
-#saveImg { max-width: min(100%, 360px); border-radius: 6px; }
+/* Keep the preview in view while editing, so slider changes show as you drag. */
+@media (max-width: 860px) {
+  .stage { order: -1; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; gap: 8px; }
+  canvas#poster { max-height: 34vh; }
+  .actions .primary { padding: 10px 16px; font-size: 14px; }
+  .actions .ghost { padding: 8px 12px; font-size: 13px; }
+}
+.save-sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+.save-sheet img { max-width: 100%; max-height: calc(100vh - 120px); border-radius: 8px; }
+.save-sheet p { color: #fff; margin: 0; font-size: 14px; text-align: center; }
+.save-sheet button { background: #fff; color: #111; border: 0; }
 details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; color: var(--muted); }
 details[open] summary { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

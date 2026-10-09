@@ -69,13 +69,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .field input[type="color"] { height: 38px; padding: 3px; }
 .hint { font-size: 13px; color: var(--muted); margin: 0; }
 .stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; flex-direction: column; gap: 12px; align-items: center; min-width: 0; }
-@media (max-width: 860px) { .stage { position: static; order: -1; } canvas#poster { max-height: 55vh; } }
-canvas#poster { width: auto; max-width: 100%; max-height: 78vh; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
+canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .primary { font: 700 16px var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 12px 22px; cursor: pointer; }
 .ghost { font: 600 14px var(--font-body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
 .status { font-size: 13px; color: var(--muted); min-height: 1.2em; text-align: center; }
-#saveImg { max-width: min(100%, 360px); border-radius: 6px; }
+/* Keep the preview in view while editing, so slider changes show as you drag. */
+@media (max-width: 860px) {
+  .stage { order: -1; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; gap: 8px; }
+  canvas#poster { max-height: 34vh; }
+  .actions .primary { padding: 10px 16px; font-size: 14px; }
+  .actions .ghost { padding: 8px 12px; font-size: 13px; }
+}
+.save-sheet { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+.save-sheet img { max-width: 100%; max-height: calc(100vh - 120px); border-radius: 8px; }
+.save-sheet p { color: #fff; margin: 0; font-size: 14px; text-align: center; }
+.save-sheet button { background: #fff; color: #111; border: 0; }
 details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; color: var(--muted); }
 details[open] summary { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -143,10 +152,15 @@ img { max-width: 100%; }
       <button class="ghost" id="showImg" type="button">Show image to save</button>
     </div>
     <div class="status" id="status" role="status"></div>
-    <img id="saveImg" alt="Finished poster. Long-press or right-click to save." hidden>
   </div>
 </div>
 
+
+<div class="save-sheet" id="saveSheet" hidden>
+  <p>Long-press (phone) or right-click (computer) the image to save it.</p>
+  <img id="saveImg" alt="Finished poster. Long-press or right-click to save.">
+  <button class="ghost" id="closeSave" type="button">Close</button>
+</div>
 
 <!-- Load order matters: settings, cards, toolkit, designs, then the app. -->
 <script>
@@ -176,8 +190,8 @@ BPG.THEMES = {
 
 // top / bottom = the safe zone where text is allowed (TikTok covers the edges with its buttons).
 BPG.PLATFORMS = {
-  instagram: { label: "Instagram 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
-  facebook: { label: "Facebook 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
+  instagram: { label: "Instagram 4:5", w: 1080, h: 1350, top: 60, bottom: 1300 },
+  facebook: { label: "Facebook 4:5", w: 1080, h: 1350, top: 60, bottom: 1300 },
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 
@@ -1349,7 +1363,7 @@ window.BPG = window.BPG || {};
   L.result = {
     standard: false,
     draw(k, g) {
-      const ctx = k.ctx, potTop = g.footerY - 44 - 50, rowH = 80, row2Top = potTop - 26 - rowH, row1Top = row2Top - 10 - rowH;
+      const ctx = k.ctx, potTop = g.footerY - 36, rowH = 80, row2Top = potTop - 26 - rowH, row1Top = row2Top - 10 - rowH;
       const hd = cap(g.val("headline"));
       let lay = k.layoutRich(hd, g.W - 2 * PAD, 96, k.D, 2, 50);
       const hBase = row1Top - 30, hTop = hBase - (lay.lines.length - 1) * lay.size * 0.95 - lay.size * 0.76;
@@ -1371,7 +1385,7 @@ window.BPG = window.BPG || {};
       if (g.val("potm")) {
         ctx.font = k.font(22, k.C, 700); k.spaced(4); const lab = "★ " + (g.t.subLabel || "PLAYER OF THE MATCH");
         ctx.fillStyle = g.accent; ctx.fillText(lab, PAD, potTop + 34); const lw = ctx.measureText(lab).width; k.spaced(0);
-        ctx.font = k.font(36, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("potm")), PAD + lw + 18, potTop + 36, g.W - 2 * PAD - lw - 24);
+        ctx.font = k.font(36, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("potm")), PAD + lw + 18, potTop + 36, g.W - 2 * PAD - lw - 24 - 260); // leaves room for the logo on the right
       }
       k.footer(g);
     },
@@ -1829,7 +1843,7 @@ window.BPG = window.BPG || {};
       a.href = url; a.download = filename(); document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       status("Downloaded " + filename());
-    } catch (e) { showImage(); status("Long-press or right-click the image below to save it."); }
+    } catch (e) { showImage(); }
   });
 
   // On phones this opens the share sheet, so you can post straight to Instagram, TikTok or Facebook.
@@ -1838,11 +1852,15 @@ window.BPG = window.BPG || {};
     const file = new File([blob], filename(), { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file] }); status("Shared."); }
-      catch (e) { if (e.name !== "AbortError") { showImage(); status("Sharing isn't available here. Long-press the image below to save it."); } }
-    } else { showImage(); status("Sharing isn't available in this browser. Long-press or right-click the image below to save it."); }
+      catch (e) { if (e.name !== "AbortError") { showImage(); } }
+    } else { showImage(); }
   });
-  function showImage() { draw(); $("saveImg").src = cv.toDataURL("image/png"); $("saveImg").hidden = false; }
-  $("showImg").addEventListener("click", () => { showImage(); status("Long-press (phone) or right-click (computer) the image to save it."); });
+  // The finished image opens on top of the page, so the preview itself always stays live.
+  function showImage() { draw(); $("saveImg").src = cv.toDataURL("image/png"); $("saveSheet").hidden = false; }
+  $("showImg").addEventListener("click", showImage);
+  $("closeSave").addEventListener("click", () => { $("saveSheet").hidden = true; });
+  $("saveSheet").addEventListener("click", (e) => { if (e.target.id === "saveSheet") $("saveSheet").hidden = true; });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("saveSheet").hidden = true; });
 
   // ---------- Start ----------
   renderBrand(); renderPlatforms(); renderAll(); setLogo();

@@ -418,7 +418,7 @@ window.BPG = window.BPG || {};
   L.result = {
     standard: false,
     draw(k, g) {
-      const ctx = k.ctx, potTop = g.footerY - 44 - 50, rowH = 80, row2Top = potTop - 26 - rowH, row1Top = row2Top - 10 - rowH;
+      const ctx = k.ctx, potTop = g.footerY - 36, rowH = 80, row2Top = potTop - 26 - rowH, row1Top = row2Top - 10 - rowH;
       const hd = cap(g.val("headline"));
       let lay = k.layoutRich(hd, g.W - 2 * PAD, 96, k.D, 2, 50);
       const hBase = row1Top - 30, hTop = hBase - (lay.lines.length - 1) * lay.size * 0.95 - lay.size * 0.76;
@@ -440,7 +440,7 @@ window.BPG = window.BPG || {};
       if (g.val("potm")) {
         ctx.font = k.font(22, k.C, 700); k.spaced(4); const lab = "★ " + (g.t.subLabel || "PLAYER OF THE MATCH");
         ctx.fillStyle = g.accent; ctx.fillText(lab, PAD, potTop + 34); const lw = ctx.measureText(lab).width; k.spaced(0);
-        ctx.font = k.font(36, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("potm")), PAD + lw + 18, potTop + 36, g.W - 2 * PAD - lw - 24);
+        ctx.font = k.font(36, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("potm")), PAD + lw + 18, potTop + 36, g.W - 2 * PAD - lw - 24 - 260); // leaves room for the logo on the right
       }
       k.footer(g);
     },

@@ -69,10 +69,15 @@
       <button class="ghost" id="showImg" type="button">Show image to save</button>
     </div>
     <div class="status" id="status" role="status"></div>
-    <img id="saveImg" alt="Finished poster. Long-press or right-click to save." hidden>
   </div>
 </div>
 
+
+<div class="save-sheet" id="saveSheet" hidden>
+  <p>Long-press (phone) or right-click (computer) the image to save it.</p>
+  <img id="saveImg" alt="Finished poster. Long-press or right-click to save.">
+  <button class="ghost" id="closeSave" type="button">Close</button>
+</div>
 
 <!-- Load order matters: settings, cards, toolkit, designs, then the app. -->
 <script src="js/config.js"></script>

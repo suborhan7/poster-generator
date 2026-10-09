@@ -24,8 +24,8 @@ BPG.THEMES = {
 
 // top / bottom = the safe zone where text is allowed (TikTok covers the edges with its buttons).
 BPG.PLATFORMS = {
-  instagram: { label: "Instagram 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
-  facebook: { label: "Facebook 4:5", w: 1080, h: 1350, top: 60, bottom: 1260 },
+  instagram: { label: "Instagram 4:5", w: 1080, h: 1350, top: 60, bottom: 1300 },
+  facebook: { label: "Facebook 4:5", w: 1080, h: 1350, top: 60, bottom: 1300 },
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 

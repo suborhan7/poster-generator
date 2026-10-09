@@ -207,7 +207,7 @@ window.BPG = window.BPG || {};
       a.href = url; a.download = filename(); document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       status("Downloaded " + filename());
-    } catch (e) { showImage(); status("Long-press or right-click the image below to save it."); }
+    } catch (e) { showImage(); }
   });
 
   // On phones this opens the share sheet, so you can post straight to Instagram, TikTok or Facebook.
@@ -216,11 +216,15 @@ window.BPG = window.BPG || {};
     const file = new File([blob], filename(), { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file] }); status("Shared."); }
-      catch (e) { if (e.name !== "AbortError") { showImage(); status("Sharing isn't available here. Long-press the image below to save it."); } }
-    } else { showImage(); status("Sharing isn't available in this browser. Long-press or right-click the image below to save it."); }
+      catch (e) { if (e.name !== "AbortError") { showImage(); } }
+    } else { showImage(); }
   });
-  function showImage() { draw(); $("saveImg").src = cv.toDataURL("image/png"); $("saveImg").hidden = false; }
-  $("showImg").addEventListener("click", () => { showImage(); status("Long-press (phone) or right-click (computer) the image to save it."); });
+  // The finished image opens on top of the page, so the preview itself always stays live.
+  function showImage() { draw(); $("saveImg").src = cv.toDataURL("image/png"); $("saveSheet").hidden = false; }
+  $("showImg").addEventListener("click", showImage);
+  $("closeSave").addEventListener("click", () => { $("saveSheet").hidden = true; });
+  $("saveSheet").addEventListener("click", (e) => { if (e.target.id === "saveSheet") $("saveSheet").hidden = true; });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("saveSheet").hidden = true; });
 
   // ---------- Start ----------
   renderBrand(); renderPlatforms(); renderAll(); setLogo();
