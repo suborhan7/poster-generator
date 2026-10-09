@@ -248,35 +248,37 @@ BPG.LAYOUTS = {
       const ctx = k.ctx, { W, H, st, sb, accent, bg } = g, s = BPG.state();
       const cream = "#F2EFE8", muted = "#C4C7CE", panel = "#1B1D23";
 
-      // Text first, so the photo can take whatever space is left.
-      const barTop = H > 1500 ? st - 30 : 0, barH = 128, barBottom = barTop + barH;
+      // The photo fills the card; the text sits over its lower part, so it is laid out first from the bottom up.
+      const barTop = H > 1500 ? st - 30 : 0, barH = 128;
       const meterY = H > 1500 ? sb - 30 : H - 70;
-      const body = g.val("body") ? k.layoutRich(g.val("body"), W - 112, 38, k.B, 4, 26, 400) : null;
+      const body = g.val("body") ? k.layoutRich(g.val("body"), W - 112, 34, k.B, 3, 26, 500) : null;
       const stats = String(g.val("stats")).split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0] && x[1]).slice(0, 4);
-      const minPhoto = H > 1500 ? 620 : 440;
+      const statH = 118, maxText = (meterY - barTop) * 0.46;
       let hl, textH;
-      for (let size = 130; ; size -= 6) {
-        hl = k.layoutRich(String(g.val("headline")).toUpperCase(), W - 112, size, k.D, 3, 56);
-        textH = 56 + hl.lines.length * hl.size * 0.98 + (body ? 20 + body.lines.length * body.size * 1.45 : 0) + (stats.length ? 36 + 150 : 0);
-        if (meterY - 90 - textH >= barBottom + minPhoto || size <= 62) break;
+      for (let size = 104; ; size -= 6) {
+        hl = k.layoutRich(String(g.val("headline")).toUpperCase(), W - 112, size, k.D, 3, 54);
+        textH = hl.lines.length * hl.size * 0.98 + (body ? 16 + body.lines.length * body.size * 1.4 : 0) + (stats.length ? 30 + statH : 0);
+        if (textH <= maxText || size <= 60) break;
       }
-      const photoBottom = Math.max(barBottom + minPhoto * 0.8, Math.min(H * 0.66, meterY - 90 - textH));
+      const textTop = meterY - 64 - textH, ph = 104, pillTop = textTop - 30 - ph;
+      const photoBottom = textTop;
 
-      // Photo band
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
       if (g.photo) {
-        ctx.save(); ctx.beginPath(); ctx.rect(0, barBottom, W, photoBottom - barBottom); ctx.clip();
-        k.coverImg(g.photo.img, 0, barBottom, W, photoBottom - barBottom);
-        if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, g.shade); ctx.fillRect(0, barBottom, W, photoBottom - barBottom); }
-        ctx.restore();
+        k.coverImg(g.photo.img, 0, 0, W, H);
+        if (g.shade > 0) { ctx.fillStyle = k.hexA(bg, g.shade); ctx.fillRect(0, 0, W, H); }
+        k.scrim(g, pillTop - 260, textTop + 140);
       } else {
-        ctx.fillStyle = panel; ctx.fillRect(0, barBottom, W, photoBottom - barBottom);
-        k.photoHint(g, (barBottom + photoBottom) / 2 - 60);
+        ctx.fillStyle = panel; ctx.fillRect(0, barTop + barH, W, pillTop - barTop - barH);
+        k.photoHint(g, (barTop + barH + pillTop) / 2);
       }
-      ctx.fillStyle = accent; ctx.fillRect(0, photoBottom, W, 9);
+      const topShade = ctx.createLinearGradient(0, 0, 0, barTop + barH + 120);
+      topShade.addColorStop(0, k.hexA(bg, 0.85)); topShade.addColorStop(1, k.hexA(bg, 0));
+      ctx.fillStyle = topShade; ctx.fillRect(0, 0, W, barTop + barH + 120);
+      const barBottom = barTop + barH;
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
 
       // Brand bar
-      ctx.fillStyle = bg; ctx.fillRect(0, barTop, W, barH);
       const logo = BPG.logoImage();
       let x = 58; const cy = barTop + barH / 2;
       if (logo) { const sc = 76 / Math.max(logo.width, logo.height); ctx.drawImage(logo, x, cy - (logo.height * sc) / 2, logo.width * sc, logo.height * sc); x += logo.width * sc + 22; }
@@ -312,36 +314,36 @@ BPG.LAYOUTS = {
 
       // Score pill
       if (g.val("score")) {
-        const py = photoBottom - 175, ph = 118, team = String(g.val("team")).toUpperCase(), score = String(g.val("score"));
+        const py = pillTop, team = String(g.val("team")).toUpperCase(), score = String(g.val("score"));
         ctx.save(); ctx.transform(1, 0, -0.12, 1, 0, 0);
-        ctx.font = k.font(84, k.D); const w1 = ctx.measureText(team + " ").width, w2 = ctx.measureText(score).width;
+        ctx.font = k.font(76, k.D); const w1 = ctx.measureText(team + " ").width, w2 = ctx.measureText(score).width;
         const bw = w1 + w2 + 70, px = 62 + py * 0.12;
         ctx.fillStyle = "#0E0F12"; ctx.fillRect(px, py, bw, ph);
-        ctx.fillStyle = cream; ctx.fillText(team, px + 36, py + 92);
-        ctx.fillStyle = accent; ctx.fillText(score, px + 36 + w1, py + 92);
+        ctx.fillStyle = cream; ctx.fillText(team, px + 36, py + 82);
+        ctx.fillStyle = accent; ctx.fillText(score, px + 36 + w1, py + 82);
         const l1 = String(g.val("line1")).toUpperCase(), l2 = String(g.val("line2")).toUpperCase();
         if (l1 || l2) {
           ctx.font = k.font(32, k.C, "italic 700"); k.spaced(4);
           const lw = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 60;
           ctx.fillStyle = accent; ctx.fillRect(px + bw, py, lw, ph);
-          ctx.fillStyle = "#14151A"; ctx.fillText(l1, px + bw + 30, py + 50); ctx.fillText(l2, px + bw + 30, py + 92); k.spaced(0);
+          ctx.fillStyle = "#14151A"; ctx.fillText(l1, px + bw + 30, py + 45); ctx.fillText(l2, px + bw + 30, py + 84); k.spaced(0);
         }
         ctx.restore();
       }
 
       // Headline, body, stats
-      let y = photoBottom + 56 + hl.size * 0.82;
+      let y = photoBottom + hl.size * 0.8;
       k.drawRich(hl, 54, y, hl.size * 0.98, k.D, cream, accent, "left");
       y += (hl.lines.length - 1) * hl.size * 0.98;
-      if (body) { y += 20 + body.size * 1.2; k.drawRich(body, 56, y, body.size * 1.45, k.B, muted, accent, "left", 400); y += (body.lines.length - 1) * body.size * 1.45; }
+      if (body) { y += 16 + body.size * 1.25; k.drawRich(body, 56, y, body.size * 1.4, k.B, "#E4E6EB", accent, "left", 500); y += (body.lines.length - 1) * body.size * 1.4; }
       if (stats.length) {
-        const top = y + 36, gap = 22, bw = (W - 112 - gap * (stats.length - 1)) / stats.length;
+        const top = y + 30, gap = 22, bw = (W - 112 - gap * (stats.length - 1)) / stats.length;
         stats.forEach(([lab, v], i) => {
           const bx = 56 + i * (bw + gap);
-          ctx.fillStyle = panel; ctx.fillRect(bx, top, bw, 150);
+          ctx.fillStyle = k.hexA(panel, 0.72); ctx.fillRect(bx, top, bw, statH);
           ctx.textAlign = "center";
-          ctx.font = k.font(k.fit(v, bw - 30, 86, k.D), k.D); ctx.fillStyle = accent; ctx.fillText(v, bx + bw / 2, top + 92);
-          ctx.font = k.font(28, k.C, 700); k.spaced(4); ctx.fillStyle = muted; ctx.fillText(lab.toUpperCase(), bx + bw / 2, top + 132, bw - 20); k.spaced(0);
+          ctx.font = k.font(k.fit(v, bw - 30, 72, k.D), k.D); ctx.fillStyle = accent; ctx.fillText(v, bx + bw / 2, top + 74);
+          ctx.font = k.font(26, k.C, 700); k.spaced(4); ctx.fillStyle = muted; ctx.fillText(lab.toUpperCase(), bx + bw / 2, top + 106, bw - 20); k.spaced(0);
           ctx.textAlign = "left";
         });
       }
@@ -356,6 +358,7 @@ BPG.LAYOUTS = {
       }
       ctx.font = k.font(36, k.C, 700); k.spaced(2); ctx.fillStyle = cream; ctx.textAlign = "right";
       ctx.fillText(s.verdict ? s.verdict : s.brand.handle || "", W - 56, meterY, W - 600); ctx.textAlign = "left"; k.spaced(0);
+      ctx.restore();
     },
   },
 };
