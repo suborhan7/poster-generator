@@ -16,10 +16,9 @@ window.BPG = window.BPG || {};
 
   try {
     const saved = JSON.parse(localStorage.getItem("bpg_state") || "null");
-    if (saved) Object.assign(state, saved, { brand: { ...BPG.BRAND, ...(saved.brand || {}) } });
+    // Brand settings (theme, colours, handle, page name) go back to the defaults on every reload; only an uploaded logo is kept.
+    if (saved) Object.assign(state, saved, { theme: "team", brand: { ...BPG.BRAND, logo: (saved.brand || {}).logo || null } });
   } catch (e) {}
-  // Team colours became the default on 10 Oct 2026; switch once, after that your choice sticks.
-  if (!state.teamThemeSeen) { if (state.theme === "brand") state.theme = "team"; state.teamThemeSeen = true; }
   if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
   if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
   const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
