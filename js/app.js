@@ -172,6 +172,8 @@ window.BPG = window.BPG || {};
 
   // ---------- Drawing ----------
   function draw() { drawCard(); if (BPG.ready) updateCaption(); }
+  // Cards packed with numbers (charts, tables, ball-by-ball rows) stay clean: no brush strokes behind them.
+  const NO_SWEEP = new Set(["form", "toplist", "innings", "result", "over", "leaders", "points", "seriesscore", "preview"]);
   function drawCard() {
     const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
@@ -185,7 +187,7 @@ window.BPG = window.BPG || {};
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
-      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep,
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout),
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
