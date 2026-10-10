@@ -93,6 +93,18 @@ window.BPG = window.BPG || {};
     ctx.restore();
   }
 
+  // Fours, sixes and strike rate in a row: number on top, small label in the team colour under it.
+  function statsRow(k, g, y, fours, sixes, sr) {
+    const ctx = k.ctx; let x = PAD;
+    [[fours, "Fours"], [sixes, "Sixes"], [sr, "Strike rate"]].filter(([v]) => v !== "" && v != null).forEach(([v, lab]) => {
+      ctx.font = k.font(48, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), x, y);
+      const vw = ctx.measureText(String(v)).width;
+      ctx.font = k.font(20, k.C, 700); k.spaced(3); ctx.fillStyle = g.accent; ctx.fillText(cap(lab), x, y + 28);
+      const lw = ctx.measureText(cap(lab)).width; k.spaced(0);
+      x += Math.max(vw, lw) + 56;
+    });
+  }
+
   // A cricket ball with its stitched seam. o: { white, alpha, label, ring }
   function ball(k, cx, cy, r, o) {
     o = o || {};
@@ -215,18 +227,19 @@ window.BPG = window.BPG || {};
   L.knock = {
     standard: false,
     draw(k, g) {
-      const ctx = k.ctx, raw = String(g.val("runs")), runs = num(raw), balls = num(g.val("balls"));
-      const duck = runs === 0 && !raw.includes("*"), sr = balls ? ((runs / balls) * 100).toFixed(1) : "-";
-      const barY = g.footerY - 60, figBase = barY - 48, figSize = 170, nameBase = figBase - figSize * 0.76 - 30;
-      const nameTop = playerName(k, g, g.val("player"), nameBase, 80, false), labBase = nameTop - 20;
-      const [f0, f1] = fadeFor(g, labBase - 40);
+      const ctx = k.ctx, raw = String(g.val("runs")), runs = num(raw), balls = num(g.val("balls")), fours = num(g.val("fours")), sixes = num(g.val("sixes"));
+      const duck = runs === 0 && !raw.includes("*"), sr = balls ? ((runs / balls) * 100).toFixed(1) : "";
+      // Bottom up, same as the big knock: info line on the logo's row, the split bar, the fours/sixes/strike rate row, then the figure and the name.
+      const hasSplit = fours + sixes > 0, barY = g.footerY - 58, statY = hasSplit ? barY - 86 : g.footerY - 58;
+      const figBase = statY - 84, figSize = 170, nameBase = figBase - figSize * 0.76 - 30;
+      const nameTop = playerName(k, g, g.val("player"), nameBase, 80, false);
+      const [f0, f1] = fadeFor(g, nameTop - 60);
 
       photo(k, g, f0, f1, duck ? 0.9 : 0);
-      halftone(k, g.W * 0.5, labBase - 40, g.W * 0.5, g.footerY - labBase, g.accent, 0.1);
+      halftone(k, g.W * 0.5, nameTop - 60, g.W * 0.5, g.footerY - nameTop, g.accent, 0.1);
       k.header(g);
       if (duck) k.stamp("DUCK", g.W / 2, f0 - 20, 190, g.accent, -0.14);
 
-      ctx.font = k.font(24, k.C, 700); k.spaced(5); ctx.fillStyle = g.accent; ctx.fillText(cap(vs(g)), PAD, labBase); k.spaced(0);
       playerName(k, g, g.val("player"), nameBase, 80);
       const r = raw.trim() || "0";
       ctx.font = k.font(figSize, k.D); ctx.fillStyle = duck ? "#FFFFFF" : g.accent; ctx.fillText(r, PAD - 6, figBase);
@@ -235,8 +248,10 @@ window.BPG = window.BPG || {};
       ctx.font = k.font(90, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(balls), x - 4, figBase);
       const bw = ctx.measureText(String(balls)).width;
       ctx.font = k.font(28, k.C, 700); k.spaced(4); ctx.fillText("BALLS", x + bw + 10, figBase); k.spaced(0);
-      runsBar(k, g, barY, runs, num(g.val("fours")), num(g.val("sixes")), `Strike rate ${sr}`);
-      k.footer(g);
+      statsRow(k, g, statY, hasSplit ? fours : "", hasSplit ? sixes : "", sr);
+      if (hasSplit) runsBar(k, g, barY, runs, fours, sixes);
+      infoLine(k, g, g.val("info") || vs(g), PAD, g.footerY, "left");
+      k.brandCorner(g, g.footerY);
     },
   };
 
@@ -571,14 +586,7 @@ window.BPG = window.BPG || {};
       // Fours, sixes and strike rate in a row (number on top, small label under it), then the split bar.
       if (hasSplit) {
         runsBar(k, g, barY, runsN, fours, sixes);
-        let x = PAD;
-        [[fours, "Fours"], [sixes, "Sixes"], [sr.replace("SR ", ""), "Strike rate"]].filter(([v]) => v !== "").forEach(([v, lab]) => {
-          ctx.font = k.font(48, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), x, statY);
-          const vw = ctx.measureText(String(v)).width;
-          ctx.font = k.font(20, k.C, 700); k.spaced(3); ctx.fillStyle = g.accent; ctx.fillText(cap(lab), x, statY + 28);
-          const lw = ctx.measureText(cap(lab)).width; k.spaced(0);
-          x += Math.max(vw, lw) + 56;
-        });
+        statsRow(k, g, statY, fours, sixes, sr.replace("SR ", ""));
       }
       k.brandCorner(g, g.footerY);
     },
