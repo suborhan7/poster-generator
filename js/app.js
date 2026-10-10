@@ -9,7 +9,7 @@ window.BPG = window.BPG || {};
   const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
   const state = {
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
-    values: {}, kicker: "", verdict: "", cta: "en", theme: "brand", brand: { ...BPG.BRAND },
+    values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null };
   let logoImg = null;
@@ -18,6 +18,8 @@ window.BPG = window.BPG || {};
     const saved = JSON.parse(localStorage.getItem("bpg_state") || "null");
     if (saved) Object.assign(state, saved, { brand: { ...BPG.BRAND, ...(saved.brand || {}) } });
   } catch (e) {}
+  // Team colours became the default on 10 Oct 2026; switch once, after that your choice sticks.
+  if (!state.teamThemeSeen) { if (state.theme === "brand") state.theme = "team"; state.teamThemeSeen = true; }
   if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
   if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
   const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
@@ -172,12 +174,16 @@ window.BPG = window.BPG || {};
     const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
-    const th = THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" ? t.look || {} : {};
+    // "Team colours": pick the jersey colours of the team on the card (the winner on result cards).
+    const teamName = (BPG.teamName && BPG.teamName(val("winner") || val("team") || val("t1") || val("abbr"))) || "";
+    const tc = state.theme === "team" ? BPG.TEAM_COLORS[teamName] : null;
+    const th = tc || THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" || (state.theme === "team" && !tc) ? t.look || {} : {};
     const footerY = p.bottom - 4, statsTop = footerY - 124, subBase = statsTop - 22, nameBase = subBase - 44, bigBase = nameBase - 84;
     const g = {
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
-      accent: t.accent || look.accent || th.accent || state.brand.accent,
+      accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
@@ -295,7 +301,7 @@ window.BPG = window.BPG || {};
   BPG.ready = true;
   renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
-    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'"].map((f) => document.fonts.load(f)))
+    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo"].map((f) => document.fonts.load(f)))
     : Promise.resolve();
   fonts.then(draw, draw);
 })();

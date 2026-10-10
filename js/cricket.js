@@ -521,4 +521,72 @@ window.BPG = window.BPG || {};
       k.footer(g);
     },
   };
+  // ---------- Bold & minimal (team colours + paint sweep) ----------
+  // Draws pieces of text side by side, each with its own colour and size, on one baseline.
+  // parts: [[text, colour, sizeFactor]]; align "left" | "center". Returns the total width.
+  function runs(k, parts, x, base, size, align) {
+    const ctx = k.ctx, widths = parts.map(([t, , f]) => { ctx.font = k.font(Math.round(size * (f || 1)), k.H, 900); return ctx.measureText(t).width; });
+    const total = widths.reduce((a, b) => a + b, 0); let cx = align === "center" ? x - total / 2 : x;
+    parts.forEach(([t, col, f], i) => { ctx.font = k.font(Math.round(size * (f || 1)), k.H, 900); ctx.fillStyle = col; ctx.fillText(t, cx, base); cx += widths[i]; });
+    return total;
+  }
+  const fitRuns = (k, parts, maxW, size, min) => {
+    const ctx = k.ctx; let s = size;
+    const w = () => parts.reduce((a, [t, , f]) => { ctx.font = k.font(Math.round(s * (f || 1)), k.H, 900); return a + ctx.measureText(t).width; }, 0);
+    while (s > min && w() > maxW) s -= 4;
+    return s;
+  };
+  // "Match 10 | WI CH v BAN CH | WCL 2026" with the bars in the accent colour.
+  function infoLine(k, g, text, x, base, align) {
+    const ctx = k.ctx, bits = String(text || "").split("|").map((b) => b.trim()).filter(Boolean);
+    if (!bits.length) return;
+    const parts = []; bits.forEach((b, i) => { if (i) parts.push(["  |  ", g.accent]); parts.push([cap(b), "rgba(255,255,255,0.92)"]); });
+    ctx.font = k.font(30, k.C, 700); k.spaced(2);
+    const total = parts.reduce((a, [t]) => a + ctx.measureText(t).width, 0), sc = Math.min(1, (g.W - 2 * PAD - (align === "center" ? 0 : 250)) / total);
+    ctx.font = k.font(Math.round(30 * sc), k.C, 700);
+    let cx = align === "center" ? x - (total * sc) / 2 : x;
+    parts.forEach(([t, col]) => { ctx.fillStyle = col; ctx.fillText(t, cx, base); cx += ctx.measureText(t).width; });
+    k.spaced(0);
+  }
+
+  // Big knock, bold: name small, "43 OFF 21" huge in the team's colour, one info line.
+  L.bigknock = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, r = String(g.val("runs") || "").trim(), b = String(g.val("balls") || "").trim();
+      const infoBase = g.footerY - 58, bigBase = infoBase - 46;
+      const parts = b ? [[r, g.accent], [" OFF ", "#FFFFFF", 0.62], [b, g.accent]] : [[r, g.accent], [" RUNS", "#FFFFFF", 0.62]];
+      const size = fitRuns(k, parts, g.W - 2 * PAD, 170, 80), nameBase = bigBase - size * 0.74 - 24;
+      if (!k.bleedPhoto(g, nameTopOf(nameBase) - 40)) k.photoHint(g, g.st + (nameBase - g.st) / 2);
+      k.paintSweep(g, nameBase - 170, "right");
+      k.header(g);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 20;
+      ctx.font = k.font(40, k.H, 800); k.spaced(1); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("player")), PAD, nameBase, g.W - 2 * PAD); k.spaced(0);
+      runs(k, parts, PAD - 4, bigBase, size, "left");
+      ctx.restore();
+      infoLine(k, g, g.val("info"), PAD, infoBase, "left");
+      k.brandCorner(g, g.footerY);
+    },
+  };
+  const nameTopOf = (nameBase) => nameBase - 40;
+
+  // Result, bold: "WEST INDIES / BEAT INDIA!" centred, the verb in the team's colour.
+  L.bigresult = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, cx = g.W / 2, w = cap(g.val("winner")), l = cap(g.val("loser")), verb = cap(g.val("verb") || "beat");
+      const infoBase = g.footerY - 58, line2 = infoBase - 52;
+      const p1 = [[w, "#FFFFFF"]], p2 = [[verb + " ", g.accent], [l + (g.val("bang") === "no" ? "" : "!"), "#FFFFFF"]];
+      const size = Math.min(fitRuns(k, p1, g.W - 2 * PAD, 112, 56), fitRuns(k, p2, g.W - 2 * PAD, 112, 56)), line1 = line2 - size * 1.0;
+      const top = line1 - size * 0.76;
+      if (!k.bleedPhoto(g, top - 40)) k.photoHint(g, g.st + (top - g.st) / 2);
+      k.paintSweep(g, top - 130, "left");
+      k.header(g);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 20;
+      runs(k, p1, cx, line1, size, "center"); runs(k, p2, cx, line2, size, "center");
+      ctx.restore();
+      infoLine(k, g, [g.val("margin"), g.val("info")].filter(Boolean).join(" | "), cx, infoBase, "center");
+      k.brandCorner(g, g.footerY);
+    },
+  };
 })();

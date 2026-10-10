@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Borhan Studio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800;900&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
 <style>
 /* Layout: a control rail on the left, the live poster on the right; stacks to one column on phones. */
 :root {
@@ -234,7 +234,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "10 Oct 2026 · v16";
+BPG.VERSION = "10 Oct 2026 · v17";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -247,6 +247,7 @@ BPG.BRAND = {
 
 // Add a theme: copy a line, give it a new key, label and two colours.
 BPG.THEMES = {
+  team: { label: "Team colours (auto from the team you type)" },
   brand: { label: "Your brand" },
   tigers: { label: "Tigers green", bg: "#062A1E", accent: "#F2C14E" },
   redgreen: { label: "Bangladesh red", bg: "#0A2E1F", accent: "#F2414B" },
@@ -266,10 +267,44 @@ BPG.PLATFORMS = {
 BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", football: "Football", general: "General" };
 
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
+// Jersey colours, used by the "Team colours" theme. bg = dark base, accent = highlight, stroke = paint strokes.
+// Add a team: copy a line. The name must match the full name the quick fill uses (e.g. "Sri Lanka").
+BPG.TEAM_COLORS = {
+  "Bangladesh": { bg: "#04301F", accent: "#FFC72C", stroke: "#0B7A43", hot: "#E4002B" },
+  "India": { bg: "#0A1C46", accent: "#FF9933", stroke: "#1F5FD1", hot: "#FF9933" },
+  "Pakistan": { bg: "#03261A", accent: "#A6E36B", stroke: "#0F7A40", hot: "#FFFFFF" },
+  "Sri Lanka": { bg: "#0A1D4A", accent: "#FFC400", stroke: "#1D58C2", hot: "#FFC400" },
+  "Australia": { bg: "#0E2A1C", accent: "#FFCD00", stroke: "#00843D", hot: "#FFCD00" },
+  "England": { bg: "#0A1D44", accent: "#EF3B4F", stroke: "#2F66D6", hot: "#EF3B4F" },
+  "South Africa": { bg: "#052A1C", accent: "#FFB81C", stroke: "#007749", hot: "#FFB81C" },
+  "New Zealand": { bg: "#0B0C10", accent: "#8ADBEA", stroke: "#3A3D4A", hot: "#FFFFFF" },
+  "West Indies": { bg: "#3A0914", accent: "#FFC72C", stroke: "#8E1B30", hot: "#FF8A1F" },
+  "Afghanistan": { bg: "#081A3C", accent: "#F2333E", stroke: "#1E5BC6", hot: "#2DB35A" },
+  "Zimbabwe": { bg: "#2A0909", accent: "#FCE300", stroke: "#C80F0F", hot: "#2DB35A" },
+  "Ireland": { bg: "#042C1C", accent: "#A9E36E", stroke: "#169B62", hot: "#FF883E" },
+  "Netherlands": { bg: "#2A1200", accent: "#FF7A00", stroke: "#E85A00", hot: "#FFFFFF" },
+  "Nepal": { bg: "#2A0610", accent: "#3D7CFF", stroke: "#DC143C", hot: "#FFFFFF" },
+  "Argentina": { bg: "#0C2340", accent: "#75AADB", stroke: "#3E7CC0", hot: "#F6B40E" },
+  "Brazil": { bg: "#063B22", accent: "#FFDF00", stroke: "#009C3B", hot: "#2A63C8" },
+  "France": { bg: "#0A1640", accent: "#E8323C", stroke: "#2445B0", hot: "#FFFFFF" },
+  "Portugal": { bg: "#3A0610", accent: "#E9B83C", stroke: "#B0122B", hot: "#2DB35A" },
+  "Spain": { bg: "#3A0508", accent: "#F6C400", stroke: "#C60B1E", hot: "#F6C400" },
+  "Germany": { bg: "#121212", accent: "#FFCE00", stroke: "#3A3A3A", hot: "#DD0000" },
+  "Real Madrid": { bg: "#0D0D2B", accent: "#FEBE10", stroke: "#3A3A8C", hot: "#FFFFFF" },
+  "Barcelona": { bg: "#1A0D3A", accent: "#EDBB00", stroke: "#A50044", hot: "#2A5BD7" },
+  "Manchester City": { bg: "#0B2545", accent: "#6CABDD", stroke: "#2F6FB3", hot: "#FFFFFF" },
+  "Manchester United": { bg: "#2A0507", accent: "#FBE122", stroke: "#DA291C", hot: "#FBE122" },
+  "Liverpool": { bg: "#2A0306", accent: "#F6EB61", stroke: "#C8102E", hot: "#00B2A9" },
+  "Arsenal": { bg: "#2A0306", accent: "#FFFFFF", stroke: "#EF0107", hot: "#9C824A" },
+  "Chelsea": { bg: "#061A40", accent: "#DBA111", stroke: "#034694", hot: "#FFFFFF" },
+  "Inter Miami": { bg: "#151515", accent: "#F7B5CD", stroke: "#444444", hot: "#F7B5CD" },
+};
+
 BPG.FONTS = {
   display: '"Anton", "Hind Siliguri", Impact, sans-serif',
   condensed: '"Barlow Condensed", "Hind Siliguri", "Arial Narrow", sans-serif',
   body: '"Barlow", "Hind Siliguri", sans-serif',
+  heavy: '"Archivo", "Hind Siliguri", "Arial Black", sans-serif',
 };
 
 </script>
@@ -327,6 +362,12 @@ BPG.TEMPLATES = {
   century: { cat: "cricket", name: "Century", layout: "batting", milestone: "100", big: "HUNDRED", accent: "#F5C542",
     hint: "Strike rate is worked out for you. With a cutout photo, the big 100 sits behind the player.",
     fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","104*"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
+  bigknock: { cat: "cricket", name: "Big knock (bold)", layout: "bigknock",
+    hint: "Colours follow the team's jersey when the theme is Team colours. Use | in the info line to split it.",
+    fields: [["player","Player","Mahmudullah Riyad"],["team","Team (sets the colours)","Bangladesh"],["runs","Runs","43"],["balls","Balls","21"],["info","Info line","Match 10 | BAN vs WI | WCL 2026",true]] },
+  bigresult: { cat: "cricket", name: "Result (bold)", layout: "bigresult",
+    hint: "Colours follow the winning team's jersey when the theme is Team colours.",
+    fields: [["winner","Winning team","West Indies"],["loser","Losing team","India"],["verb","Word in colour","beat"],["margin","Margin","by 6 wickets"],["info","Info line","2nd T20I | WI in IND 2026",true]] },
   knock: { cat: "cricket", name: "Knock (X off Y)", layout: "knock",
     hint: "A 0 without * gets a DUCK stamp automatically.",
     fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","82"],["balls","Balls","41"],["fours","4s","8"],["sixes","6s","4"]] },
@@ -362,6 +403,9 @@ BPG.TEMPLATES = {
   fresult: { cat: "football", name: "Full-time score", layout: "fscore",
     hint: "Put *stars* around words in the headline to colour them.",
     fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
+  fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
+    hint: "Colours follow the winning team's jersey when the theme is Team colours.",
+    fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
   redcard: { cat: "football", name: "Red card", layout: "redcard", big: "RED CARD", accent: "#FF3B3B",
     fields: [["player","Player","Casemiro"],["team","Team","Brazil"],["opp","Opponent","Argentina"],["minute","Minute","58'"],["reason","Reason","Second yellow",true]] },
   rating: { cat: "football", name: "Player rating", layout: "rating",
@@ -397,7 +441,7 @@ window.BPG = window.BPG || {};
 
 BPG.createKit = function (ctx, env) {
   const F = BPG.FONTS, D = F.display, C = F.condensed;
-  const k = { ctx, D, C, B: F.body };
+  const k = { ctx, D, C, B: F.body, H: F.heavy };
 
   k.font = (size, fam, weight) => `${weight || ""} ${size}px ${fam}`.trim();
   k.spaced = (px) => { try { ctx.letterSpacing = px + "px"; } catch (e) {} };
@@ -488,6 +532,38 @@ BPG.createKit = function (ctx, env) {
     top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);
     return true;
+  };
+  // Paint sweep: rough brush strokes in the team's jersey colours, rising from the bottom-left corner
+  // behind the text. Same random pattern every time (seeded), so a card never changes on redraw.
+  // top = where the strokes start fading in; keep it below the player so the photo stays clear.
+  k.paintSweep = (g, top, side = "left") => {
+    const { W, H } = g, base = Math.min(H, g.footerY + 60), c1 = g.stroke || g.accent, c2 = g.accent, c3 = g.hot || g.accent;
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    // Drawn on its own layer so the soft top edge doesn't erase the photo underneath.
+    const layer = document.createElement("canvas"); layer.width = W; layer.height = H; const ctx = layer.getContext("2d");
+    ctx.beginPath(); ctx.rect(0, top, W, H - top); ctx.clip();
+    const fade = ctx.createLinearGradient(0, top, 0, top + 220);
+    const dir = side === "left" ? 1 : -1, x0 = side === "left" ? -60 : W + 60;
+    // Broad bands made of many thin bristle lines, each slightly offset and see-through.
+    [[c1, 0.55, 230, 0], [c2, 0.85, 70, 150], [c3, 0.7, 34, 250], [c1, 0.35, 120, 330]].forEach(([col, alpha, width, off]) => {
+      for (let i = 0; i < 46; i++) {
+        const t = rnd(), y = base + 40 - off - t * width, len = W * (0.45 + rnd() * 0.5);
+        ctx.strokeStyle = k.hexA(col, alpha * (0.25 + rnd() * 0.75)); ctx.lineWidth = 1 + rnd() * 5;
+        ctx.beginPath(); ctx.moveTo(x0, y);
+        ctx.bezierCurveTo(x0 + dir * len * 0.35, y - len * 0.16 - rnd() * 30, x0 + dir * len * 0.7, y - len * 0.3 - rnd() * 30, x0 + dir * len, y - len * 0.42 + rnd() * 40);
+        ctx.stroke();
+      }
+    });
+    // Speckle: a few paint flecks so it reads as texture, not lines.
+    for (let i = 0; i < 160; i++) {
+      const x = side === "left" ? rnd() * W * 0.75 : W - rnd() * W * 0.75, y = top + 60 + rnd() * (H - top);
+      ctx.fillStyle = k.hexA(rnd() > 0.5 ? c2 : c1, 0.15 + rnd() * 0.4); ctx.fillRect(x, y, 1 + rnd() * 3, 1 + rnd() * 3);
+    }
+    // Soften the top edge into the photo.
+    ctx.globalCompositeOperation = "destination-out";
+    fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = fade; ctx.fillRect(0, top, W, 220);
+    k.ctx.drawImage(layer, 0, 0);
   };
   // Small logo mark: your uploaded logo, or the BR speech bubble. (x, y) is the top-left corner.
   k.logoMark = (g, x, y, size = 64) => {
@@ -1551,6 +1627,74 @@ window.BPG = window.BPG || {};
       k.footer(g);
     },
   };
+  // ---------- Bold & minimal (team colours + paint sweep) ----------
+  // Draws pieces of text side by side, each with its own colour and size, on one baseline.
+  // parts: [[text, colour, sizeFactor]]; align "left" | "center". Returns the total width.
+  function runs(k, parts, x, base, size, align) {
+    const ctx = k.ctx, widths = parts.map(([t, , f]) => { ctx.font = k.font(Math.round(size * (f || 1)), k.H, 900); return ctx.measureText(t).width; });
+    const total = widths.reduce((a, b) => a + b, 0); let cx = align === "center" ? x - total / 2 : x;
+    parts.forEach(([t, col, f], i) => { ctx.font = k.font(Math.round(size * (f || 1)), k.H, 900); ctx.fillStyle = col; ctx.fillText(t, cx, base); cx += widths[i]; });
+    return total;
+  }
+  const fitRuns = (k, parts, maxW, size, min) => {
+    const ctx = k.ctx; let s = size;
+    const w = () => parts.reduce((a, [t, , f]) => { ctx.font = k.font(Math.round(s * (f || 1)), k.H, 900); return a + ctx.measureText(t).width; }, 0);
+    while (s > min && w() > maxW) s -= 4;
+    return s;
+  };
+  // "Match 10 | WI CH v BAN CH | WCL 2026" with the bars in the accent colour.
+  function infoLine(k, g, text, x, base, align) {
+    const ctx = k.ctx, bits = String(text || "").split("|").map((b) => b.trim()).filter(Boolean);
+    if (!bits.length) return;
+    const parts = []; bits.forEach((b, i) => { if (i) parts.push(["  |  ", g.accent]); parts.push([cap(b), "rgba(255,255,255,0.92)"]); });
+    ctx.font = k.font(30, k.C, 700); k.spaced(2);
+    const total = parts.reduce((a, [t]) => a + ctx.measureText(t).width, 0), sc = Math.min(1, (g.W - 2 * PAD - (align === "center" ? 0 : 250)) / total);
+    ctx.font = k.font(Math.round(30 * sc), k.C, 700);
+    let cx = align === "center" ? x - (total * sc) / 2 : x;
+    parts.forEach(([t, col]) => { ctx.fillStyle = col; ctx.fillText(t, cx, base); cx += ctx.measureText(t).width; });
+    k.spaced(0);
+  }
+
+  // Big knock, bold: name small, "43 OFF 21" huge in the team's colour, one info line.
+  L.bigknock = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, r = String(g.val("runs") || "").trim(), b = String(g.val("balls") || "").trim();
+      const infoBase = g.footerY - 58, bigBase = infoBase - 46;
+      const parts = b ? [[r, g.accent], [" OFF ", "#FFFFFF", 0.62], [b, g.accent]] : [[r, g.accent], [" RUNS", "#FFFFFF", 0.62]];
+      const size = fitRuns(k, parts, g.W - 2 * PAD, 170, 80), nameBase = bigBase - size * 0.74 - 24;
+      if (!k.bleedPhoto(g, nameTopOf(nameBase) - 40)) k.photoHint(g, g.st + (nameBase - g.st) / 2);
+      k.paintSweep(g, nameBase - 170, "right");
+      k.header(g);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 20;
+      ctx.font = k.font(40, k.H, 800); k.spaced(1); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("player")), PAD, nameBase, g.W - 2 * PAD); k.spaced(0);
+      runs(k, parts, PAD - 4, bigBase, size, "left");
+      ctx.restore();
+      infoLine(k, g, g.val("info"), PAD, infoBase, "left");
+      k.brandCorner(g, g.footerY);
+    },
+  };
+  const nameTopOf = (nameBase) => nameBase - 40;
+
+  // Result, bold: "WEST INDIES / BEAT INDIA!" centred, the verb in the team's colour.
+  L.bigresult = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, cx = g.W / 2, w = cap(g.val("winner")), l = cap(g.val("loser")), verb = cap(g.val("verb") || "beat");
+      const infoBase = g.footerY - 58, line2 = infoBase - 52;
+      const p1 = [[w, "#FFFFFF"]], p2 = [[verb + " ", g.accent], [l + (g.val("bang") === "no" ? "" : "!"), "#FFFFFF"]];
+      const size = Math.min(fitRuns(k, p1, g.W - 2 * PAD, 112, 56), fitRuns(k, p2, g.W - 2 * PAD, 112, 56)), line1 = line2 - size * 1.0;
+      const top = line1 - size * 0.76;
+      if (!k.bleedPhoto(g, top - 40)) k.photoHint(g, g.st + (top - g.st) / 2);
+      k.paintSweep(g, top - 130, "left");
+      k.header(g);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 20;
+      runs(k, p1, cx, line1, size, "center"); runs(k, p2, cx, line2, size, "center");
+      ctx.restore();
+      infoLine(k, g, [g.val("margin"), g.val("info")].filter(Boolean).join(" | "), cx, infoBase, "center");
+      k.brandCorner(g, g.footerY);
+    },
+  };
 })();
 
 </script>
@@ -1767,6 +1911,8 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     seriesscore: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; if (s.teams.length > 2) return `${s.name}: results so far.`; const st = BPG.series.seriesLine(s); return `${s.name}: ${st.text.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}.`; },
     preview: (v) => { const s = BPG.series && BPG.series.current(); const m = s && BPG.series.nextMatch(s, v("match")); return m ? `Match ${m.no}: ${m.t1} vs ${m.t2}${m.date ? ", " + m.date : ""}${m.time ? " at " + m.time + " (BD time)" : ""}${m.venue ? ", " + m.venue : ""}. Who's winning this one?` : ""; },
     leaders: (v, t) => { const s = BPG.series && BPG.series.current(); if (!s) return ""; const S = BPG.series;
@@ -1787,7 +1933,7 @@ window.BPG = window.BPG || {};
     const line = (LINES[t.layout] || (() => ""))(v, t, val)
       .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
     const sr = BPG.series && BPG.series.current();
-    const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2")]).map(plain).filter(Boolean);
+    const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2"), val("winner"), val("loser")]).map(plain).filter(Boolean);
     const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
     const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
     const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
@@ -2218,7 +2364,7 @@ window.BPG = window.BPG || {};
   const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
   const state = {
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
-    values: {}, kicker: "", verdict: "", cta: "en", theme: "brand", brand: { ...BPG.BRAND },
+    values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null };
   let logoImg = null;
@@ -2227,6 +2373,8 @@ window.BPG = window.BPG || {};
     const saved = JSON.parse(localStorage.getItem("bpg_state") || "null");
     if (saved) Object.assign(state, saved, { brand: { ...BPG.BRAND, ...(saved.brand || {}) } });
   } catch (e) {}
+  // Team colours became the default on 10 Oct 2026; switch once, after that your choice sticks.
+  if (!state.teamThemeSeen) { if (state.theme === "brand") state.theme = "team"; state.teamThemeSeen = true; }
   if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
   if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
   const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
@@ -2381,12 +2529,16 @@ window.BPG = window.BPG || {};
     const p = PLATFORMS[state.platform], t = T[state.tpl], layout = L[t.layout];
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
-    const th = THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" ? t.look || {} : {};
+    // "Team colours": pick the jersey colours of the team on the card (the winner on result cards).
+    const teamName = (BPG.teamName && BPG.teamName(val("winner") || val("team") || val("t1") || val("abbr"))) || "";
+    const tc = state.theme === "team" ? BPG.TEAM_COLORS[teamName] : null;
+    const th = tc || THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" || (state.theme === "team" && !tc) ? t.look || {} : {};
     const footerY = p.bottom - 4, statsTop = footerY - 124, subBase = statsTop - 22, nameBase = subBase - 44, bigBase = nameBase - 84;
     const g = {
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
-      accent: t.accent || look.accent || th.accent || state.brand.accent,
+      accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
@@ -2504,7 +2656,7 @@ window.BPG = window.BPG || {};
   BPG.ready = true;
   renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
-    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'"].map((f) => document.fonts.load(f)))
+    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo"].map((f) => document.fonts.load(f)))
     : Promise.resolve();
   fonts.then(draw, draw);
 })();

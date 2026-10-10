@@ -4,7 +4,7 @@ window.BPG = window.BPG || {};
 
 BPG.createKit = function (ctx, env) {
   const F = BPG.FONTS, D = F.display, C = F.condensed;
-  const k = { ctx, D, C, B: F.body };
+  const k = { ctx, D, C, B: F.body, H: F.heavy };
 
   k.font = (size, fam, weight) => `${weight || ""} ${size}px ${fam}`.trim();
   k.spaced = (px) => { try { ctx.letterSpacing = px + "px"; } catch (e) {} };
@@ -95,6 +95,38 @@ BPG.createKit = function (ctx, env) {
     top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);
     return true;
+  };
+  // Paint sweep: rough brush strokes in the team's jersey colours, rising from the bottom-left corner
+  // behind the text. Same random pattern every time (seeded), so a card never changes on redraw.
+  // top = where the strokes start fading in; keep it below the player so the photo stays clear.
+  k.paintSweep = (g, top, side = "left") => {
+    const { W, H } = g, base = Math.min(H, g.footerY + 60), c1 = g.stroke || g.accent, c2 = g.accent, c3 = g.hot || g.accent;
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    // Drawn on its own layer so the soft top edge doesn't erase the photo underneath.
+    const layer = document.createElement("canvas"); layer.width = W; layer.height = H; const ctx = layer.getContext("2d");
+    ctx.beginPath(); ctx.rect(0, top, W, H - top); ctx.clip();
+    const fade = ctx.createLinearGradient(0, top, 0, top + 220);
+    const dir = side === "left" ? 1 : -1, x0 = side === "left" ? -60 : W + 60;
+    // Broad bands made of many thin bristle lines, each slightly offset and see-through.
+    [[c1, 0.55, 230, 0], [c2, 0.85, 70, 150], [c3, 0.7, 34, 250], [c1, 0.35, 120, 330]].forEach(([col, alpha, width, off]) => {
+      for (let i = 0; i < 46; i++) {
+        const t = rnd(), y = base + 40 - off - t * width, len = W * (0.45 + rnd() * 0.5);
+        ctx.strokeStyle = k.hexA(col, alpha * (0.25 + rnd() * 0.75)); ctx.lineWidth = 1 + rnd() * 5;
+        ctx.beginPath(); ctx.moveTo(x0, y);
+        ctx.bezierCurveTo(x0 + dir * len * 0.35, y - len * 0.16 - rnd() * 30, x0 + dir * len * 0.7, y - len * 0.3 - rnd() * 30, x0 + dir * len, y - len * 0.42 + rnd() * 40);
+        ctx.stroke();
+      }
+    });
+    // Speckle: a few paint flecks so it reads as texture, not lines.
+    for (let i = 0; i < 160; i++) {
+      const x = side === "left" ? rnd() * W * 0.75 : W - rnd() * W * 0.75, y = top + 60 + rnd() * (H - top);
+      ctx.fillStyle = k.hexA(rnd() > 0.5 ? c2 : c1, 0.15 + rnd() * 0.4); ctx.fillRect(x, y, 1 + rnd() * 3, 1 + rnd() * 3);
+    }
+    // Soften the top edge into the photo.
+    ctx.globalCompositeOperation = "destination-out";
+    fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = fade; ctx.fillRect(0, top, W, 220);
+    k.ctx.drawImage(layer, 0, 0);
   };
   // Small logo mark: your uploaded logo, or the BR speech bubble. (x, y) is the top-left corner.
   k.logoMark = (g, x, y, size = 64) => {

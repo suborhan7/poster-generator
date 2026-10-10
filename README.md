@@ -94,6 +94,10 @@ In `js/config.js`, add a line to `BPG.THEMES`:
 pakistan: { label: "Pakistan green", bg: "#04301B", accent: "#FFFFFF" },
 ```
 
+## Team colours
+
+The colour theme **Team colours** (the default) paints each card in the jersey colours of the team you type: Bangladesh green and gold, West Indies maroon and yellow, Argentina sky blue, and so on. On result cards it uses the winner. Add or change a team in `BPG.TEAM_COLORS` in `js/config.js`. The bold cards (*Big knock (bold)*, *Result (bold)*) also add brush strokes in those colours behind the text.
+
 ## Series mode
 
 Pick **Series**, tap **+ New series**, type the name and teams (short names work). After each match open it and type or paste the result, one thing per line:

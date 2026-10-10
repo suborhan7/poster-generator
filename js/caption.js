@@ -32,6 +32,8 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     seriesscore: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; if (s.teams.length > 2) return `${s.name}: results so far.`; const st = BPG.series.seriesLine(s); return `${s.name}: ${st.text.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}.`; },
     preview: (v) => { const s = BPG.series && BPG.series.current(); const m = s && BPG.series.nextMatch(s, v("match")); return m ? `Match ${m.no}: ${m.t1} vs ${m.t2}${m.date ? ", " + m.date : ""}${m.time ? " at " + m.time + " (BD time)" : ""}${m.venue ? ", " + m.venue : ""}. Who's winning this one?` : ""; },
     leaders: (v, t) => { const s = BPG.series && BPG.series.current(); if (!s) return ""; const S = BPG.series;
@@ -52,7 +54,7 @@ window.BPG = window.BPG || {};
     const line = (LINES[t.layout] || (() => ""))(v, t, val)
       .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
     const sr = BPG.series && BPG.series.current();
-    const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2")]).map(plain).filter(Boolean);
+    const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2"), val("winner"), val("loser")]).map(plain).filter(Boolean);
     const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
     const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
     const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
