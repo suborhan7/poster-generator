@@ -68,20 +68,6 @@ BPG.createKit = function (ctx, env) {
     ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.045)"; ctx.lineWidth = 18;
     for (let i = -H; i < W + H; i += 64) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i - H * 0.6, H); ctx.stroke(); }
     ctx.restore();
-    // With a cutout, the scene behind the player is the original photo, blurred and washed in the team colour,
-    // with the brush strokes running behind the player.
-    if (g.photo && g.photo.cut) {
-      const o = g.photo.orig && g.photo.orig !== g.photo.img ? g.photo.orig : null;
-      if (o && "filter" in ctx) {
-        const s = Math.max(W / o.width, H / o.height) * 1.08;
-        ctx.filter = "blur(22px) saturate(0.6)"; ctx.drawImage(o, (W - o.width * s) / 2, (H - o.height * s) / 2, o.width * s, o.height * s); ctx.filter = "none";
-        ctx.fillStyle = k.hexA(bg, 0.62); ctx.fillRect(0, 0, W, H);
-      }
-      const glow = ctx.createRadialGradient(W * 0.5, H * 0.35, 0, W * 0.5, H * 0.35, W * 0.75);
-      glow.addColorStop(0, k.hexA(g.stroke || accent, 0.45)); glow.addColorStop(1, k.hexA(g.stroke || accent, 0));
-      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
-      if (g.teamTheme) k.paintSweep(g, 0, g.sweepSide || "right");
-    }
   };
   // Fades the photo into the background colour from `from` to `to`, solid below.
   k.fadeBottom = (g, from, to) => {
