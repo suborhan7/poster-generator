@@ -100,6 +100,7 @@ window.BPG = window.BPG || {};
     if (!t.fields.some(([id]) => ["winner", "team", "t1", "abbr"].includes(id)))
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
+    $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
     $("photo2Label").textContent = t.photo2 || "Second photo";
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;

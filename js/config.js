@@ -3,7 +3,7 @@
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "10 Oct 2026 · v27";
+BPG.VERSION = "10 Oct 2026 · v29";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -38,6 +38,11 @@ BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", footba
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
 // Jersey colours, used by the "Team colours" theme. bg = dark base, accent = highlight, stroke = paint strokes.
 // Add a team: copy a line. The name must match the full name the quick fill uses (e.g. "Sri Lanka").
+// Flags for the squad card, by team name (ISO country codes; flag images come from the free flag-icons set).
+BPG.FLAG_CODES = {
+  "Bangladesh": "bd", "India": "in", "Pakistan": "pk", "Sri Lanka": "lk", "Australia": "au", "England": "gb-eng", "South Africa": "za", "New Zealand": "nz", "Afghanistan": "af", "Zimbabwe": "zw", "Ireland": "ie", "Netherlands": "nl", "Nepal": "np", "Scotland": "gb-sct", "UAE": "ae", "Oman": "om", "USA": "us", "Namibia": "na", "Canada": "ca", "Hong Kong": "hk", "Uganda": "ug", "Papua New Guinea": "pg", "Argentina": "ar", "Brazil": "br", "France": "fr", "Portugal": "pt", "Spain": "es", "Germany": "de", "Italy": "it", "Belgium": "be", "Croatia": "hr", "Uruguay": "uy", "Morocco": "ma", "Japan": "jp", "Colombia": "co", "Ecuador": "ec", "Chile": "cl", "Paraguay": "py", "Peru": "pe", "Venezuela": "ve", "Bolivia": "bo", "Saudi Arabia": "sa", "South Korea": "kr", "Switzerland": "ch", "Denmark": "dk", "Senegal": "sn", "Egypt": "eg", "Nigeria": "ng", "Mexico": "mx", "Qatar": "qa", "Iran": "ir", "Ghana": "gh", "Cameroon": "cm", "Ivory Coast": "ci", "Algeria": "dz", "Tunisia": "tn", "Poland": "pl", "Austria": "at", "Turkey": "tr", "Serbia": "rs", "Wales": "gb-wls", "Norway": "no", "Sweden": "se", "Ukraine": "ua",
+};
+
 BPG.TEAM_COLORS = {
   "Bangladesh": { bg: "#04301F", accent: "#FFC72C", stroke: "#0B7A43", hot: "#E4002B" },
   "India": { bg: "#0A1C46", accent: "#FF9933", stroke: "#1F5FD1", hot: "#FF9933" },

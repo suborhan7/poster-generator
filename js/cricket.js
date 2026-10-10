@@ -593,6 +593,48 @@ window.BPG = window.BPG || {};
   };
   const nameTopOf = (nameBase) => nameBase - 40;
 
+  // Flags come from the free flag-icons set on jsDelivr. Each loads once, then the card redraws.
+  const flags = {};
+  function flagImg(team) {
+    const code = BPG.FLAG_CODES && BPG.FLAG_CODES[team];
+    if (!code) return null;
+    if (!flags[code]) {
+      flags[code] = { img: null };
+      fetch(`https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/${code}.svg`).then((r) => r.text()).then((svg) => {
+        // Give the SVG a fixed size so every browser (Safari too) can draw it on the canvas.
+        const sized = svg.replace("<svg ", '<svg width="1280" height="960" preserveAspectRatio="none" ');
+        const i = new Image();
+        i.onload = () => { flags[code].img = i; if (BPG.app) BPG.app.draw(); };
+        i.src = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
+      }).catch(() => {});
+    }
+    return flags[code].img;
+  }
+  // Draws the flag in thin vertical strips, each nudged up or down and shaded, so it looks like cloth in the wind.
+  function wavingFlag(k, g, img) {
+    const ctx = k.ctx, { W, H } = g, fw = Math.round(W * 0.82), fh = Math.round(fw * 0.75);
+    const x0 = W - fw + Math.round(W * 0.1), y0 = Math.round(g.st + (g.footerY - g.st) * 0.42 - fh / 2);
+    const off = document.createElement("canvas"); off.width = fw; off.height = fh + 80;
+    const o = off.getContext("2d"), strip = 4, amp = 26;
+    for (let x = 0; x < fw; x += strip) {
+      const t = x / fw, wave = Math.sin(t * Math.PI * 2.2 + 0.6), dy = wave * amp * (0.35 + t * 0.65);
+      o.drawImage(img, (x / fw) * img.width, 0, (strip / fw) * img.width, img.height, x, 40 + dy, strip + 0.6, fh);
+      const shade = Math.cos(t * Math.PI * 2.2 + 0.6);
+      o.fillStyle = shade > 0 ? `rgba(255,255,255,${0.12 * shade})` : `rgba(0,0,0,${-0.32 * shade})`;
+      o.fillRect(x, 40 + dy, strip + 0.6, fh);
+    }
+    ctx.save(); ctx.translate(x0 + fw / 2, y0 + fh / 2); ctx.rotate(-0.08);
+    ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 40;
+    ctx.drawImage(off, -fw / 2, -fh / 2 - 40); ctx.restore();
+    // Fade the flag's left edge and bottom into the background so the names stay easy to read.
+    const side = ctx.createLinearGradient(W * 0.3, 0, W * 0.72, 0);
+    side.addColorStop(0, k.hexA(g.bg, 1)); side.addColorStop(0.5, k.hexA(g.bg, 0.55)); side.addColorStop(1, k.hexA(g.bg, 0));
+    ctx.fillStyle = side; ctx.fillRect(0, 0, W * 0.72, H);
+    const low = ctx.createLinearGradient(0, g.footerY - 300, 0, H);
+    low.addColorStop(0, k.hexA(g.bg, 0)); low.addColorStop(0.7, k.hexA(g.bg, 0.9)); low.addColorStop(1, k.hexA(g.bg, 1));
+    ctx.fillStyle = low; ctx.fillRect(0, g.footerY - 300, W, H - g.footerY + 300);
+  }
+
   // ---------- Squad announcement ----------
   // Team name and the full squad down the left, the player photo on the right fading into the team colour.
   // One name per line. A blank line starts a new group; a line starting with # is a small group heading.
@@ -601,16 +643,9 @@ window.BPG = window.BPG || {};
     standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, colW = W * 0.55;
-      if (g.photo) {
-        const x0 = Math.round(W * 0.3);
-        ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, W - x0, H); ctx.clip(); k.coverImg(g.photo.img, x0, 0, W - x0, H); ctx.restore();
-        const side = ctx.createLinearGradient(x0, 0, W * 0.66, 0);
-        side.addColorStop(0, k.hexA(g.bg, 1)); side.addColorStop(0.45, k.hexA(g.bg, 0.6)); side.addColorStop(1, k.hexA(g.bg, 0));
-        ctx.fillStyle = side; ctx.fillRect(x0 - 1, 0, W * 0.66 - x0 + 1, H);
-        const low = ctx.createLinearGradient(0, g.footerY - 260, 0, H);
-        low.addColorStop(0, k.hexA(g.bg, 0)); low.addColorStop(0.6, k.hexA(g.bg, 0.85)); low.addColorStop(1, k.hexA(g.bg, 1));
-        ctx.fillStyle = low; ctx.fillRect(0, g.footerY - 260, W, H - g.footerY + 260);
-      } else k.photoHint(g, H * 0.45);
+      // No player photo here: the team's flag, waving on the right, fading into the team colour.
+      const flag = flagImg(BPG.teamName ? BPG.teamName(g.val("team")) : g.val("team"));
+      if (flag) wavingFlag(k, g, flag);
       // A soft glow of the team colour behind the list, so it never looks flat.
       const glow = ctx.createRadialGradient(0, H * 0.35, 0, 0, H * 0.35, W * 0.8);
       glow.addColorStop(0, k.hexA(g.stroke || g.accent, 0.35)); glow.addColorStop(1, k.hexA(g.stroke || g.accent, 0));
