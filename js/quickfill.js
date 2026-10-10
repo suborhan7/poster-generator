@@ -64,6 +64,33 @@ window.BPG = window.BPG || {};
     "Bayern Munich": ["fcb munich", "bayern"],
     "Inter Miami": ["miami"],
     "Al Nassr": ["nassr"],
+    "Uganda": ["uga"],
+    "Papua New Guinea": ["png", "papua new guinea"],
+    "Qatar": ["qat"],
+    "Iran": ["irn"],
+    "Ghana": ["gha"],
+    "Cameroon": ["cmr"],
+    "Ivory Coast": ["civ", "cote d'ivoire"],
+    "Algeria": ["alg"],
+    "Tunisia": ["tun"],
+    "Poland": ["pol"],
+    "Austria": ["aut"],
+    "Turkey": ["tur", "turkiye"],
+    "Serbia": ["srb"],
+    "Wales": ["wal"],
+    "Norway": ["nor"],
+    "Sweden": ["swe"],
+    "Ukraine": ["ukr"],
+    "Al Hilal": ["hilal"],
+    "Paris Saint-Germain": ["psg", "paris"],
+    "Juventus": ["juve"],
+    "AC Milan": ["milan", "acm"],
+    "Inter Milan": ["inter"],
+    "Atletico Madrid": ["atletico", "atleti", "atm"],
+    "Borussia Dortmund": ["bvb", "dortmund"],
+    "Tottenham": ["spurs", "tot"],
+    "Newcastle": ["newcastle united", "nufc"],
+    "Bayer Leverkusen": ["leverkusen", "b04"],
   };
   // The short form printed on cards that want one (score bars, reaction pill).
   const SHORT = {
@@ -72,6 +99,7 @@ window.BPG = window.BPG || {};
     "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
     "Canada": "CAN", "Hong Kong": "HK", "Argentina": "ARG", "Brazil": "BRA", "France": "FRA", "Germany": "GER", "Spain": "ESP",
     "Portugal": "POR", "Italy": "ITA", "Belgium": "BEL", "Croatia": "CRO", "Uruguay": "URU", "Morocco": "MAR", "Japan": "JPN", "Mexico": "MEX", "Colombia": "COL", "Ecuador": "ECU", "Chile": "CHI", "Paraguay": "PAR", "Peru": "PER", "Venezuela": "VEN", "Bolivia": "BOL", "Saudi Arabia": "KSA", "South Korea": "KOR", "Switzerland": "SUI", "Denmark": "DEN", "Senegal": "SEN", "Egypt": "EGY", "Nigeria": "NGA",
+    "Uganda": "UGA", "Papua New Guinea": "PNG", "Qatar": "QAT", "Iran": "IRN", "Ghana": "GHA", "Cameroon": "CMR", "Ivory Coast": "CIV", "Algeria": "ALG", "Tunisia": "TUN", "Poland": "POL", "Austria": "AUT", "Turkey": "TUR", "Serbia": "SRB", "Wales": "WAL", "Norway": "NOR", "Sweden": "SWE", "Ukraine": "UKR", "Bayern Munich": "BAY", "Al Nassr": "NAS", "Al Hilal": "HIL", "Paris Saint-Germain": "PSG", "Juventus": "JUV", "AC Milan": "MIL", "Inter Milan": "INT", "Inter Miami": "MIA", "Atletico Madrid": "ATM", "Borussia Dortmund": "BVB", "Tottenham": "TOT", "Newcastle": "NEW", "Bayer Leverkusen": "B04",
   };
 
   const lookup = new Map();
