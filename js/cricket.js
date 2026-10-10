@@ -566,7 +566,7 @@ window.BPG = window.BPG || {};
 
   // Big knock, bold: name small, "43 OFF 21" huge in the team's colour, one info line.
   L.bigknock = {
-    standard: false,
+    standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, r = String(g.val("runs") || "").trim(), b = String(g.val("balls") || "").trim();
       const runsN = num(r), ballsN = num(b), fours = num(g.val("fours")), sixes = num(g.val("sixes"));
@@ -595,7 +595,7 @@ window.BPG = window.BPG || {};
 
   // Result, bold: "WEST INDIES / BEAT INDIA!" centred, the verb in the team's colour.
   L.bigresult = {
-    standard: false,
+    standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, cx = g.W / 2, w = cap(g.val("winner")), l = cap(g.val("loser")), verb = cap(g.val("verb") || "beat");
       const infoBase = g.footerY - 58, line2 = infoBase - 52;

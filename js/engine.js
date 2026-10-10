@@ -94,6 +94,8 @@ BPG.createKit = function (ctx, env) {
     const top = ctx.createLinearGradient(0, 0, 0, g.st + 140);
     top.addColorStop(0, k.hexA(g.bg, 0.55)); top.addColorStop(1, k.hexA(g.bg, 0));
     ctx.fillStyle = top; ctx.fillRect(0, 0, g.W, g.st + 140);
+    // Team colours theme: every card gets the jersey-coloured brush strokes behind its text.
+    if (g.sweep && !g.swept) { g.swept = true; k.paintSweep(g, textTop - 90, g.sweepSide || "right"); }
     return true;
   };
   // Paint sweep: rough brush strokes in the team's jersey colours, rising from the bottom-left corner

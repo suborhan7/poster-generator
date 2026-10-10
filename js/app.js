@@ -96,6 +96,9 @@ window.BPG = window.BPG || {};
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => setVal(id, v)));
+    // Cards with no team field can still take a team's jersey colours.
+    if (!t.fields.some(([id]) => ["winner", "team", "t1", "abbr"].includes(id)))
+      addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photo2Label").textContent = t.photo2 || "Second photo";
     $("tplHint").textContent = t.hint || "";
@@ -174,7 +177,7 @@ window.BPG = window.BPG || {};
     if (!layout) { console.error(`Layout "${t.layout}" not found in layouts.js`); return; }
     if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; }
     // "Team colours": pick the jersey colours of the team on the card (the winner on result cards).
-    const teamName = (BPG.teamName && BPG.teamName(val("winner") || val("team") || val("t1") || val("abbr"))) || "";
+    const teamName = (BPG.teamName && BPG.teamName(val("winner") || val("team") || val("t1") || val("abbr") || val("colorteam"))) || "";
     const tc = state.theme === "team" ? BPG.TEAM_COLORS[teamName] : null;
     const th = tc || THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" || (state.theme === "team" && !tc) ? t.look || {} : {};
     const footerY = p.bottom - 4, statsTop = footerY - 124, subBase = statsTop - 22, nameBase = subBase - 44, bigBase = nameBase - 84;
@@ -182,7 +185,7 @@ window.BPG = window.BPG || {};
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
-      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null,
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
