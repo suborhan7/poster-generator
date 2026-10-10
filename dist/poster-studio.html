@@ -234,7 +234,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Oct 2026 · v15";
+BPG.VERSION = "10 Oct 2026 · v16";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -828,19 +828,18 @@ BPG.LAYOUTS = {
 
   hottake: {
     standard: false,
+    // Plaantik-style: clear photo, small tag, the take in normal sentence case, your name under it.
     draw(k, g) {
-      const ctx = k.ctx;
-      k.photoArea(g, g.H, 0.45);
+      const ctx = k.ctx, W = g.W, x = 56;
+      const q = k.layoutRich(g.val("quote"), W - 2 * x, 46, k.B, 5, 30, 600), lh = q.size * 1.25;
+      const byY = g.footerY, textBase = byY - 58 - (q.lines.length - 1) * lh, tagY = textBase - q.size - 30;
+      if (!k.bleedPhoto(g, tagY - 60)) k.photoHint(g, (g.st + tagY) / 2);
       k.header(g);
-      const top = g.st + 140;
-      ctx.font = k.font(300, k.D); ctx.fillStyle = g.accent; ctx.fillText("“", 40, top + 220);
-      k.label(g.big, 210, top + 70, g.accent, 42);
-      const avail = g.sb - 200 - (top + 260);
-      const lay = k.layoutRich(String(g.val("quote")).toUpperCase(), g.W - 112, 120, k.D, Math.max(3, Math.floor(avail / 90)), 48);
-      k.drawRich(lay, 54, top + 260 + lay.size * 0.8, lay.size * 1.05, k.D, "#FFFFFF", g.accent, "left");
-      ctx.font = k.font(48, k.C, 700); ctx.fillStyle = g.accent;
-      ctx.fillText("— " + g.val("by"), 56, top + 260 + lay.lines.length * lay.size * 1.05 + lay.size * 0.8 + 50);
-      k.footer(g);
+      ctx.font = k.font(64, k.D); ctx.fillStyle = g.accent; ctx.fillText("“", x - 4, tagY + 26);
+      ctx.font = `italic ${k.font(26, k.C, 700)}`; k.spaced(3); ctx.fillText(String(g.big || "Hot take").toUpperCase(), x + 40, tagY); k.spaced(0);
+      k.drawRich(q, x, textBase, lh, k.B, "#FFFFFF", g.accent, "left", 600);
+      if (g.val("by")) { ctx.font = k.font(28, k.C, 700); k.spaced(2); ctx.fillStyle = g.accent; ctx.fillText("— " + g.val("by"), x, byY); k.spaced(0); }
+      k.brandCorner(g, byY);
     },
   },
 
@@ -857,7 +856,6 @@ BPG.LAYOUTS = {
       ctx.textAlign = "center";
       ctx.font = k.font(k.fit(nm, W - 112, 76, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, W / 2, panelTop + 90);
       const dy = panelTop + 130;
-      ctx.fillStyle = k.hexA("#FFFFFF", 0.5); ctx.fillRect(140, dy - 4, W / 2 - 200, 2); ctx.fillRect(W / 2 + 60, dy - 4, W / 2 - 200, 2);
       ctx.font = k.font(70, k.D); ctx.fillStyle = g.accent; ctx.fillText("“ ”", W / 2, dy + 34);
       k.drawRich(q, W / 2, panelTop + 196, q.size * 1.3, k.B, "#FFFFFF", g.accent, "center", 500);
       if (g.val("context")) {
@@ -871,24 +869,24 @@ BPG.LAYOUTS = {
 
   toplist: {
     standard: false,
+    // Compact ranked list at the bottom; the photo stays clear above it.
     draw(k, g) {
-      const ctx = k.ctx, W = g.W;
-      k.photoArea(g, g.H, 0.55);
+      const ctx = k.ctx, W = g.W, x = 56;
+      const rows = String(g.val("items")).split("\n").map((r) => r.split("|").map((t) => t.trim())).filter((r) => r[0]).slice(0, 5);
+      const rowH = g.H > 1500 ? 88 : 74, listTop = g.footerY - 56 - rows.length * rowH;
+      const tl = k.layoutRich(String(g.val("title")).toUpperCase(), W - 2 * x, 64, k.D, 2, 40), tlh = tl.size * 0.98;
+      const titleBase = listTop - 26 - (tl.lines.length - 1) * tlh, titleTop = titleBase - tl.size * 0.76;
+      if (!k.bleedPhoto(g, titleTop - 30)) k.photoHint(g, (g.st + titleTop) / 2);
       k.header(g);
-      const tl = k.layoutRich(String(g.val("title")).toUpperCase(), W - 112, 110, k.D, 3, 50);
-      k.drawRich(tl, 54, g.st + 230, tl.size * 1.02, k.D, "#FFFFFF", g.accent, "left");
-      const rows = String(g.val("items")).split("\n").map((r) => r.split("|").map((x) => x.trim())).filter((r) => r[0]).slice(0, 5);
-      const top = g.st + 230 + tl.lines.length * tl.size * 1.02 + 30, avail = g.footerY - 70 - top;
-      const rh = Math.min(230, avail / Math.max(rows.length, 1));
+      k.drawRich(tl, x - 2, titleBase, tlh, k.D, "#FFFFFF", g.accent, "left");
       rows.forEach(([v, n], i) => {
-        const y = top + i * rh;
-        ctx.fillStyle = "rgba(255,255,255,0.07)"; ctx.fillRect(56, y + 10, W - 112, rh - 20);
-        ctx.fillStyle = g.accent; ctx.fillRect(56, y + 10, 12, rh - 20);
-        ctx.font = k.font(rh * 0.5, k.D); ctx.fillStyle = k.hexA(g.accent, 0.9); ctx.fillText(String(i + 1), 100, y + rh * 0.68);
-        ctx.font = k.font(k.fit(String(v), W * 0.42, rh * 0.5, k.D), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), 100 + rh * 0.42, y + rh * 0.68);
+        const y = listTop + i * rowH, mid = y + rowH / 2, first = i === 0;
+        if (first) { ctx.fillStyle = g.accent; ctx.beginPath(); ctx.moveTo(x + 18, y + 6); ctx.lineTo(W - x, y + 6); ctx.lineTo(W - x - 18, y + rowH - 6); ctx.lineTo(x, y + rowH - 6); ctx.closePath(); ctx.fill(); }
+        const ink = first ? k.inkOn(g.accent) : "#FFFFFF";
+        ctx.font = k.font(32, k.D); ctx.fillStyle = first ? ink : g.accent; ctx.fillText(String(i + 1), x + 24, mid + 12);
         const nm = String(n || "").toUpperCase();
-        ctx.font = k.font(k.fit(nm, W * 0.36, 52, k.C, 700), k.C, 700); ctx.fillStyle = "rgba(255,255,255,0.85)";
-        ctx.textAlign = "right"; ctx.fillText(nm, W - 92, y + rh * 0.64); ctx.textAlign = "left";
+        ctx.font = k.font(k.fit(nm, W * 0.5, 38, k.C, 700), k.C, 700); k.spaced(1); ctx.fillStyle = ink; ctx.fillText(nm, x + 70, mid + 13); k.spaced(0);
+        ctx.textAlign = "right"; ctx.font = k.font(k.fit(String(v), W * 0.3, first ? 50 : 44, k.D), k.D); ctx.fillStyle = ink; ctx.fillText(String(v), W - x - 34, mid + 17); ctx.textAlign = "left";
       });
       k.footer(g);
     },
