@@ -554,7 +554,10 @@ window.BPG = window.BPG || {};
     standard: false,
     draw(k, g) {
       const ctx = k.ctx, r = String(g.val("runs") || "").trim(), b = String(g.val("balls") || "").trim();
-      const infoBase = g.footerY - 58, bigBase = infoBase - 46;
+      const runsN = num(r), ballsN = num(b), fours = num(g.val("fours")), sixes = num(g.val("sixes"));
+      const hasSplit = fours + sixes > 0, sr = ballsN ? `SR ${((runsN / ballsN) * 100).toFixed(1)}` : "";
+      // Bottom up: info line on the logo's row, the fours/sixes/running bar above it, then the big figure and the name.
+      const barY = g.footerY - 64, bigBase = (hasSplit ? barY - 34 : g.footerY - 58) - 46;
       const parts = b ? [[r, g.accent], [" OFF ", "#FFFFFF", 0.62], [b, g.accent]] : [[r, g.accent], [" RUNS", "#FFFFFF", 0.62]];
       const size = fitRuns(k, parts, g.W - 2 * PAD, 170, 80), nameBase = bigBase - size * 0.74 - 24;
       if (!k.bleedPhoto(g, nameTopOf(nameBase) - 40)) k.photoHint(g, g.st + (nameBase - g.st) / 2);
@@ -564,7 +567,8 @@ window.BPG = window.BPG || {};
       ctx.font = k.font(40, k.H, 800); k.spaced(1); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("player")), PAD, nameBase, g.W - 2 * PAD); k.spaced(0);
       runs(k, parts, PAD - 4, bigBase, size, "left");
       ctx.restore();
-      infoLine(k, g, g.val("info"), PAD, infoBase, "left");
+      infoLine(k, g, g.val("info"), PAD, hasSplit ? g.footerY : g.footerY - 58, "left");
+      if (hasSplit) runsBar(k, g, barY, runsN, fours, sixes, sr);
       k.brandCorner(g, g.footerY);
     },
   };

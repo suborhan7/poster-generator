@@ -161,6 +161,7 @@ window.BPG = window.BPG || {};
   BPG.quickExample = (tpl) => ({
     batting: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL",
     knock: "Litton Das 82 off 41 8 fours 4 sixes BAN v SA",
+    bigknock: "Mahmudullah 43(21) 3x4 4x6 BAN",
     bowling: "Mustafizur 5/23 (8.3) BAN vs SA",
     over: "Taskin Ahmed BAN vs SA",
     wicket: "Temba Bavuma 41(55)",

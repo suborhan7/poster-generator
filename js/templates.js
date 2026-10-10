@@ -53,7 +53,7 @@ BPG.TEMPLATES = {
     fields: [["player","Player","Najmul Hossain Shanto"],["team","Team","Bangladesh"],["opp","Opponent","South Africa"],["runs","Runs (add * if not out)","104*"],["balls","Balls","121"],["fours","4s","9"],["sixes","6s","3"]] },
   bigknock: { cat: "cricket", name: "Big knock (bold)", layout: "bigknock",
     hint: "Colours follow the team's jersey when the theme is Team colours. Use | in the info line to split it.",
-    fields: [["player","Player","Mahmudullah Riyad"],["team","Team (sets the colours)","Bangladesh"],["runs","Runs","43"],["balls","Balls","21"],["info","Info line","Match 10 | BAN vs WI | WCL 2026",true]] },
+    fields: [["player","Player","Mahmudullah Riyad"],["team","Team (sets the colours)","Bangladesh"],["runs","Runs","43"],["balls","Balls","21"],["fours","4s (optional)","3"],["sixes","6s (optional)","4"],["info","Info line","BAN vs WI | WCL 2026",true]] },
   bigresult: { cat: "cricket", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","West Indies"],["loser","Losing team","India"],["verb","Word in colour","beat"],["margin","Margin","by 6 wickets"],["info","Info line","2nd T20I | WI in IND 2026",true]] },
