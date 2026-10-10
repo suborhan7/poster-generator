@@ -32,6 +32,7 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    squad: (v, t, raw) => { const n = String(raw("players")).split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")); return `🚨 ${v("team")} ${v("title").toLowerCase() || "squad"} is out! ${n.length} players:\n${n.join(", ")}`; },
     bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     seriesscore: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; if (s.teams.length > 2) return `${s.name}: results so far.`; const st = BPG.series.seriesLine(s); return `${s.name}: ${st.text.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}.`; },

@@ -593,6 +593,76 @@ window.BPG = window.BPG || {};
   };
   const nameTopOf = (nameBase) => nameBase - 40;
 
+  // ---------- Squad announcement ----------
+  // Team name and the full squad down the left, the player photo on the right fading into the team colour.
+  // One name per line. A blank line starts a new group; a line starting with # is a small group heading.
+  // (C), (VC) and (WK) after a name are shown small in the accent colour.
+  L.squad = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, colW = W * 0.55;
+      if (g.photo) {
+        const x0 = Math.round(W * 0.3);
+        ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, W - x0, H); ctx.clip(); k.coverImg(g.photo.img, x0, 0, W - x0, H); ctx.restore();
+        const side = ctx.createLinearGradient(x0, 0, W * 0.66, 0);
+        side.addColorStop(0, k.hexA(g.bg, 1)); side.addColorStop(0.45, k.hexA(g.bg, 0.6)); side.addColorStop(1, k.hexA(g.bg, 0));
+        ctx.fillStyle = side; ctx.fillRect(x0 - 1, 0, W * 0.66 - x0 + 1, H);
+        const low = ctx.createLinearGradient(0, g.footerY - 260, 0, H);
+        low.addColorStop(0, k.hexA(g.bg, 0)); low.addColorStop(0.6, k.hexA(g.bg, 0.85)); low.addColorStop(1, k.hexA(g.bg, 1));
+        ctx.fillStyle = low; ctx.fillRect(0, g.footerY - 260, W, H - g.footerY + 260);
+      } else k.photoHint(g, H * 0.45);
+      // A soft glow of the team colour behind the list, so it never looks flat.
+      const glow = ctx.createRadialGradient(0, H * 0.35, 0, 0, H * 0.35, W * 0.8);
+      glow.addColorStop(0, k.hexA(g.stroke || g.accent, 0.35)); glow.addColorStop(1, k.hexA(g.stroke || g.accent, 0));
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+      k.header(g);
+
+      // Heading: small tag, the team name big, the series line under it.
+      let y = g.st + 20;
+      const team = cap(g.val("team")), tSize = k.fit(team, colW, 104, k.H, 900, 56);
+      y += tSize * 0.86 + 14;
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 18;
+      ctx.font = k.font(tSize, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(team, PAD - 4, y); ctx.restore();
+      const sub = cap(g.val("title"));
+      if (sub) { y += 40; ctx.font = k.font(k.fit(sub, colW, 26, k.C, 700, 18), k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fillText(sub, PAD, y, colW); k.spaced(0); }
+
+      // The list, sized to fill the space down to the bottom row.
+      const rows = [];
+      String(g.val("players") || "").split("\n").forEach((line) => {
+        const t = line.trim();
+        if (!t) { if (rows.length && rows[rows.length - 1].type !== "gap") rows.push({ type: "gap" }); return; }
+        if (t.startsWith("#")) { rows.push({ type: "head", text: t.replace(/^#+\s*/, "") }); return; }
+        const m = t.match(/^(.*?)\s*\(\s*(c|vc|v\.c|wk|c\s*&\s*wk|wk\s*&\s*c)\s*\)\s*$/i);
+        rows.push({ type: "name", text: m ? m[1] : t, role: m ? m[2].replace(/\./g, "").replace(/\s+/g, "").toUpperCase() : "" });
+      });
+      while (rows.length && rows[rows.length - 1].type === "gap") rows.pop();
+      const top = y + 64, bottom = g.footerY - 64;
+      // Line heights in multiples of the text size: a heading gets more room above it than below.
+      const step = (r, i) => (r.type === "gap" ? 0.7 : r.type === "head" ? (i ? 1.15 : 0.6) : rows[i - 1] && rows[i - 1].type === "head" ? 1.08 : 1.28);
+      const units = rows.reduce((a, r, i) => a + step(r, i), 0) || 1;
+      let size = Math.max(24, Math.min(54, (bottom - top) / units));
+      ctx.font = k.font(size, k.C, 700);
+      const widest = Math.max(1, ...rows.filter((r) => r.type === "name").map((r) => ctx.measureText(cap(r.text)).width + (r.role ? size * 1.6 : 0)));
+      if (widest > colW) size = Math.max(22, size * colW / widest);
+      y = top;
+      rows.forEach((r, i) => {
+        y += size * step(r, i);
+        if (r.type === "gap") return;
+        if (r.type === "head") {
+          ctx.font = k.font(Math.round(size * 0.5), k.C, 700); k.spaced(5); ctx.fillStyle = g.accent; ctx.fillText(cap(r.text), PAD, y); k.spaced(0);
+          return;
+        }
+        ctx.font = k.font(size, k.C, 700); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(r.text), PAD, y);
+        if (r.role) {
+          const x = PAD + ctx.measureText(cap(r.text)).width + size * 0.3;
+          ctx.font = k.font(Math.round(size * 0.55), k.C, 700); k.spaced(2); ctx.fillStyle = g.accent; ctx.fillText(r.role, x, y); k.spaced(0);
+        }
+      });
+      infoLine(k, g, g.val("info"), PAD, g.footerY, "left");
+      k.brandCorner(g, g.footerY);
+    },
+  };
+
   // Result, bold: "WEST INDIES / BEAT INDIA!" centred, the verb in the team's colour.
   L.bigresult = {
     standard: false, ownSweep: true,

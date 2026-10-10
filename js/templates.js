@@ -87,6 +87,9 @@ BPG.TEMPLATES = {
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
 
   // ---------------- Football ----------------
+  squad: { cat: "cricket", name: "Squad announcement", layout: "squad",
+    hint: "One player per line. Leave an empty line between groups, or start a line with # for a small heading (# Bowlers). (C), (VC) and (WK) after a name show in colour.",
+    fields: [["team","Team (sets the colours)","Bangladesh"],["title","Line under the name","Squad for the ODI tri series",true],["players","Players","Litton Das (C)\nTawhid Hridoy (VC)\nTanzid Hasan\nSoumya Sarkar\nNajmul Hossain Shanto\nMosaddek Hossain\nNurul Hasan (WK)\nMehidy Hasan Miraz\nSaif Uddin\n\nRishad Hossain\nAliss Al Islam\nTanvir Islam\nTaskin Ahmed\nMustafizur Rahman\nHasan Mahmud\nShoriful Islam",true,"area"],["info","Info line (optional)","ODI tri series | UAE 2026",true]] },
   goal: { cat: "football", name: "Goal", layout: "goal", big: "GOAL!",
     fields: [["player","Scorer","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["minute","Minute","67'"],["score","Score now","Argentina 1-0 Brazil",true],["assist","Assist","Julián Álvarez"]] },
   fresult: { cat: "football", name: "Full-time score", layout: "fscore",
@@ -101,6 +104,9 @@ BPG.TEMPLATES = {
     fields: [["player","Player","Lionel Messi"],["team","Team","Argentina"],["opp","Opponent","Brazil"],["rating","Rating out of 10","9.2"],["stats","Key stats (Label: value, comma between)","Goals: 1, Assists: 1, Key passes: 5",true]] },
 
   // ---------------- General ----------------
+  fsquad: { cat: "football", name: "Squad announcement", layout: "squad",
+    hint: "One player per line. Start a line with # for a heading (# Goalkeepers, # Defenders). (C) after a name shows in colour.",
+    fields: [["team","Team (sets the colours)","Argentina"],["title","Line under the name","Squad for the World Cup qualifiers",true],["players","Players","# Goalkeepers\nEmiliano Martinez\nGeronimo Rulli\n# Defenders\nCristian Romero\nNicolas Otamendi\nNahuel Molina\nNicolas Tagliafico\n# Midfielders\nRodrigo De Paul\nEnzo Fernandez\nAlexis Mac Allister\n# Forwards\nLionel Messi (C)\nJulian Alvarez\nLautaro Martinez",true,"area"],["info","Info line (optional)","CONMEBOL qualifiers | Nov 2026",true]] },
   statuscard: { cat: "general", name: "Status (In the XI, ruled out…)", layout: "status",
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Player","Nayeem Hasan",true],["stamp","Status","*IN THE XI*",true],["detail","Detail line","Only Test | AFG v BAN in UAE 2026",true]] },
