@@ -234,7 +234,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "10 Oct 2026 · v19";
+BPG.VERSION = "10 Oct 2026 · v20";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -1662,8 +1662,8 @@ window.BPG = window.BPG || {};
       const ctx = k.ctx, r = String(g.val("runs") || "").trim(), b = String(g.val("balls") || "").trim();
       const runsN = num(r), ballsN = num(b), fours = num(g.val("fours")), sixes = num(g.val("sixes"));
       const hasSplit = fours + sixes > 0, sr = ballsN ? `SR ${((runsN / ballsN) * 100).toFixed(1)}` : "";
-      // Bottom up: info line on the logo's row, fours/sixes/strike rate above it, then the big figure and the name.
-      const barY = g.footerY - 88, bigBase = (hasSplit ? barY - 60 : g.footerY - 58) - 46;
+      // Bottom up: info line on the logo's row, the split bar, fours/sixes/strike rate above it, then the big figure and the name.
+      const barY = g.footerY - 58, statY = barY - 86, bigBase = (hasSplit ? statY - 38 : g.footerY - 58) - 46;
       const parts = b ? [[r, g.accent], [" OFF ", "#FFFFFF", 0.62], [b, g.accent]] : [[r, g.accent], [" RUNS", "#FFFFFF", 0.62]];
       const size = fitRuns(k, parts, g.W - 2 * PAD, 170, 80), nameBase = bigBase - size * 0.74 - 24;
       if (!k.bleedPhoto(g, nameTopOf(nameBase) - 40)) k.photoHint(g, g.st + (nameBase - g.st) / 2);
@@ -1674,13 +1674,14 @@ window.BPG = window.BPG || {};
       runs(k, parts, PAD - 4, bigBase, size, "left");
       ctx.restore();
       infoLine(k, g, g.val("info"), PAD, hasSplit ? g.footerY : g.footerY - 58, "left");
-      // Fours, sixes and strike rate in a row: number on top, small label in the team colour under it.
+      // Fours, sixes and strike rate in a row (number on top, small label under it), then the split bar.
       if (hasSplit) {
+        runsBar(k, g, barY, runsN, fours, sixes);
         let x = PAD;
         [[fours, "Fours"], [sixes, "Sixes"], [sr.replace("SR ", ""), "Strike rate"]].filter(([v]) => v !== "").forEach(([v, lab]) => {
-          ctx.font = k.font(48, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), x, barY - 2);
+          ctx.font = k.font(48, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), x, statY);
           const vw = ctx.measureText(String(v)).width;
-          ctx.font = k.font(20, k.C, 700); k.spaced(3); ctx.fillStyle = g.accent; ctx.fillText(cap(lab), x, barY + 26);
+          ctx.font = k.font(20, k.C, 700); k.spaced(3); ctx.fillStyle = g.accent; ctx.fillText(cap(lab), x, statY + 28);
           const lw = ctx.measureText(cap(lab)).width; k.spaced(0);
           x += Math.max(vw, lw) + 56;
         });
