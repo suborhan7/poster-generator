@@ -120,3 +120,7 @@ img { max-width: 100%; }
 .cardlist button { padding: 7px 12px; font-size: 13px; }
 .filebtn { display: inline-flex; align-items: center; }
 .ghost.danger { color: #d33; border-color: color-mix(in srgb, #d33 40%, var(--line)); }
+/* Tick box with its label on one line (automatic cutout). */
+.field label.check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.field label.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent, #5B8CFF); }
+#cutStatus:empty { display: none; }

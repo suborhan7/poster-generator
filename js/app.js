@@ -152,9 +152,37 @@ window.BPG = window.BPG || {};
       return [0, 23, 24 * 23, 24 * 24 - 1, 12, 24 * 12].filter((p) => d[p * 4 + 3] < 200).length >= 2;
     } catch (e) { return false; }
   }
+  // Automatic cutout: on by default, remembered on this phone. The original photo is kept, so it can be switched back.
+  let autoCut = true;
+  try { autoCut = localStorage.getItem("bpg_autocut") !== "0"; } catch (e) {}
+  $("autoCut").checked = autoCut;
+  const cutStatus = (t) => { $("cutStatus").textContent = t; };
+  async function makeCutout(n) {
+    const p = photos[n]; if (!p || p.isPng || !BPG.cutout) return;
+    if (p.cutImg) { Object.assign(p, { img: p.cutImg, cut: true }); draw(); return; }
+    try {
+      const c = await BPG.cutout(p.orig, cutStatus);
+      if (photos[n] !== p) return; // a newer photo was picked meanwhile
+      p.cutImg = c;
+      if ($("autoCut").checked) { Object.assign(p, { img: c, cut: true }); draw(); }
+      cutStatus("Background removed. Untick the box to use the full photo.");
+    } catch (e) {
+      console.warn(e);
+      cutStatus(location.protocol === "https:" ? "Couldn't remove the background this time. Check your internet and pick the photo again." : "Automatic cutout works on the website, not in this preview.");
+    }
+  }
+  $("autoCut").addEventListener("change", (e) => {
+    try { localStorage.setItem("bpg_autocut", e.target.checked ? "1" : "0"); } catch (err) {}
+    [1, 2].forEach((n) => {
+      const p = photos[n]; if (!p || p.isPng) return;
+      if (e.target.checked) makeCutout(n); else { Object.assign(p, { img: p.orig, cut: false }); cutStatus(""); draw(); }
+    });
+  });
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const img = await loadImage(f); photos[n] = { img, cut: isCutout(img) }; draw();
+    const img = await loadImage(f), isPng = isCutout(img);
+    photos[n] = { img, orig: img, cut: isPng, isPng }; draw();
+    if ($("autoCut").checked && !isPng) makeCutout(n);
   }));
   $("b_logo").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
@@ -187,7 +215,7 @@ window.BPG = window.BPG || {};
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
-      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout),
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 

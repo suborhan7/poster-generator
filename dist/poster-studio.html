@@ -133,6 +133,10 @@ img { max-width: 100%; }
 .cardlist button { padding: 7px 12px; font-size: 13px; }
 .filebtn { display: inline-flex; align-items: center; }
 .ghost.danger { color: #d33; border-color: color-mix(in srgb, #d33 40%, var(--line)); }
+/* Tick box with its label on one line (automatic cutout). */
+.field label.check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.field label.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent, #5B8CFF); }
+#cutStatus:empty { display: none; }
 </style>
 </head>
 <body>
@@ -162,7 +166,8 @@ img { max-width: 100%; }
     <section class="box">
       <span class="label">Photo</span>
       <div class="fields">
-        <div class="field wide"><label for="photo1">Player photo (a cutout PNG looks best)</label><input id="photo1" type="file" accept="image/*"></div>
+        <div class="field wide"><label for="photo1">Player photo</label><input id="photo1" type="file" accept="image/*"></div>
+        <div class="field wide"><label class="check"><input type="checkbox" id="autoCut"> Remove the background automatically (cutout)</label><p class="hint" id="cutStatus"></p></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
         <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
         <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0"></div>
@@ -234,7 +239,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "10 Oct 2026 · v27";
+BPG.VERSION = "10 Oct 2026 · v28";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -620,6 +625,20 @@ BPG.createKit = function (ctx, env) {
     ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.045)"; ctx.lineWidth = 18;
     for (let i = -H; i < W + H; i += 64) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i - H * 0.6, H); ctx.stroke(); }
     ctx.restore();
+    // With a cutout, the scene behind the player is the original photo, blurred and washed in the team colour,
+    // with the brush strokes running behind the player.
+    if (g.photo && g.photo.cut) {
+      const o = g.photo.orig && g.photo.orig !== g.photo.img ? g.photo.orig : null;
+      if (o && "filter" in ctx) {
+        const s = Math.max(W / o.width, H / o.height) * 1.08;
+        ctx.filter = "blur(22px) saturate(0.6)"; ctx.drawImage(o, (W - o.width * s) / 2, (H - o.height * s) / 2, o.width * s, o.height * s); ctx.filter = "none";
+        ctx.fillStyle = k.hexA(bg, 0.62); ctx.fillRect(0, 0, W, H);
+      }
+      const glow = ctx.createRadialGradient(W * 0.5, H * 0.35, 0, W * 0.5, H * 0.35, W * 0.75);
+      glow.addColorStop(0, k.hexA(g.stroke || accent, 0.45)); glow.addColorStop(1, k.hexA(g.stroke || accent, 0));
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+      if (g.teamTheme) k.paintSweep(g, 0, g.sweepSide || "right");
+    }
   };
   // Fades the photo into the background colour from `from` to `to`, solid below.
   k.fadeBottom = (g, from, to) => {
@@ -2646,6 +2665,63 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Automatic cutout: removes the photo's background in the browser, for free (nothing is uploaded).
+// BPG.cutout(image, onStatus) resolves with a canvas: the player with a transparent background.
+// The first run downloads the AI model (about 100 MB) once; the browser keeps it for next time.
+window.BPG = window.BPG || {};
+
+(() => {
+  const VERSION = "1.4.5";
+  const PATHS = [
+    `https://staticimgly.com/@imgly/background-removal-data/${VERSION}/dist/`,
+    `https://cdn.jsdelivr.net/npm/@imgly/background-removal-data@${VERSION}/dist/`,
+  ];
+  let lib = null;
+  // Where the cutout library sits: vendor/ next to js/ on the website.
+  const here = document.currentScript && document.currentScript.src;
+  const LIB = here ? new URL("../vendor/bg-removal.js", here).href : new URL("vendor/bg-removal.js", location.href).href;
+
+  const toBlob = (img, max) => new Promise((ok) => {
+    const s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(ok, "image/png");
+  });
+
+  // The model leaves soft, half-see-through edges on blurry arms and hair; firm them up a little.
+  function firm(img, w, h) {
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const x = c.getContext("2d"); x.drawImage(img, 0, 0, w, h);
+    const d = x.getImageData(0, 0, w, h), p = d.data;
+    for (let i = 3; i < p.length; i += 4) p[i] = Math.max(0, Math.min(255, (p[i] - 30) * 2));
+    x.putImageData(d, 0, 0);
+    return c;
+  }
+
+  BPG.cutout = async (img, onStatus = () => {}) => {
+    if (!lib) {
+      onStatus("Loading the cutout tool…");
+      lib = await import(LIB);
+    }
+    const blob = await toBlob(img, 2000);
+    let out = null, err = null;
+    for (const publicPath of PATHS) {
+      try {
+        out = await lib.removeBackground(blob, {
+          publicPath, model: "medium", output: { format: "image/png" },
+          progress: (key, cur, total) => { if (key.startsWith("fetch") && total) onStatus(`Downloading the cutout model, first time only… ${Math.round((cur / total) * 100)}%`); else onStatus("Removing the background…"); },
+        });
+        break;
+      } catch (e) { err = e; }
+    }
+    if (!out) throw err || new Error("Cutout failed");
+    const bmp = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(out); });
+    return firm(bmp, bmp.width, bmp.height);
+  };
+})();
+
+</script>
+<script>
 // The form, the live preview and the download/share buttons.
 window.BPG = window.BPG || {};
 
@@ -2800,9 +2876,37 @@ window.BPG = window.BPG || {};
       return [0, 23, 24 * 23, 24 * 24 - 1, 12, 24 * 12].filter((p) => d[p * 4 + 3] < 200).length >= 2;
     } catch (e) { return false; }
   }
+  // Automatic cutout: on by default, remembered on this phone. The original photo is kept, so it can be switched back.
+  let autoCut = true;
+  try { autoCut = localStorage.getItem("bpg_autocut") !== "0"; } catch (e) {}
+  $("autoCut").checked = autoCut;
+  const cutStatus = (t) => { $("cutStatus").textContent = t; };
+  async function makeCutout(n) {
+    const p = photos[n]; if (!p || p.isPng || !BPG.cutout) return;
+    if (p.cutImg) { Object.assign(p, { img: p.cutImg, cut: true }); draw(); return; }
+    try {
+      const c = await BPG.cutout(p.orig, cutStatus);
+      if (photos[n] !== p) return; // a newer photo was picked meanwhile
+      p.cutImg = c;
+      if ($("autoCut").checked) { Object.assign(p, { img: c, cut: true }); draw(); }
+      cutStatus("Background removed. Untick the box to use the full photo.");
+    } catch (e) {
+      console.warn(e);
+      cutStatus(location.protocol === "https:" ? "Couldn't remove the background this time. Check your internet and pick the photo again." : "Automatic cutout works on the website, not in this preview.");
+    }
+  }
+  $("autoCut").addEventListener("change", (e) => {
+    try { localStorage.setItem("bpg_autocut", e.target.checked ? "1" : "0"); } catch (err) {}
+    [1, 2].forEach((n) => {
+      const p = photos[n]; if (!p || p.isPng) return;
+      if (e.target.checked) makeCutout(n); else { Object.assign(p, { img: p.orig, cut: false }); cutStatus(""); draw(); }
+    });
+  });
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const img = await loadImage(f); photos[n] = { img, cut: isCutout(img) }; draw();
+    const img = await loadImage(f), isPng = isCutout(img);
+    photos[n] = { img, orig: img, cut: isPng, isPng }; draw();
+    if ($("autoCut").checked && !isPng) makeCutout(n);
   }));
   $("b_logo").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
@@ -2835,7 +2939,7 @@ window.BPG = window.BPG || {};
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
-      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout),
+      stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
