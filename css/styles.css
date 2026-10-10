@@ -120,3 +120,13 @@ img { max-width: 100%; }
 .cardlist button { padding: 7px 12px; font-size: 13px; }
 .filebtn { display: inline-flex; align-items: center; }
 .ghost.danger { color: #d33; border-color: color-mix(in srgb, #d33 40%, var(--line)); }
+/* Tick box with its label on one line (automatic cutout). */
+.field label.check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.field label.check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent, #5B8CFF); }
+#cutStatus:empty { display: none; }
+/* Cutout editor: full screen, the photo in the middle, tools underneath. */
+.cut-editor { position: fixed; inset: 0; z-index: 30; background: rgba(8,10,14,.94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; }
+.cut-editor canvas { max-width: 100%; border-radius: 8px; touch-action: none; cursor: crosshair; }
+.cut-editor .cut-tip { color: #fff; margin: 0; font-size: 14px; line-height: 1.4; text-align: center; max-width: 560px; }
+.cut-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+.cut-editor .ghost { color: #fff; border-color: rgba(255,255,255,.45); background: transparent; }
