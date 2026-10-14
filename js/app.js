@@ -195,8 +195,11 @@ window.BPG = window.BPG || {};
   });
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const img = await loadImage(f), isPng = isCutout(img);
-    photos[n] = { img, orig: img, cut: isPng, isPng }; cutStatus(""); showCutMode(); draw();
+    const raw = await loadImage(f), isPng = isCutout(raw);
+    // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
+    const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
+    photos[n] = { img, orig: img, cut: isPng, isPng }; showCutMode(); draw();
+    cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
     e.target.value = ""; // so picking the same photo again still works
   }));
@@ -216,7 +219,7 @@ window.BPG = window.BPG || {};
   }
 
   // ---------- Drawing ----------
-  function draw() { drawCard(); if (BPG.ready) updateCaption(); }
+  function draw() { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high"; drawCard(); if (BPG.ready) updateCaption(); }
   // Cards packed with numbers (charts, tables, ball-by-ball rows) stay clean: no brush strokes behind them.
   const NO_SWEEP = new Set(["form", "toplist", "innings", "result", "over", "leaders", "points", "seriesscore", "preview"]);
   function drawCard() {

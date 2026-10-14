@@ -245,7 +245,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "10 Oct 2026 · v30";
+BPG.VERSION = "14 Oct 2026 · v31";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -2713,6 +2713,62 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Photo sharpening. Small photos get stretched to fill a 1080 x 1350 card, which makes them soft.
+// When a photo is picked we make a bigger copy once: scaled up smoothly, then sharpened (unsharp mask),
+// so the card stays crisp. BPG.enhancePhoto(img) returns { img, w, h, small }.
+window.BPG = window.BPG || {};
+
+(() => {
+  const TARGET = 2000; // long side we aim for; a card needs about 1350-1920 px of photo height
+
+  // Scale in steps of at most 2x with high-quality smoothing (one big jump looks blocky).
+  function upscale(img, w, h) {
+    let src = img, sw = img.naturalWidth || img.width, sh = img.naturalHeight || img.height;
+    while (sw < w || sh < h) {
+      const nw = Math.min(w, sw * 2), nh = Math.min(h, sh * 2), c = document.createElement("canvas");
+      c.width = Math.round(nw); c.height = Math.round(nh);
+      const x = c.getContext("2d"); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
+      x.drawImage(src, 0, 0, c.width, c.height);
+      src = c; sw = c.width; sh = c.height;
+    }
+    return src;
+  }
+
+  // Unsharp mask: add back the difference between the photo and a blurred copy of it.
+  function sharpen(c, amount) {
+    const x = c.getContext("2d"), W = c.width, H = c.height, d = x.getImageData(0, 0, W, H), p = d.data;
+    const b = new Float32Array(W * H * 3), t = new Float32Array(W * H * 3);
+    // 1-2-1 blur, across then down.
+    for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) {
+      const l = Math.max(0, i - 1), r = Math.min(W - 1, i + 1), o = (y * W + i) * 3;
+      for (let k = 0; k < 3; k++) t[o + k] = (p[(y * W + l) * 4 + k] + 2 * p[(y * W + i) * 4 + k] + p[(y * W + r) * 4 + k]) / 4;
+    }
+    for (let y = 0; y < H; y++) {
+      const u = Math.max(0, y - 1), v = Math.min(H - 1, y + 1);
+      for (let i = 0; i < W; i++) { const o = (y * W + i) * 3; for (let k = 0; k < 3; k++) b[o + k] = (t[(u * W + i) * 3 + k] + 2 * t[o + k] + t[(v * W + i) * 3 + k]) / 4; }
+    }
+    for (let j = 0, n = W * H; j < n; j++) for (let k = 0; k < 3; k++) {
+      const v = p[j * 4 + k], diff = v - b[j * 3 + k];
+      // Skip tiny differences so noise and JPEG blocks aren't sharpened too.
+      if (Math.abs(diff) > 3) p[j * 4 + k] = v + diff * amount;
+    }
+    x.putImageData(d, 0, 0);
+  }
+
+  BPG.enhancePhoto = (img) => {
+    const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, long = Math.max(w, h);
+    const small = Math.min(w, h) < 900;
+    if (long >= TARGET * 0.9) return { img, w, h, small: false };
+    try {
+      const s = TARGET / long, c = upscale(img, Math.round(w * s), Math.round(h * s));
+      sharpen(c, s > 2 ? 0.9 : 0.6);
+      return { img: c, w, h, small };
+    } catch (e) { return { img, w, h, small }; }
+  };
+})();
+
+</script>
+<script>
 // Automatic cutout: removes the photo's background in the browser, for free (nothing is uploaded).
 // BPG.cutout(image, onStatus) resolves with a canvas: the player with a transparent background.
 // The first run downloads the AI model (about 100 MB) once; the browser keeps it for next time.
@@ -3079,8 +3135,11 @@ window.BPG = window.BPG || {};
   });
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const img = await loadImage(f), isPng = isCutout(img);
-    photos[n] = { img, orig: img, cut: isPng, isPng }; cutStatus(""); showCutMode(); draw();
+    const raw = await loadImage(f), isPng = isCutout(raw);
+    // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
+    const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
+    photos[n] = { img, orig: img, cut: isPng, isPng }; showCutMode(); draw();
+    cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
     e.target.value = ""; // so picking the same photo again still works
   }));
@@ -3100,7 +3159,7 @@ window.BPG = window.BPG || {};
   }
 
   // ---------- Drawing ----------
-  function draw() { drawCard(); if (BPG.ready) updateCaption(); }
+  function draw() { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high"; drawCard(); if (BPG.ready) updateCaption(); }
   // Cards packed with numbers (charts, tables, ball-by-ball rows) stay clean: no brush strokes behind them.
   const NO_SWEEP = new Set(["form", "toplist", "innings", "result", "over", "leaders", "points", "seriesscore", "preview"]);
   function drawCard() {
