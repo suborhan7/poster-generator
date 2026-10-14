@@ -140,7 +140,7 @@ async function cricket(state) {
 // ---------------- Telegram ----------------
 async function telegram(state, text) {
   const tok = env.TELEGRAM_BOT_TOKEN;
-  if (!tok) { console.log("[no bot token, would send]\n" + text); return true; }
+  if (!tok) { console.log("No TELEGRAM_BOT_TOKEN secret yet, so nothing was sent."); return false; }
   const api = `https://api.telegram.org/bot${tok}`;
   let chat = env.TELEGRAM_CHAT_ID || state.chatId;
   if (!chat) {
