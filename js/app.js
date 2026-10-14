@@ -349,6 +349,26 @@ window.BPG = window.BPG || {};
   }
   $("ver").textContent = BPG.VERSION ? "Version " + BPG.VERSION : "";
 
+  // A link from a match alert (alerts/run.mjs) opens a card already filled in:
+  // ?card=goal&d=<base64url JSON of field values>&big=FOUR-FOR. Fields the alert doesn't know are left empty.
+  try {
+    const q = new URLSearchParams(location.search), tpl = q.get("card");
+    if (tpl && T[tpl]) {
+      let d = {};
+      if (q.get("d")) {
+        const b = q.get("d").replace(/-/g, "+").replace(/_/g, "/");
+        d = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0))));
+      }
+      const values = {};
+      T[tpl].fields.forEach(([id]) => { values[id] = d[id] != null ? String(d[id]) : ""; });
+      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.values[tpl] = Object.assign(values, q.get("big") ? { __big: q.get("big") } : {});
+      if (q.get("size") && PLATFORMS[q.get("size")]) state.platform = q.get("size");
+      persist();
+      history.replaceState(null, "", location.pathname);
+    }
+  } catch (e) {}
+
   // ---------- Start ----------
   BPG.ready = true;
   renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();

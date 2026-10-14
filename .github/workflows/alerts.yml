@@ -1,0 +1,51 @@
+# Checks live matches every 10 minutes and sends key moments to Telegram (alerts/run.mjs).
+# Free for public repos. GitHub can start scheduled runs a few minutes late.
+# Note: GitHub pauses schedules after 60 days without any commit; re-enable it in the Actions tab.
+name: Match alerts
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Send a sample alert to check the bot"
+        type: boolean
+        default: false
+
+concurrency:
+  group: match-alerts
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Remembers which moments were already sent, without making commits (commits would redeploy the site).
+      - uses: actions/cache/restore@v4
+        with:
+          path: .alerts-state
+          key: alerts-state-${{ github.run_id }}
+          restore-keys: alerts-state-
+      - name: Check matches
+        run: node alerts/run.mjs ${{ inputs.test && '--test' || '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          FOOTBALL_DATA_KEY: ${{ secrets.FOOTBALL_DATA_KEY }}
+          CRICKETDATA_KEY: ${{ secrets.CRICKETDATA_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .alerts-state
+          key: alerts-state-${{ github.run_id }}

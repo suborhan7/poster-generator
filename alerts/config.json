@@ -1,0 +1,15 @@
+{
+  "football": {
+    "leagues": [39, 140, 2, 1, 4, 9, 32, 34],
+    "teams": ["Bangladesh", "Argentina", "Brazil", "Portugal"],
+    "footballDataCompetitions": ["PL", "PD", "CL", "WC", "EC"],
+    "dailyLimit": 95
+  },
+  "cricket": {
+    "teams": ["Bangladesh", "India", "Pakistan", "Sri Lanka", "Afghanistan", "Australia", "England", "South Africa", "New Zealand", "West Indies", "Ireland", "Zimbabwe"],
+    "seriesKeywords": ["Bangladesh Premier League"],
+    "scorecardEveryMinutes": 20,
+    "idleCheckMinutes": 180,
+    "reserveHits": 5
+  }
+}
