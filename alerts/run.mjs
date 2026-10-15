@@ -146,7 +146,7 @@ async function telegram(state, text) {
   if (!chat) {
     const u = await get(`${api}/getUpdates`);
     const msg = ((u && u.result) || []).map((x) => x.message || x.channel_post).filter(Boolean).pop();
-    if (!msg) { console.log("No chat yet: open your bot in Telegram and send it any message, then run again."); return false; }
+    if (!msg) { console.log("::error::The bot has no chat yet. Open your bot in Telegram, press Start, send it any message, then run this again."); return false; }
     chat = state.chatId = msg.chat.id;
   }
   try {
@@ -188,4 +188,4 @@ export async function main(argv = process.argv.slice(2), at = Date.now()) {
   return true;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) main().then((ok) => { if (!ok) process.exitCode = 1; });
