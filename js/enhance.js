@@ -82,6 +82,67 @@ window.BPG = window.BPG || {};
     ctx.fillStyle = ctx.createPattern(grainTile, "repeat"); ctx.fillRect(x, y, w, h); ctx.restore();
   };
 
+  // Auto framing: finds where the player is, so every card can place them well without the sliders.
+  // Sports photos keep the player sharp and the crowd blurred, so we look for the sharpest region
+  // (plus a pull towards the middle). A cutout is easier: the player is wherever the photo isn't see-through.
+  // Returns { l, t, r, b, cx, cy } as fractions of the photo, or null when nothing stands out.
+  BPG.findSubject = (img) => {
+    try {
+      const W0 = img.naturalWidth || img.width, H0 = img.naturalHeight || img.height, sc = 160 / Math.max(W0, H0);
+      const W = Math.max(8, Math.round(W0 * sc)), H = Math.max(8, Math.round(H0 * sc));
+      const c = document.createElement("canvas"); c.width = W; c.height = H;
+      const x = c.getContext("2d"); x.drawImage(img, 0, 0, W, H);
+      const p = x.getImageData(0, 0, W, H).data, n = W * H, m = new Float32Array(n);
+      let see = 0; for (let i = 0; i < n; i++) if (p[i * 4 + 3] < 128) see++;
+      if (see > n * 0.05) { // cutout
+        for (let i = 0; i < n; i++) m[i] = p[i * 4 + 3] >= 128 ? 1 : 0;
+        return box(m, W, H, 0.5);
+      }
+      const L = new Float32Array(n);
+      for (let i = 0; i < n; i++) L[i] = 0.299 * p[i * 4] + 0.587 * p[i * 4 + 1] + 0.114 * p[i * 4 + 2];
+      for (let y = 1; y < H - 1; y++) for (let i = 1; i < W - 1; i++) {
+        const o = y * W + i;
+        const gx = L[o - W + 1] + 2 * L[o + 1] + L[o + W + 1] - L[o - W - 1] - 2 * L[o - 1] - L[o + W - 1];
+        const gy = L[o + W - 1] + 2 * L[o + W] + L[o + W + 1] - L[o - W - 1] - 2 * L[o - W] - L[o - W + 1];
+        m[o] = Math.sqrt(gx * gx + gy * gy);
+      }
+      // Smooth into regions, then favour the middle of the frame a little.
+      const r = Math.max(3, Math.round(Math.max(W, H) / 22)), sm = blur(m, W, H, r);
+      for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) {
+        const dx = (i / W - 0.5) / 0.42, dy = (y / H - 0.45) / 0.5;
+        sm[y * W + i] *= Math.exp(-(dx * dx + dy * dy) / 2) * 0.6 + 0.4;
+      }
+      let mx = 0, sum = 0; for (let i = 0; i < n; i++) { mx = Math.max(mx, sm[i]); sum += sm[i]; }
+      if (!mx || mx < (sum / n) * 1.6) return null; // nothing stands out: keep the plain centred crop
+      return box(sm, W, H, mx * 0.45);
+    } catch (e) { return null; }
+  };
+  function blur(a, W, H, r) {
+    const t = new Float32Array(W * H), o = new Float32Array(W * H);
+    for (let y = 0; y < H; y++) { let s = 0; for (let i = -r; i <= r; i++) s += a[y * W + Math.min(W - 1, Math.max(0, i))];
+      for (let i = 0; i < W; i++) { t[y * W + i] = s / (2 * r + 1); s += a[y * W + Math.min(W - 1, i + r + 1)] - a[y * W + Math.max(0, i - r)]; } }
+    for (let i = 0; i < W; i++) { let s = 0; for (let y = -r; y <= r; y++) s += t[Math.min(H - 1, Math.max(0, y)) * W + i];
+      for (let y = 0; y < H; y++) { o[y * W + i] = s / (2 * r + 1); s += t[Math.min(H - 1, y + r + 1) * W + i] - t[Math.max(0, y - r) * W + i]; } }
+    return o;
+  }
+  // Bounding box of the connected region above `thr` that holds the strongest point.
+  function box(m, W, H, thr) {
+    let best = 0; for (let i = 1; i < m.length; i++) if (m[i] > m[best]) best = i;
+    if (m[best] < thr) return null;
+    const seen = new Uint8Array(m.length), st = [best]; seen[best] = 1;
+    let l = W, t = H, r = 0, b = 0, sx = 0, sy = 0, cnt = 0;
+    while (st.length) {
+      const o = st.pop(), x = o % W, y = (o / W) | 0;
+      l = Math.min(l, x); r = Math.max(r, x); t = Math.min(t, y); b = Math.max(b, y); sx += x; sy += y; cnt++;
+      for (const q of [o - 1, o + 1, o - W, o + W]) {
+        if (q < 0 || q >= m.length || seen[q] || m[q] < thr) continue;
+        if ((q === o - 1 && x === 0) || (q === o + 1 && x === W - 1)) continue;
+        seen[q] = 1; st.push(q);
+      }
+    }
+    return { l: l / W, t: t / H, r: (r + 1) / W, b: (b + 1) / H, cx: sx / cnt / W, cy: sy / cnt / H };
+  }
+
   BPG.enhancePhoto = (img) => {
     const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, long = Math.max(w, h);
     const small = Math.min(w, h) < 900;

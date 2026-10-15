@@ -32,9 +32,24 @@ BPG.createKit = function (ctx, env) {
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   };
 
+  // Where to draw a photo so it covers a w x h box. With a found player (img.bpgFocus, see BPG.findSubject)
+  // the player is centred, their head lands at headY, and a small or far-away player is zoomed in a little
+  // (at most 1.5x) to fill the space down to footY. The sliders then nudge from there.
+  k.place = (img, w, h, a, headY, footY) => {
+    const cover = Math.max(w / img.width, h / img.height), f = img.bpgFocus;
+    if (!f) { const s = cover * a.zoom, dw = img.width * s, dh = img.height * s; return { s, x: (w - dw) / 2 + (a.offx / 100) * w, y: (h - dh) * 0.3 + (a.offy / 100) * h, dw, dh }; }
+    const ph = (f.b - f.t) * img.height, pw = (f.r - f.l) * img.width;
+    let s = Math.min(cover * (f.small ? 1.15 : 1.5), // a small photo gets blurry when zoomed, so barely zoom it
+       Math.max(cover, Math.min(0.8 * (footY - headY) / ph, 0.85 * w / pw)));
+    s *= a.zoom;
+    const dw = img.width * s, dh = img.height * s, cl = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const x = cl(w / 2 - f.cx * dw, w - dw, 0) + (a.offx / 100) * w, y = cl(headY - f.t * dh, h - dh, 0) + (a.offy / 100) * h;
+    return { s, x, y, dw, dh };
+  };
   // Photo filling a box, using the zoom / move sliders.
   k.coverImg = (img, x, y, w, h, useSliders = true) => {
     const a = useSliders ? env.adjust() : { zoom: 1, offx: 0, offy: 0 };
+    if (img.bpgFocus) { const p = k.place(img, w, h, a, h * 0.12, h * 0.7); ctx.drawImage(img, x + p.x, y + p.y, p.dw, p.dh); return; }
     const s = Math.max(w / img.width, h / img.height) * a.zoom;
     const dw = img.width * s, dh = img.height * s;
     ctx.drawImage(img, x + (w - dw) / 2 + (a.offx / 100) * w, y + (h - dh) / 2 + (a.offy / 100) * h, dw, dh);
@@ -95,9 +110,9 @@ BPG.createKit = function (ctx, env) {
     const img = g.photo.img, a = env.adjust();
     // Size the photo to the part of the card that stays visible, so it is zoomed in as little as possible.
     const bh = Math.min(g.H, textTop + 80);
-    const s = Math.max(g.W / img.width, bh / img.height) * a.zoom, w = img.width * s, h = img.height * s;
+    const pl = k.place(img, g.W, bh, a, g.st + 60, textTop - 60);
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
-    ctx.drawImage(img, (g.W - w) / 2 + (a.offx / 100) * g.W, (bh - h) * 0.3 + (a.offy / 100) * bh, w, h);
+    ctx.drawImage(img, pl.x, pl.y, pl.dw, pl.dh);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
     if (BPG.grain && BPG.proFinish && BPG.proFinish()) BPG.grain(ctx, 0, 0, g.W, bh);
     if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, g.W, bh); }

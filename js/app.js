@@ -170,7 +170,7 @@ window.BPG = window.BPG || {};
     try {
       const c = await BPG.cutout(p.orig, cutStatus);
       if (photos[n] !== p) return; // a newer photo was picked meanwhile
-      p.cutImg = c;
+      p.cutImg = c; c.bpgFocus = (BPG.findSubject && BPG.findSubject(c)) || p.orig.bpgFocus;
       if (cutMode === "cut") Object.assign(p, { img: c, cut: true });
       cutStatus("Background removed. If a bat or the stumps went missing, tap Fix the cutout.");
       showCutMode(); draw();
@@ -191,7 +191,7 @@ window.BPG = window.BPG || {};
   });
   $("cutFix").addEventListener("click", () => {
     const p = photos[1]; if (!p || !p.cutImg || !BPG.editCutout) return;
-    BPG.editCutout(p, (fixed) => { p.cutImg = fixed; if (cutMode === "cut") Object.assign(p, { img: fixed, cut: true }); draw(); });
+    BPG.editCutout(p, (fixed) => { fixed.bpgFocus = (BPG.findSubject && BPG.findSubject(fixed)) || p.cutImg.bpgFocus; p.cutImg = fixed; if (cutMode === "cut") Object.assign(p, { img: fixed, cut: true }); draw(); });
   });
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
@@ -199,6 +199,10 @@ window.BPG = window.BPG || {};
     // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
     const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
     const graded = isPng || !BPG.gradePhoto ? img : BPG.gradePhoto(img), use = proMode === "pro" ? graded : img;
+    // Auto framing: find the player once, so each card places them without the sliders.
+    const focus = BPG.findSubject ? BPG.findSubject(img) : null;
+    if (focus) focus.small = en.small;
+    img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
