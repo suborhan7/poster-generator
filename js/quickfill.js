@@ -234,7 +234,7 @@ window.BPG = window.BPG || {};
     put("team", ids.has("abbr") || tpl.layout !== "reaction" ? p.team : BPG.teamShort(p.team));
     put("abbr", p.team && BPG.teamShort(p.team));
     put("opp", p.opp);
-    put("runs", tpl.layout === "bowling" ? p.given : p.runs);
+    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" ? p.given : p.runs);
     put("balls", tpl.layout === "over" ? undefined : p.balls);
     put("fours", p.fours); put("sixes", p.sixes);
     put("wkts", p.wkts);
@@ -257,6 +257,8 @@ window.BPG = window.BPG || {};
     scoreupd: "BAN 317/8 (84)",
     innings: "Bangladesh 286/7 (50)",
     result: "BAN vs SA",
+    testmile: "Mushfiqur 191 (341) 22x4 1x6 BAN vs PAK",
+    testbowl: "Taijul 6/39 (24.4) BAN vs PAK",
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
     redcard: "Casemiro 58' BRA vs ARG",

@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Borhan Studio">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800;900&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@700;800;900&family=Cinzel:wght@700;900&family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&family=Hind+Siliguri:wght@500;700&display=swap">
 <style>
 /* Layout: a control rail on the left, the live poster on the right; stacks to one column on phones. */
 :root {
@@ -246,7 +246,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "15 Oct 2026 · v35";
+BPG.VERSION = "15 Oct 2026 · v36";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -276,7 +276,7 @@ BPG.PLATFORMS = {
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 
-BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", football: "Football", general: "General" };
+BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", test: "Test cricket", football: "Football", general: "General" };
 
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
 // Jersey colours, used by the "Team colours" theme. bg = dark base, accent = highlight, stroke = paint strokes.
@@ -430,6 +430,7 @@ BPG.FONTS = {
   display: '"Anton", "Hind Siliguri", Impact, sans-serif',
   condensed: '"Barlow Condensed", "Hind Siliguri", "Arial Narrow", sans-serif',
   body: '"Barlow", "Hind Siliguri", sans-serif',
+  serif: '"Cinzel", Georgia, serif',
   heavy: '"Archivo", "Hind Siliguri", "Arial Black", sans-serif',
 };
 
@@ -522,6 +523,21 @@ BPG.TEMPLATES = {
   toss: { cat: "cricket", name: "Toss", layout: "toss",
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
+
+  // ---------------- Test cricket (white kits, honours-board look: js/testcards.js) ----------------
+  testton: { cat: "test", name: "Test hundred", layout: "testmile", milestone: "100", big: "HUNDRED",
+    hint: "Made for white kits. Use the Big headline word for DOUBLE HUNDRED, MAIDEN TON and so on.",
+    fields: [["player","Player","Mushfiqur Rahim"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","191"],["balls","Balls","341"],["fours","4s","22"],["sixes","6s","1"],["info","Match line","1st Test | Day 3 | Rawalpindi",true]] },
+  testfifty: { cat: "test", name: "Test fifty", layout: "testmile", milestone: "50", big: "FIFTY",
+    fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","56*"],["balls","Balls","98"],["fours","4s","7"],["sixes","6s","0"],["info","Match line","1st Test | Day 2 | Rawalpindi",true]] },
+  testfifer: { cat: "test", name: "Five-wicket haul (Test)", layout: "testbowl", big: "FIVE-WICKET HAUL",
+    hint: "Economy is worked out for you. Change the Big headline word for TEN IN THE MATCH and so on.",
+    fields: [["player","Bowler","Taijul Islam"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["wkts","Wickets","6"],["runs","Runs given","39"],["overs","Overs","24.4"],["maidens","Maidens","7"],["info","Match line","2nd Test | Day 4 | Mirpur",true]] },
+  stumps: { cat: "test", name: "Stumps / Lunch / Tea", layout: "stumps",
+    hint: "Photo is optional. Write both innings in one box, like 312 & 45/2.",
+    fields: [["status","Status","STUMPS, DAY 2",true],["t1","Team 1","Bangladesh"],["s1","Team 1 score","312 & 45/2"],["t2","Team 2","Pakistan"],["s2","Team 2 score","241"],["line","Where it stands","Bangladesh lead by 116 runs",true],["info","Match line","2nd Test | Mirpur",true]] },
+  testresult: { cat: "test", name: "Test result", layout: "testresult", big: "TEST RESULT",
+    fields: [["winner","Winning team","Bangladesh"],["loser","Losing team","Pakistan"],["margin","Margin","by 10 wickets",true],["series","Series line (optional)","Bangladesh lead the series 1-0",true],["potm","Player of the match","Mushfiqur Rahim"],["info","Match line","1st Test | Rawalpindi",true]] },
 
   // ---------------- Football ----------------
   squad: { cat: "cricket", name: "Squad announcement", layout: "squad",
@@ -1993,6 +2009,212 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Test cricket cards, made for white kits: the honours-board look. Deep green-black like a pavilion board,
+// gold serif lettering (Cinzel), a red-ball mark, and the team colours only on a small badge,
+// so the whites stand out instead of fighting a jersey colour. Same bottom-up layout as the other cards,
+// so the photo takes whatever space is left in both Instagram and TikTok sizes.
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const BG = "#0C1411", GOLD = "#D8B46A", CREAM = "#F2EADB", RED = "#B8242C";
+  const SERIF = '"Cinzel", Georgia, "Times New Roman", serif';
+  const cap = (s) => String(s == null ? "" : s).trim().toUpperCase();
+  const num = (s) => parseInt(String(s).replace(/[^\d-]/g, ""), 10) || 0;
+  const team = (name) => (BPG.teamName && BPG.teamName(name)) || String(name || "");
+  const short = (name) => (BPG.teamShort ? BPG.teamShort(team(name)) : cap(name).slice(0, 3));
+
+  // The board: plain deep colour with a faint warm light from the top, then the photo.
+  function board(k, g, textTop) {
+    const ctx = k.ctx;
+    g.bg = BG; g.accent = GOLD; g.sweep = false;
+    ctx.fillStyle = BG; ctx.fillRect(0, 0, g.W, g.H);
+    const glow = ctx.createRadialGradient(g.W * 0.5, 0, 0, g.W * 0.5, 0, g.W);
+    glow.addColorStop(0, "rgba(216,180,106,0.16)"); glow.addColorStop(1, "rgba(216,180,106,0)");
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, g.W, g.H);
+    return k.bleedPhoto(g, textTop);
+  }
+
+  // A small red ball with its seam. (x, y) is the centre.
+  function ball(k, x, y, r) {
+    const ctx = k.ctx;
+    ctx.save(); ctx.shadowBlur = 0;
+    const gr = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+    gr.addColorStop(0, "#E0505A"); gr.addColorStop(1, RED);
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(255,240,220,0.75)"; ctx.lineWidth = Math.max(1, r * 0.12);
+    [-0.28, 0.28].forEach((o) => { ctx.beginPath(); ctx.ellipse(x + o * r, y, r * 0.22, r * 0.92, 0, -Math.PI / 2, Math.PI / 2, o < 0); ctx.stroke(); });
+    ctx.restore();
+  }
+
+  // Team badge: the short name in the team's own colours. Returns its width.
+  function badge(k, x, base, name, size = 24) {
+    const ctx = k.ctx, tc = BPG.TEAM_COLORS[team(name)], t = short(name);
+    if (!t) return 0;
+    ctx.save(); ctx.shadowBlur = 0;
+    ctx.font = k.font(size, k.C, 700); k.spaced(2);
+    const w = ctx.measureText(t).width + 22, h = size + 12;
+    ctx.fillStyle = tc ? tc.bg : "#22302A"; k.roundRect(x, base - h + 6, w, h, 6); ctx.fill();
+    ctx.strokeStyle = tc ? tc.accent : GOLD; ctx.lineWidth = 2; k.roundRect(x, base - h + 6, w, h, 6); ctx.stroke();
+    ctx.fillStyle = tc ? tc.accent : GOLD; ctx.fillText(t, x + 11, base - 1);
+    k.spaced(0); ctx.restore();
+    return w;
+  }
+
+  // Small heading above the name: red ball, the moment (HUNDRED), then "BAN v SA".
+  function tagLine(k, g, base, label, a, b) {
+    const ctx = k.ctx;
+    ball(k, PAD + 13, base - 11, 13);
+    ctx.font = k.font(32, k.C, 700); k.spaced(5); ctx.fillStyle = GOLD;
+    const t = cap(label); ctx.fillText(t, PAD + 40, base);
+    let x = PAD + 40 + ctx.measureText(t).width + 18;
+    k.spaced(3); ctx.font = k.font(26, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.7)";
+    const vs = a && b ? `${short(a)} v ${short(b)}` : "";
+    if (vs) ctx.fillText(vs, x, base);
+    k.spaced(0);
+  }
+
+  // The name in gold-leaf serif capitals, shrunk to fit one line. Returns the size used.
+  function name(k, g, text, base, max = 92) {
+    const ctx = k.ctx, t = cap(text) || "PLAYER NAME";
+    const size = k.fit(t, g.W - 2 * PAD, max, SERIF, 700, 46);
+    ctx.font = k.font(size, SERIF, 700); ctx.fillStyle = CREAM; ctx.fillText(t, PAD - 2, base);
+    return size;
+  }
+
+  // A row of small figures: the number in cream, its label in gold.
+  function stats(k, base, items) {
+    const ctx = k.ctx; let x = PAD;
+    items.filter(([, v]) => v !== "" && v != null).forEach(([lab, v]) => {
+      ctx.font = k.font(40, k.C, 700); ctx.fillStyle = CREAM; ctx.fillText(String(v), x, base);
+      x += ctx.measureText(String(v)).width + 10;
+      const l = cap(String(v).trim() === "1" ? lab.replace(/es$|s$/, "") : lab); // 1 SIX, not 1 SIXES
+      ctx.font = k.font(22, k.C, 700); k.spaced(3); ctx.fillStyle = GOLD; ctx.fillText(l, x, base - 3);
+      x += ctx.measureText(l).width + 38; k.spaced(0);
+    });
+  }
+
+  // Bottom row: the match line (1st Test · Day 2 · Mirpur) on the left, logo on the right.
+  function foot(k, g, info) {
+    const ctx = k.ctx, t = cap(String(info || "").replace(/\s*\|\s*/g, " · "));
+    if (t) { ctx.font = k.font(22, k.C, 600); k.spaced(4); ctx.fillStyle = "rgba(242,234,219,0.6)"; ctx.fillText(t, PAD, g.footerY, g.W * 0.6); k.spaced(0); }
+    k.brandCorner(g, g.footerY);
+  }
+
+  const shadow = (k) => { k.ctx.shadowColor = "rgba(0,0,0,0.55)"; k.ctx.shadowBlur = 16; };
+
+  // ---------- Test hundred / fifty ----------
+  L.testmile = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, raw = String(g.val("runs")), runs = num(raw), balls = num(g.val("balls"));
+      const statY = g.footerY - 70, scoreBase = statY - 66, figSize = 150;
+      const nameBase = scoreBase - figSize * 0.74 - 40, ctxSize = 92, tagBase = nameBase - ctxSize * 0.82 - 28;
+      board(k, g, tagBase - 50);
+      ctx.save(); shadow(k);
+      tagLine(k, g, tagBase, g.big, g.val("team"), g.val("opp"));
+      name(k, g, g.val("player"), nameBase, ctxSize);
+      const r = String(runs) + (raw.includes("*") ? "*" : "");
+      ctx.font = k.font(figSize, SERIF, 900); ctx.fillStyle = GOLD; ctx.fillText(r, PAD - 6, scoreBase);
+      const rw = ctx.measureText(r).width;
+      if (balls) { ctx.font = k.font(46, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.85)"; ctx.fillText(`(${balls})`, PAD + rw + 12, scoreBase); }
+      stats(k, statY, [["balls", balls || ""], ["fours", g.val("fours")], ["sixes", g.val("sixes")], ["strike rate", balls ? ((runs / balls) * 100).toFixed(1) : ""]]);
+      ctx.restore();
+      foot(k, g, g.val("info"));
+    },
+  };
+
+  // ---------- Test bowling: five-for, ten in the match ----------
+  L.testbowl = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, w = num(g.val("wkts")), r = num(g.val("runs")), balls = k.oversToBalls(g.val("overs"));
+      const statY = g.footerY - 70, figBase = statY - 66, figSize = 150;
+      const nameBase = figBase - figSize * 0.74 - 40, tagBase = nameBase - 92 * 0.82 - 28;
+      board(k, g, tagBase - 50);
+      ctx.save(); shadow(k);
+      tagLine(k, g, tagBase, g.big, g.val("team"), g.val("opp"));
+      name(k, g, g.val("player"), nameBase);
+      ctx.font = k.font(figSize, SERIF, 900); ctx.fillStyle = GOLD; ctx.fillText(String(w), PAD - 6, figBase);
+      const x = PAD - 6 + ctx.measureText(String(w)).width;
+      ctx.fillStyle = CREAM; ctx.fillText("/" + r, x, figBase);
+      // One red ball per wicket, beside the figures.
+      const fw = x + ctx.measureText("/" + r).width + 34, n = Math.min(w, 10), rr = n > 5 ? 15 : 19;
+      for (let i = 0; i < n; i++) {
+        const row = n > 5 ? Math.floor(i / 5) : 0, col = n > 5 ? i % 5 : i, bx = fw + rr + col * (rr * 2 + 10);
+        if (bx + rr < g.W - PAD) ball(k, bx, figBase - figSize * 0.36 + (n > 5 ? (row - 0.5) * (rr * 2 + 10) : 0), rr);
+      }
+      stats(k, statY, [["overs", g.val("overs")], ["maidens", g.val("maidens")], ["economy", balls ? ((r / balls) * 6).toFixed(2) : ""]]);
+      ctx.restore();
+      foot(k, g, g.val("info"));
+    },
+  };
+
+  // ---------- Stumps / lunch / tea: where the match stands ----------
+  L.stumps = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, line = String(g.val("line") || "").trim();
+      const lineBase = g.footerY - 66, row2 = (line ? lineBase - 74 : g.footerY - 70), row1 = row2 - 92, tagBase = row1 - 92;
+      const hasPhoto = board(k, g, tagBase - 50);
+      if (!hasPhoto) {
+        // No photo: the day, large and faint, like lettering on the board.
+        const day = (/day\s*\d/i.exec(g.val("status")) || [""])[0].toUpperCase() || "STUMPS";
+        ctx.font = k.font(k.fit(day, g.W * 0.9, 300, SERIF, 900), SERIF, 900); ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(216,180,106,0.09)"; ctx.fillText(day, g.W / 2, tagBase - 160); ctx.textAlign = "left";
+      }
+      ctx.save(); shadow(k);
+      tagLine(k, g, tagBase, g.val("status") || "STUMPS", "", "");
+      [[g.val("t1"), g.val("s1"), row1], [g.val("t2"), g.val("s2"), row2]].forEach(([t, s, y]) => {
+        if (!t && !s) return;
+        const bw = badge(k, PAD, y - 8, t, 24);
+        const sc = String(s || "").trim();
+        ctx.font = k.font(64, SERIF, 900); const sw = ctx.measureText(sc).width;
+        ctx.fillStyle = GOLD; ctx.textAlign = "right"; ctx.fillText(sc, g.W - PAD, y); ctx.textAlign = "left";
+        const nm = cap(team(t)), room = g.W - 2 * PAD - bw - 24 - sw - 30;
+        ctx.font = k.font(k.fit(nm, room, 54, SERIF, 700, 30), SERIF, 700); ctx.fillStyle = CREAM;
+        ctx.fillText(nm, PAD + bw + 20, y - 4);
+      });
+      if (line) { ctx.font = k.font(k.fit(line, g.W - 2 * PAD, 40, k.C, 600, 26), k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.85)"; ctx.fillText(line, PAD, lineBase); }
+      ctx.restore();
+      foot(k, g, g.val("info"));
+    },
+  };
+
+  // ---------- Test result ----------
+  L.testresult = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, potm = String(g.val("potm") || "").trim(), series = String(g.val("series") || "").trim();
+      let y = g.footerY - 66;
+      const potmBase = potm ? y : null; if (potm) y -= 58;
+      const seriesBase = series ? y : null; if (series) y -= 66;
+      const marginBase = y - 6, beatBase = marginBase - 74, winBase = beatBase - 58, tagBase = winBase - 118;
+      board(k, g, tagBase - 50);
+      ctx.save(); shadow(k);
+      tagLine(k, g, tagBase, g.big || "TEST RESULT", "", "");
+      const wn = cap(team(g.val("winner"))) || "WINNER";
+      const ws = k.fit(wn, g.W - 2 * PAD - 120, 120, SERIF, 900, 56);
+      ctx.font = k.font(ws, SERIF, 900); ctx.fillStyle = CREAM; ctx.fillText(wn, PAD - 4, winBase);
+      badge(k, PAD + ctx.measureText(wn).width + 22, winBase - ws * 0.3, g.val("winner"), 24);
+      ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.8)"; k.spaced(2);
+      ctx.fillText(`BEAT ${cap(team(g.val("loser")))}`, PAD, beatBase); k.spaced(0);
+      const m = cap(g.val("margin"));
+      ctx.font = k.font(k.fit(m, g.W - 2 * PAD, 58, SERIF, 700, 30), SERIF, 700); ctx.fillStyle = GOLD; ctx.fillText(m, PAD - 2, marginBase);
+      if (series) { ctx.font = k.font(k.fit(series, g.W - 2 * PAD, 36, k.C, 600, 24), k.C, 600); ctx.fillStyle = CREAM; ctx.fillText(series, PAD, seriesBase); }
+      if (potm) {
+        ctx.font = k.font(22, k.C, 700); k.spaced(4); ctx.fillStyle = GOLD; const lab = "PLAYER OF THE MATCH";
+        ctx.fillText(lab, PAD, potmBase); const lw = ctx.measureText(lab).width; k.spaced(0);
+        ctx.font = k.font(34, k.C, 700); ctx.fillStyle = CREAM; ctx.fillText(potm, PAD + lw + 16, potmBase + 2);
+      }
+      ctx.restore();
+      foot(k, g, g.val("info"));
+    },
+  };
+})();
+
+</script>
+<script>
 // Quick fill: type one line like "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL" and the form fills itself.
 // BPG.quickParse(text) returns what it understood; BPG.quickApply(template, text) maps that onto a card's fields.
 window.BPG = window.BPG || {};
@@ -2229,7 +2451,7 @@ window.BPG = window.BPG || {};
     put("team", ids.has("abbr") || tpl.layout !== "reaction" ? p.team : BPG.teamShort(p.team));
     put("abbr", p.team && BPG.teamShort(p.team));
     put("opp", p.opp);
-    put("runs", tpl.layout === "bowling" ? p.given : p.runs);
+    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" ? p.given : p.runs);
     put("balls", tpl.layout === "over" ? undefined : p.balls);
     put("fours", p.fours); put("sixes", p.sixes);
     put("wkts", p.wkts);
@@ -2252,6 +2474,8 @@ window.BPG = window.BPG || {};
     scoreupd: "BAN 317/8 (84)",
     innings: "Bangladesh 286/7 (50)",
     result: "BAN vs SA",
+    testmile: "Mushfiqur 191 (341) 22x4 1x6 BAN vs PAK",
+    testbowl: "Taijul 6/39 (24.4) BAN vs PAK",
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
     redcard: "Casemiro 58' BRA vs ARG",
@@ -2295,6 +2519,10 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    testmile: (v, t) => `${t.milestone === "100" ? "💯" : "🏏"} ${v("player")} reaches ${t.milestone === "100" ? "a Test hundred" : "a Test fifty"} against ${v("opp")}! ${v("runs")}${v("balls") ? " off " + v("balls") + " balls" : ""}. ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    testbowl: (v) => `🔴 ${v("player")} takes ${v("wkts")}/${v("runs")} against ${v("opp")}${v("overs") ? " in " + v("overs") + " overs" : ""}. ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    stumps: (v) => `${v("status")}: ${v("t1")} ${v("s1")}, ${v("t2")} ${v("s2")}. ${v("line")}`,
+    testresult: (v) => `${v("winner")} beat ${v("loser")} ${v("margin")}! ${v("series")} ${v("potm") ? "Player of the match: " + v("potm") + "." : ""}`,
     squad: (v, t, raw) => { const n = String(raw("players")).split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")); return `🚨 ${v("team")} ${v("title").toLowerCase() || "squad"} is out! ${n.length} players:\n${n.join(", ")}`; },
     bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
@@ -2319,7 +2547,7 @@ window.BPG = window.BPG || {};
       .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
     const sr = BPG.series && BPG.series.current();
     const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2"), val("winner"), val("loser")]).map(plain).filter(Boolean);
-    const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
+    const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "test" ? "#Cricket #TestCricket" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
     const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
     const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
     return [line, opts.verdict ? `Borhan's verdict: ${plain(opts.verdict)}` : "", BPG.CTAS[opts.cta || "en"], tags].filter(Boolean).join("\n\n");
@@ -3463,7 +3691,7 @@ window.BPG = window.BPG || {};
   BPG.ready = true;
   renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
-    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo"].map((f) => document.fonts.load(f)))
+    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo", "700 40px Cinzel", "900 40px Cinzel"].map((f) => document.fonts.load(f)))
     : Promise.resolve();
   fonts.then(draw, draw);
 })();

@@ -32,6 +32,10 @@ window.BPG = window.BPG || {};
     versus: (v) => `${v("question")} ${v("p1")} or ${v("p2")}? Comment below 👇`,
     breaking: (v) => `🚨 BREAKING: ${v("headline")}. ${v("detail")}`,
     frame: (v) => `${v("headline")}`,
+    testmile: (v, t) => `${t.milestone === "100" ? "💯" : "🏏"} ${v("player")} reaches ${t.milestone === "100" ? "a Test hundred" : "a Test fifty"} against ${v("opp")}! ${v("runs")}${v("balls") ? " off " + v("balls") + " balls" : ""}. ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    testbowl: (v) => `🔴 ${v("player")} takes ${v("wkts")}/${v("runs")} against ${v("opp")}${v("overs") ? " in " + v("overs") + " overs" : ""}. ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    stumps: (v) => `${v("status")}: ${v("t1")} ${v("s1")}, ${v("t2")} ${v("s2")}. ${v("line")}`,
+    testresult: (v) => `${v("winner")} beat ${v("loser")} ${v("margin")}! ${v("series")} ${v("potm") ? "Player of the match: " + v("potm") + "." : ""}`,
     squad: (v, t, raw) => { const n = String(raw("players")).split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")); return `🚨 ${v("team")} ${v("title").toLowerCase() || "squad"} is out! ${n.length} players:\n${n.join(", ")}`; },
     bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
@@ -56,7 +60,7 @@ window.BPG = window.BPG || {};
       .replace(/\(\s*\)/g, "").replace(/ {2,}/g, " ").replace(/\s+([.,!])/g, "$1").replace(/([.!]){2,}/g, "$1").trim();
     const sr = BPG.series && BPG.series.current();
     const teams = (t.cat === "series" && sr ? sr.teams : [val("team"), val("opp"), val("t1"), val("t2"), val("winner"), val("loser")]).map(plain).filter(Boolean);
-    const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
+    const sport = t.cat === "football" || (t.cat === "series" && sr && sr.sport === "football") ? "#Football" : t.cat === "test" ? "#Cricket #TestCricket" : t.cat === "cricket" || t.cat === "series" ? "#Cricket" : "";
     const vsTag = teams.length >= 2 ? "#" + short(teams[0]) + "v" + short(teams[1]) : "";
     const tags = [...new Set(["#BorhanRants", vsTag, ...teams.map(tag), tag(val("player")), sport, opts.extraTags || ""].filter(Boolean))].join(" ");
     return [line, opts.verdict ? `Borhan's verdict: ${plain(opts.verdict)}` : "", BPG.CTAS[opts.cta || "en"], tags].filter(Boolean).join("\n\n");

@@ -395,7 +395,7 @@ window.BPG = window.BPG || {};
   BPG.ready = true;
   renderBrand(); renderPlatforms(); renderCtas(); renderAll(); setLogo();
   const fonts = document.fonts && document.fonts.load
-    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo"].map((f) => document.fonts.load(f)))
+    ? Promise.all(["100px Anton", "700 40px 'Barlow Condensed'", "italic 700 40px 'Barlow Condensed'", "600 40px 'Barlow Condensed'", "400 40px Barlow", "500 40px Barlow", "700 40px 'Hind Siliguri'", "900 40px Archivo", "800 40px Archivo", "700 40px Cinzel", "900 40px Cinzel"].map((f) => document.fonts.load(f)))
     : Promise.resolve();
   fonts.then(draw, draw);
 })();

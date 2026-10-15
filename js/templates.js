@@ -86,6 +86,21 @@ BPG.TEMPLATES = {
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
 
+  // ---------------- Test cricket (white kits, honours-board look: js/testcards.js) ----------------
+  testton: { cat: "test", name: "Test hundred", layout: "testmile", milestone: "100", big: "HUNDRED",
+    hint: "Made for white kits. Use the Big headline word for DOUBLE HUNDRED, MAIDEN TON and so on.",
+    fields: [["player","Player","Mushfiqur Rahim"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","191"],["balls","Balls","341"],["fours","4s","22"],["sixes","6s","1"],["info","Match line","1st Test | Day 3 | Rawalpindi",true]] },
+  testfifty: { cat: "test", name: "Test fifty", layout: "testmile", milestone: "50", big: "FIFTY",
+    fields: [["player","Player","Litton Das"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","56*"],["balls","Balls","98"],["fours","4s","7"],["sixes","6s","0"],["info","Match line","1st Test | Day 2 | Rawalpindi",true]] },
+  testfifer: { cat: "test", name: "Five-wicket haul (Test)", layout: "testbowl", big: "FIVE-WICKET HAUL",
+    hint: "Economy is worked out for you. Change the Big headline word for TEN IN THE MATCH and so on.",
+    fields: [["player","Bowler","Taijul Islam"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["wkts","Wickets","6"],["runs","Runs given","39"],["overs","Overs","24.4"],["maidens","Maidens","7"],["info","Match line","2nd Test | Day 4 | Mirpur",true]] },
+  stumps: { cat: "test", name: "Stumps / Lunch / Tea", layout: "stumps",
+    hint: "Photo is optional. Write both innings in one box, like 312 & 45/2.",
+    fields: [["status","Status","STUMPS, DAY 2",true],["t1","Team 1","Bangladesh"],["s1","Team 1 score","312 & 45/2"],["t2","Team 2","Pakistan"],["s2","Team 2 score","241"],["line","Where it stands","Bangladesh lead by 116 runs",true],["info","Match line","2nd Test | Mirpur",true]] },
+  testresult: { cat: "test", name: "Test result", layout: "testresult", big: "TEST RESULT",
+    fields: [["winner","Winning team","Bangladesh"],["loser","Losing team","Pakistan"],["margin","Margin","by 10 wickets",true],["series","Series line (optional)","Bangladesh lead the series 1-0",true],["potm","Player of the match","Mushfiqur Rahim"],["info","Match line","1st Test | Rawalpindi",true]] },
+
   // ---------------- Football ----------------
   squad: { cat: "cricket", name: "Squad announcement", layout: "squad",
     noPhoto: true,
