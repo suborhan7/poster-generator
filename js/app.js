@@ -198,12 +198,30 @@ window.BPG = window.BPG || {};
     const raw = await loadImage(f), isPng = isCutout(raw);
     // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
     const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
-    photos[n] = { img, orig: img, cut: isPng, isPng }; showCutMode(); draw();
+    const graded = isPng || !BPG.gradePhoto ? img : BPG.gradePhoto(img), use = proMode === "pro" ? graded : img;
+    photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
     e.target.value = ""; // so picking the same photo again still works
   }));
   showCutMode();
+  // Photo finish: Pro (graded, see BPG.gradePhoto, plus fine grain when drawn) or Natural. Remembered on this phone.
+  let proMode = "pro";
+  try { proMode = localStorage.getItem("bpg_pro") || "pro"; } catch (e) {}
+  const showProMode = () => $("proMode").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === proMode)));
+  showProMode();
+  $("proMode").addEventListener("click", (e) => {
+    const v = e.target.closest("button") && e.target.closest("button").dataset.v; if (!v || v === proMode) return;
+    proMode = v; try { localStorage.setItem("bpg_pro", v); } catch (err) {}
+    showProMode();
+    [1, 2].forEach((n) => {
+      const p = photos[n]; if (!p || p.isPng) return;
+      p.orig = v === "pro" ? p.graded : p.plain; p.cutImg = null;
+      if (p.cut) makeCutout(n); else p.img = p.orig;
+    });
+    showCutMode(); draw();
+  });
+  BPG.proFinish = () => proMode === "pro";
   $("b_logo").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
     const img = await loadImage(f);

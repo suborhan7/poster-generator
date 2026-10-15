@@ -99,6 +99,7 @@ BPG.createKit = function (ctx, env) {
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
     ctx.drawImage(img, (g.W - w) / 2 + (a.offx / 100) * g.W, (bh - h) * 0.3 + (a.offy / 100) * bh, w, h);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
+    if (BPG.grain && BPG.proFinish && BPG.proFinish()) BPG.grain(ctx, 0, 0, g.W, bh);
     if (a.shade > 0) { ctx.fillStyle = k.hexA(g.bg, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, g.W, bh); }
     ctx.restore();
     const from = Math.round(textTop - 380), to = Math.round(textTop + 40), gr = ctx.createLinearGradient(0, from, 0, to);

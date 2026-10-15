@@ -40,6 +40,48 @@ window.BPG = window.BPG || {};
     x.putImageData(d, 0, 0);
   }
 
+  // "Pro finish": the look of an edited sports photo. Local contrast (clarity) so faces and kits pop,
+  // a gentle S-curve, and vibrance (dull colours get more boost than already-strong ones, so skin stays natural).
+  BPG.gradePhoto = (src) => {
+    try {
+      const W = src.width, H = src.height, c = document.createElement("canvas"); c.width = W; c.height = H;
+      const x = c.getContext("2d"); x.drawImage(src, 0, 0);
+      if (!("filter" in x)) return src;
+      const b = document.createElement("canvas"); b.width = W; b.height = H;
+      const bx = b.getContext("2d"); bx.filter = `blur(${Math.max(6, Math.round(Math.max(W, H) / 90))}px)`; bx.drawImage(src, 0, 0);
+      const d = x.getImageData(0, 0, W, H), p = d.data, q = bx.getImageData(0, 0, W, H).data;
+      const curve = new Float32Array(256);
+      for (let i = 0; i < 256; i++) { const t = i / 255; curve[i] = 255 * (t + 0.22 * t * (1 - t) * (2 * t - 1) * 2); }
+      for (let i = 0; i < p.length; i += 4) {
+        let r = p[i], g = p[i + 1], bl = p[i + 2];
+        const lum = 0.299 * r + 0.587 * g + 0.114 * bl, blum = 0.299 * q[i] + 0.587 * q[i + 1] + 0.114 * q[i + 2];
+        const lift = (lum - blum) * 0.35 * (1 - Math.abs(lum - 128) / 160); // clarity, kept off pure blacks and whites
+        r += lift; g += lift; bl += lift;
+        const mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), sat = mx > 0 ? (mx - mn) / mx : 0, avg = (r + g + bl) / 3;
+        const v = 0.28 * (1 - sat); // vibrance
+        r += (r - avg) * v; g += (g - avg) * v; bl += (bl - avg) * v;
+        p[i] = curve[Math.max(0, Math.min(255, r | 0))]; p[i + 1] = curve[Math.max(0, Math.min(255, g | 0))]; p[i + 2] = curve[Math.max(0, Math.min(255, bl | 0))];
+      }
+      x.putImageData(d, 0, 0);
+      return c;
+    } catch (e) { return src; }
+  };
+
+  // Fine film grain, laid over the photo when it is drawn. Hides the smoothness of scaled-up photos
+  // and gives the card a printed, premium feel. One small tile, made once.
+  let grainTile = null;
+  BPG.grain = (ctx, x, y, w, h, strength = 0.07) => {
+    if (!grainTile) {
+      grainTile = document.createElement("canvas"); grainTile.width = grainTile.height = 256;
+      const gx = grainTile.getContext("2d"), d = gx.createImageData(256, 256);
+      let seed = 11; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      for (let i = 0; i < d.data.length; i += 4) { const v = 128 + (rnd() + rnd() + rnd() - 1.5) * 90; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+      gx.putImageData(d, 0, 0);
+    }
+    ctx.save(); ctx.globalCompositeOperation = "overlay"; ctx.globalAlpha = strength;
+    ctx.fillStyle = ctx.createPattern(grainTile, "repeat"); ctx.fillRect(x, y, w, h); ctx.restore();
+  };
+
   BPG.enhancePhoto = (img) => {
     const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, long = Math.max(w, h);
     const small = Math.min(w, h) < 900;
