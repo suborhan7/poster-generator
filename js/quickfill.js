@@ -203,6 +203,14 @@ window.BPG = window.BPG || {};
     if (!out.overs) take(/\b([\d]{1,2}(?:\.\d)?)\s*(?:ov|overs?)\b/i, (m) => { out.overs = m[1]; });
     take(/\b(\d{1,3})\s*'(?=\s)|\b(\d{1,3})(?:st|nd|rd|th)?\s*(?:min|minute)\b/i, (m) => { out.minute = (m[1] || m[2]) + "'"; });
 
+    // Assist: "assist Alvarez", "ast: Julian Alvarez", "assisted by De Paul", or a name in brackets "(Alvarez)".
+    take(/(?:\b(?:assisted\s+by|assists?|asst|ast)\b\s*[:=-]?\s*|\((?=\s*\p{L}))((?:\p{L}[\p{L}.'-]*)(?:\s+(?!vs?\b|versus\b)\p{L}[\p{L}.'-]*){0,2})\s*\)?/iu, (m) => {
+      const ws = m[1].split(" ");
+      while (ws.length > 1 && lookup.has(ws[ws.length - 1].toLowerCase())) ws.pop(); // "assist Alvarez ARG vs BRA"
+      out.assist = title(ws.join(" "));
+      if (ws.length < m[1].split(" ").length) t += " " + m[1].split(" ").slice(ws.length).join(" ") + " ";
+    });
+
     // Any team names still left (no "vs"), in the order typed.
     const left = [];
     t = t.replace(new RegExp(`(^|[\\s,(])(${teamRe})(?=[\\s,.;)]|$)`, "gi"), (all, pre, w) => {
@@ -231,7 +239,7 @@ window.BPG = window.BPG || {};
     put("fours", p.fours); put("sixes", p.sixes);
     put("wkts", p.wkts);
     put("score", p.score); put("overs", p.scoreOvers || p.overs);
-    put("minute", p.minute);
+    put("minute", p.minute); put("assist", p.assist);
     if (p.goals1 !== undefined) { put("t1", p.team); put("s1", p.goals1); put("t2", p.opp); put("s2", p.goals2); put("score", `${p.team} ${p.goals1}-${p.goals2} ${p.opp}`); }
     else if (tpl.layout === "result" || tpl.layout === "fscore") { put("t1", p.team); put("t2", p.opp); }
     const labels = Object.keys(set).map((id) => tpl.fields.find((f) => f[0] === id)[1].replace(/\s*\(.*\)$/, ""));
@@ -249,7 +257,7 @@ window.BPG = window.BPG || {};
     scoreupd: "BAN 317/8 (84)",
     innings: "Bangladesh 286/7 (50)",
     result: "BAN vs SA",
-    goal: "Messi 67' ARG vs BRA",
+    goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
