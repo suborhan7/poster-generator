@@ -8,6 +8,7 @@
   "cricket": {
     "teams": ["Bangladesh", "India", "Pakistan", "Sri Lanka", "Afghanistan", "Australia", "England", "South Africa", "New Zealand", "West Indies", "Ireland", "Zimbabwe"],
     "seriesKeywords": ["Bangladesh Premier League"],
+    "listEveryMinutes": 10,
     "scorecardEveryMinutes": 20,
     "idleCheckMinutes": 180,
     "reserveHits": 5

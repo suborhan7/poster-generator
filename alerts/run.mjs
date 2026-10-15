@@ -109,7 +109,9 @@ async function cricket(state) {
 
   const tracked = Object.values(c.matches);
   const busy = tracked.some((m) => (m.started && !m.ended) || (!m.started && now >= m.start - 45 * MIN));
-  if (!(busy || now - c.lastList >= C.idleCheckMinutes * MIN) || !canHit()) return [];
+  // The free plan has 100 hits a day, so even during a match the list is checked at most every listEveryMinutes.
+  const wait = (busy ? C.listEveryMinutes : C.idleCheckMinutes) * MIN;
+  if (now - c.lastList < wait - 30 * 1000 || !canHit()) return [];
 
   const j = await get(`${base}/currentMatches?${key}&offset=0`);
   track(j);

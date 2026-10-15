@@ -39,7 +39,7 @@ const fixture = (short, h, a, events, extra = {}) => ({
   teams: { home: { name: "Arsenal" }, away: { name: "Chelsea" } }, goals: { home: h, away: a }, events, ...extra,
 });
 const cmBase = { id: "m1", name: "Bangladesh vs Afghanistan, 1st ODI, Afghanistan tour of Bangladesh 2026", matchType: "odi",
-  teams: ["Bangladesh", "Afghanistan"], dateTimeGMT: "2026-10-14T08:00:00", matchStarted: false, matchEnded: false, score: [] };
+  teams: ["Bangladesh", "Afghanistan"], dateTimeGMT: "2026-10-15T08:00:00", matchStarted: false, matchEnded: false, score: [] };
 const other = { ...cmBase, id: "x", name: "Nepal vs Oman, 3rd T20I, Oman tour", teams: ["Nepal", "Oman"], tossWinner: "Nepal", tossChoice: "bat" };
 world = { fx: fixture("NS", 0, 0, []), cm: cmBase, card: { scorecard: [] } };
 
@@ -81,7 +81,7 @@ out = await run(KO + 125 * MIN);
 assert.equal(out.length, 0, "finished match is not checked again");
 
 // ---- Cricket ----
-const T0 = Date.parse("2026-10-14T08:00:00Z");
+const T0 = Date.parse("2026-10-15T08:00:00Z");
 world.cm = { ...cmBase, tossWinner: "Bangladesh", tossChoice: "bat", matchStarted: true };
 out = await run(T0 - 20 * MIN);
 assert.equal(out.length, 1, "toss for a followed team only (Nepal v Oman is ignored)");
