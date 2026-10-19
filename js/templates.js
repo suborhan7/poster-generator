@@ -86,7 +86,7 @@ BPG.TEMPLATES = {
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
 
-  // ---------------- Test cricket (white kits, honours-board look: js/testcards.js) ----------------
+  // ---------------- Test cricket (white kits, red-ball look: js/testcards.js) ----------------
   testton: { cat: "test", name: "Test hundred", layout: "testmile", milestone: "100", big: "HUNDRED",
     hint: "Made for white kits. Use the Big headline word for DOUBLE HUNDRED, MAIDEN TON and so on.",
     fields: [["player","Player","Mushfiqur Rahim"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","191"],["balls","Balls","341"],["fours","4s","22"],["sixes","6s","1"],["info","Match line","1st Test | Day 3 | Rawalpindi",true]] },
@@ -144,3 +144,4 @@ BPG.TEMPLATES = {
   frame: { cat: "general", name: "Photo frame", layout: "frame",
     fields: [["headline","Headline (optional)","SCENES IN MIRPUR",true]] },
 };
+

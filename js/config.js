@@ -3,7 +3,7 @@
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "15 Oct 2026 · v36";
+BPG.VERSION = "19 Oct 2026 · v37";
 
 BPG.BRAND = {
   handle: "@borhanrants",

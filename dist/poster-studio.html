@@ -246,7 +246,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "15 Oct 2026 · v36";
+BPG.VERSION = "19 Oct 2026 · v37";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -524,7 +524,7 @@ BPG.TEMPLATES = {
     hint: "Put *stars* around words to colour them.",
     fields: [["player","Line above (optional)","Only Test",true],["stamp","Headline","*BANGLADESH* OPT TO BAT FIRST",true],["detail","Detail line","AFG v BAN in UAE 2026",true]] },
 
-  // ---------------- Test cricket (white kits, honours-board look: js/testcards.js) ----------------
+  // ---------------- Test cricket (white kits, red-ball look: js/testcards.js) ----------------
   testton: { cat: "test", name: "Test hundred", layout: "testmile", milestone: "100", big: "HUNDRED",
     hint: "Made for white kits. Use the Big headline word for DOUBLE HUNDRED, MAIDEN TON and so on.",
     fields: [["player","Player","Mushfiqur Rahim"],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["runs","Runs (add * if not out)","191"],["balls","Balls","341"],["fours","4s","22"],["sixes","6s","1"],["info","Match line","1st Test | Day 3 | Rawalpindi",true]] },
@@ -582,6 +582,7 @@ BPG.TEMPLATES = {
   frame: { cat: "general", name: "Photo frame", layout: "frame",
     fields: [["headline","Headline (optional)","SCENES IN MIRPUR",true]] },
 };
+
 
 </script>
 <script>
@@ -2009,30 +2010,61 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
-// Test cricket cards, made for white kits: the honours-board look. Deep green-black like a pavilion board,
-// gold serif lettering (Cinzel), a red-ball mark, and the team colours only on a small badge,
-// so the whites stand out instead of fighting a jersey colour. Same bottom-up layout as the other cards,
-// so the photo takes whatever space is left in both Instagram and TikTok sizes.
+// Test cricket cards, made for white kits: the red-ball look (user's pick, 2026-10-19). Deep cherry red
+// like a new Test ball, a big stitched seam curving behind the player, cream lettering, so the whites
+// stand out. Same bottom-up layout as the other cards, so the photo takes whatever space is left
+// in both Instagram and TikTok sizes.
 window.BPG = window.BPG || {};
 
 (function () {
   const L = BPG.LAYOUTS, PAD = 56;
-  const BG = "#0C1411", GOLD = "#D8B46A", CREAM = "#F2EADB", RED = "#B8242C";
-  const SERIF = '"Cinzel", Georgia, "Times New Roman", serif';
+  const BG = "#4A0A10", GOLD = "#FFB27A", CREAM = "#FFF4E6", RED = "#B8242C";
   const cap = (s) => String(s == null ? "" : s).trim().toUpperCase();
   const num = (s) => parseInt(String(s).replace(/[^\d-]/g, ""), 10) || 0;
   const team = (name) => (BPG.teamName && BPG.teamName(name)) || String(name || "");
   const short = (name) => (BPG.teamShort ? BPG.teamShort(team(name)) : cap(name).slice(0, 3));
 
-  // The board: plain deep colour with a faint warm light from the top, then the photo.
+  // The ball's seam: two curves with stitches across them, sweeping across the card.
+  function seamOn(ctx, g, alpha) {
+    const cx = g.W * 1.05, cy = g.H * 0.95, r = g.W * 0.95;
+    ctx.save(); ctx.globalAlpha = alpha; ctx.lineCap = "round"; ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(255,236,214,0.55)"; ctx.lineWidth = 5;
+    [-1, 1].forEach((side) => { ctx.beginPath(); ctx.arc(cx, cy, r + side * 26, Math.PI * 0.95, Math.PI * 1.75); ctx.stroke(); });
+    ctx.strokeStyle = "rgba(255,236,214,0.8)"; ctx.lineWidth = 4;
+    for (let a = Math.PI * 0.97; a < Math.PI * 1.74; a += 0.035) {
+      ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * (r - 20), cy + Math.sin(a) * (r - 20));
+      ctx.lineTo(cx + Math.cos(a + 0.02) * (r + 20), cy + Math.sin(a + 0.02) * (r + 20)); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Draws the seam fading out smoothly before the text, so it never runs through the words.
+  function seam(k, g, alpha, textTop) {
+    const c = document.createElement("canvas"); c.width = g.W; c.height = g.H;
+    const x = c.getContext("2d"); seamOn(x, g, alpha);
+    const fade = x.createLinearGradient(0, textTop - 260, 0, textTop - 40);
+    fade.addColorStop(0, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,0)");
+    x.globalCompositeOperation = "destination-in"; x.fillStyle = fade; x.fillRect(0, 0, g.W, g.H);
+    k.ctx.drawImage(c, 0, 0);
+  }
+
+  // The red: a cherry glow, the seam, then the photo, re-tinted red where it fades so the bottom isn't flat.
+  // The seam goes over the photo again, faintly.
   function board(k, g, textTop) {
     const ctx = k.ctx;
     g.bg = BG; g.accent = GOLD; g.sweep = false;
-    ctx.fillStyle = BG; ctx.fillRect(0, 0, g.W, g.H);
-    const glow = ctx.createRadialGradient(g.W * 0.5, 0, 0, g.W * 0.5, 0, g.W);
-    glow.addColorStop(0, "rgba(216,180,106,0.16)"); glow.addColorStop(1, "rgba(216,180,106,0)");
-    ctx.fillStyle = glow; ctx.fillRect(0, 0, g.W, g.H);
-    return k.bleedPhoto(g, textTop);
+    const gr = ctx.createRadialGradient(g.W * 0.62, g.H * 0.3, 0, g.W * 0.62, g.H * 0.3, g.H * 0.8);
+    gr.addColorStop(0, "#A3172A"); gr.addColorStop(0.55, "#6E0F1A"); gr.addColorStop(1, BG);
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, g.W, g.H);
+    seam(k, g, 0.9, textTop);
+    const has = k.bleedPhoto(g, textTop);
+    if (g.photo) {
+      const tint = ctx.createLinearGradient(0, textTop - 260, 0, g.H);
+      tint.addColorStop(0, "rgba(110,15,26,0)"); tint.addColorStop(1, "rgba(110,15,26,0.55)");
+      ctx.fillStyle = tint; ctx.fillRect(0, textTop - 260, g.W, g.H);
+      seam(k, g, 0.4, textTop);
+    }
+    return has;
   }
 
   // A small red ball with its seam. (x, y) is the centre.
@@ -2042,6 +2074,7 @@ window.BPG = window.BPG || {};
     const gr = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
     gr.addColorStop(0, "#E0505A"); gr.addColorStop(1, RED);
     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = CREAM; ctx.lineWidth = Math.max(2, r * 0.14); ctx.stroke(); // ring so it shows on the red
     ctx.strokeStyle = "rgba(255,240,220,0.75)"; ctx.lineWidth = Math.max(1, r * 0.12);
     [-0.28, 0.28].forEach((o) => { ctx.beginPath(); ctx.ellipse(x + o * r, y, r * 0.22, r * 0.92, 0, -Math.PI / 2, Math.PI / 2, o < 0); ctx.stroke(); });
     ctx.restore();
@@ -2061,28 +2094,25 @@ window.BPG = window.BPG || {};
     return w;
   }
 
-  // Small heading above the name: red ball, the moment (HUNDRED), then "BAN v SA".
+  // Small heading above the name: the moment (HUNDRED), then "BAN v SA".
   function tagLine(k, g, base, label, a, b) {
     const ctx = k.ctx;
-    ball(k, PAD + 13, base - 11, 13);
-    ctx.font = k.font(32, k.C, 700); k.spaced(5); ctx.fillStyle = GOLD;
-    const t = cap(label); ctx.fillText(t, PAD + 40, base);
-    let x = PAD + 40 + ctx.measureText(t).width + 18;
-    k.spaced(3); ctx.font = k.font(26, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.7)";
-    const vs = a && b ? `${short(a)} v ${short(b)}` : "";
-    if (vs) ctx.fillText(vs, x, base);
+    ctx.font = k.font(30, k.C, 700); k.spaced(6); ctx.fillStyle = CREAM;
+    const t = cap(label); ctx.fillText(t, PAD, base);
+    const vs = a && b ? `·  ${short(a)} v ${short(b)}` : "";
+    if (vs) { ctx.fillStyle = "rgba(255,244,230,0.6)"; ctx.fillText(vs, PAD + ctx.measureText(t).width + 22, base); }
     k.spaced(0);
   }
 
-  // The name in gold-leaf serif capitals, shrunk to fit one line. Returns the size used.
+  // The name in bold condensed capitals, shrunk to fit one line. Returns the size used.
   function name(k, g, text, base, max = 92) {
     const ctx = k.ctx, t = cap(text) || "PLAYER NAME";
-    const size = k.fit(t, g.W - 2 * PAD, max, SERIF, 700, 46);
-    ctx.font = k.font(size, SERIF, 700); ctx.fillStyle = CREAM; ctx.fillText(t, PAD - 2, base);
+    const size = k.fit(t, g.W - 2 * PAD, max, k.C, 700, 44);
+    ctx.font = k.font(size, k.C, 700); ctx.fillStyle = CREAM; ctx.fillText(t, PAD - 2, base);
     return size;
   }
 
-  // A row of small figures: the number in cream, its label in gold.
+  // A row of small figures: the number in cream, its label in peach.
   function stats(k, base, items) {
     const ctx = k.ctx; let x = PAD;
     items.filter(([, v]) => v !== "" && v != null).forEach(([lab, v]) => {
@@ -2097,7 +2127,7 @@ window.BPG = window.BPG || {};
   // Bottom row: the match line (1st Test · Day 2 · Mirpur) on the left, logo on the right.
   function foot(k, g, info) {
     const ctx = k.ctx, t = cap(String(info || "").replace(/\s*\|\s*/g, " · "));
-    if (t) { ctx.font = k.font(22, k.C, 600); k.spaced(4); ctx.fillStyle = "rgba(242,234,219,0.6)"; ctx.fillText(t, PAD, g.footerY, g.W * 0.6); k.spaced(0); }
+    if (t) { ctx.font = k.font(22, k.C, 600); k.spaced(4); ctx.fillStyle = "rgba(255,244,230,0.6)"; ctx.fillText(t, PAD, g.footerY, g.W * 0.6); k.spaced(0); }
     k.brandCorner(g, g.footerY);
   }
 
@@ -2108,17 +2138,17 @@ window.BPG = window.BPG || {};
     standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, raw = String(g.val("runs")), runs = num(raw), balls = num(g.val("balls"));
-      const statY = g.footerY - 70, scoreBase = statY - 66, figSize = 150;
-      const nameBase = scoreBase - figSize * 0.74 - 40, ctxSize = 92, tagBase = nameBase - ctxSize * 0.82 - 28;
-      board(k, g, tagBase - 50);
+      const statY = g.footerY - 64, scoreBase = statY - 60, figSize = 210;
+      const nameBase = scoreBase - figSize * 0.78 - 30, tagBase = nameBase - 92;
+      board(k, g, tagBase - 40);
       ctx.save(); shadow(k);
       tagLine(k, g, tagBase, g.big, g.val("team"), g.val("opp"));
-      name(k, g, g.val("player"), nameBase, ctxSize);
+      name(k, g, g.val("player"), nameBase, 84);
       const r = String(runs) + (raw.includes("*") ? "*" : "");
-      ctx.font = k.font(figSize, SERIF, 900); ctx.fillStyle = GOLD; ctx.fillText(r, PAD - 6, scoreBase);
+      ctx.font = k.font(figSize, k.D); ctx.fillStyle = CREAM; ctx.fillText(r, PAD - 6, scoreBase);
       const rw = ctx.measureText(r).width;
-      if (balls) { ctx.font = k.font(46, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.85)"; ctx.fillText(`(${balls})`, PAD + rw + 12, scoreBase); }
-      stats(k, statY, [["balls", balls || ""], ["fours", g.val("fours")], ["sixes", g.val("sixes")], ["strike rate", balls ? ((runs / balls) * 100).toFixed(1) : ""]]);
+      if (balls) { ctx.font = k.font(48, k.C, 600); ctx.fillStyle = "rgba(255,244,230,0.75)"; ctx.fillText(`(${balls})`, PAD + rw + 14, scoreBase); }
+      stats(k, statY, [["fours", g.val("fours")], ["sixes", g.val("sixes")], ["strike rate", balls ? ((runs / balls) * 100).toFixed(1) : ""]]);
       ctx.restore();
       foot(k, g, g.val("info"));
     },
@@ -2129,15 +2159,15 @@ window.BPG = window.BPG || {};
     standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, w = num(g.val("wkts")), r = num(g.val("runs")), balls = k.oversToBalls(g.val("overs"));
-      const statY = g.footerY - 70, figBase = statY - 66, figSize = 150;
-      const nameBase = figBase - figSize * 0.74 - 40, tagBase = nameBase - 92 * 0.82 - 28;
-      board(k, g, tagBase - 50);
+      const statY = g.footerY - 64, figBase = statY - 60, figSize = 210;
+      const nameBase = figBase - figSize * 0.78 - 30, tagBase = nameBase - 92;
+      board(k, g, tagBase - 40);
       ctx.save(); shadow(k);
       tagLine(k, g, tagBase, g.big, g.val("team"), g.val("opp"));
-      name(k, g, g.val("player"), nameBase);
-      ctx.font = k.font(figSize, SERIF, 900); ctx.fillStyle = GOLD; ctx.fillText(String(w), PAD - 6, figBase);
+      name(k, g, g.val("player"), nameBase, 84);
+      ctx.font = k.font(figSize, k.D); ctx.fillStyle = CREAM; ctx.fillText(String(w), PAD - 6, figBase);
       const x = PAD - 6 + ctx.measureText(String(w)).width;
-      ctx.fillStyle = CREAM; ctx.fillText("/" + r, x, figBase);
+      ctx.fillStyle = "rgba(255,244,230,0.6)"; ctx.fillText("/" + r, x, figBase);
       // One red ball per wicket, beside the figures.
       const fw = x + ctx.measureText("/" + r).width + 34, n = Math.min(w, 10), rr = n > 5 ? 15 : 19;
       for (let i = 0; i < n; i++) {
@@ -2160,8 +2190,8 @@ window.BPG = window.BPG || {};
       if (!hasPhoto) {
         // No photo: the day, large and faint, like lettering on the board.
         const day = (/day\s*\d/i.exec(g.val("status")) || [""])[0].toUpperCase() || "STUMPS";
-        ctx.font = k.font(k.fit(day, g.W * 0.9, 300, SERIF, 900), SERIF, 900); ctx.textAlign = "center";
-        ctx.fillStyle = "rgba(216,180,106,0.09)"; ctx.fillText(day, g.W / 2, tagBase - 160); ctx.textAlign = "left";
+        ctx.font = k.font(k.fit(day, g.W * 0.9, 300, k.D), k.D); ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(255,244,230,0.08)"; ctx.fillText(day, g.W / 2, tagBase - 160); ctx.textAlign = "left";
       }
       ctx.save(); shadow(k);
       tagLine(k, g, tagBase, g.val("status") || "STUMPS", "", "");
@@ -2169,13 +2199,13 @@ window.BPG = window.BPG || {};
         if (!t && !s) return;
         const bw = badge(k, PAD, y - 8, t, 24);
         const sc = String(s || "").trim();
-        ctx.font = k.font(64, SERIF, 900); const sw = ctx.measureText(sc).width;
-        ctx.fillStyle = GOLD; ctx.textAlign = "right"; ctx.fillText(sc, g.W - PAD, y); ctx.textAlign = "left";
+        ctx.font = k.font(76, k.D); const sw = ctx.measureText(sc).width;
+        ctx.fillStyle = CREAM; ctx.textAlign = "right"; ctx.fillText(sc, g.W - PAD, y); ctx.textAlign = "left";
         const nm = cap(team(t)), room = g.W - 2 * PAD - bw - 24 - sw - 30;
-        ctx.font = k.font(k.fit(nm, room, 54, SERIF, 700, 30), SERIF, 700); ctx.fillStyle = CREAM;
+        ctx.font = k.font(k.fit(nm, room, 54, k.C, 700, 30), k.C, 700); ctx.fillStyle = CREAM;
         ctx.fillText(nm, PAD + bw + 20, y - 4);
       });
-      if (line) { ctx.font = k.font(k.fit(line, g.W - 2 * PAD, 40, k.C, 600, 26), k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.85)"; ctx.fillText(line, PAD, lineBase); }
+      if (line) { ctx.font = k.font(k.fit(line, g.W - 2 * PAD, 40, k.C, 600, 26), k.C, 600); ctx.fillStyle = "rgba(255,244,230,0.85)"; ctx.fillText(line, PAD, lineBase); }
       ctx.restore();
       foot(k, g, g.val("info"));
     },
@@ -2189,18 +2219,18 @@ window.BPG = window.BPG || {};
       let y = g.footerY - 66;
       const potmBase = potm ? y : null; if (potm) y -= 58;
       const seriesBase = series ? y : null; if (series) y -= 66;
-      const marginBase = y - 6, beatBase = marginBase - 74, winBase = beatBase - 58, tagBase = winBase - 118;
+      const wn = cap(team(g.val("winner"))) || "WINNER";
+      const ws = k.fit(wn, g.W - 2 * PAD - 120, 130, k.D, "", 56);
+      const marginBase = y - 6, beatBase = marginBase - 74, winBase = beatBase - 58, tagBase = winBase - ws * 0.88 - 34;
       board(k, g, tagBase - 50);
       ctx.save(); shadow(k);
       tagLine(k, g, tagBase, g.big || "TEST RESULT", "", "");
-      const wn = cap(team(g.val("winner"))) || "WINNER";
-      const ws = k.fit(wn, g.W - 2 * PAD - 120, 120, SERIF, 900, 56);
-      ctx.font = k.font(ws, SERIF, 900); ctx.fillStyle = CREAM; ctx.fillText(wn, PAD - 4, winBase);
+      ctx.font = k.font(ws, k.D); ctx.fillStyle = CREAM; ctx.fillText(wn, PAD - 4, winBase);
       badge(k, PAD + ctx.measureText(wn).width + 22, winBase - ws * 0.3, g.val("winner"), 24);
-      ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(242,234,219,0.8)"; k.spaced(2);
+      ctx.font = k.font(44, k.C, 600); ctx.fillStyle = "rgba(255,244,230,0.8)"; k.spaced(2);
       ctx.fillText(`BEAT ${cap(team(g.val("loser")))}`, PAD, beatBase); k.spaced(0);
       const m = cap(g.val("margin"));
-      ctx.font = k.font(k.fit(m, g.W - 2 * PAD, 58, SERIF, 700, 30), SERIF, 700); ctx.fillStyle = GOLD; ctx.fillText(m, PAD - 2, marginBase);
+      ctx.font = k.font(k.fit(m, g.W - 2 * PAD, 60, k.C, 700, 30), k.C, 700); ctx.fillStyle = GOLD; ctx.fillText(m, PAD - 2, marginBase);
       if (series) { ctx.font = k.font(k.fit(series, g.W - 2 * PAD, 36, k.C, 600, 24), k.C, 600); ctx.fillStyle = CREAM; ctx.fillText(series, PAD, seriesBase); }
       if (potm) {
         ctx.font = k.font(22, k.C, 700); k.spaced(4); ctx.fillStyle = GOLD; const lab = "PLAYER OF THE MATCH";
