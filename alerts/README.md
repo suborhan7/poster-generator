@@ -28,6 +28,6 @@ Each message has a link that opens the right card in the poster studio with ever
 ## Good to know
 
 - GitHub may start a check a few minutes late, so an alert can come 5 to 15 minutes after the moment.
-- The free cricket plan has 100 checks a day; a full ODI fits, two at once may run out near the end.
+- The free cricket plan has 100 hits a day and a full scorecard costs 10, so scores, toss, innings break and result are checked every 10 minutes, while fifties, hundreds and wicket hauls are checked about hourly and at each innings break. One full ODI uses about 92 hits. Bangladesh matches get first call on the hits. If the hits still run out, alerts that arrive later are marked "Catching up".
 - GitHub pauses the 10-minute schedule if the repo has no commits for 60 days. Turn it back on in the Actions tab.
 - `node alerts/test.mjs` plays sample matches through the checker without any keys.

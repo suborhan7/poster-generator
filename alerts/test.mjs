@@ -119,5 +119,60 @@ const br = decode(out[0]), cr = decode(out[0], 1);
 assert.deepEqual([br.card, br.d.winner, br.d.loser, br.d.margin, br.d.info], ["bigresult", "Bangladesh", "Afghanistan", "by 42 runs", "1st ODI | Afghanistan tour of Bangladesh 2026"]);
 assert.deepEqual([cr.card, cr.d.headline, cr.d.s1, cr.d.s2, cr.d.potm], ["cresult", "*BANGLADESH* WIN BY 42 RUNS", "286/7 (50)", "244/10 (46.3)", "Towhid Hridoy"]);
 
+// ---- A whole ODI on the real free budget: the list costs 1 hit, a scorecard 10, 100 a day ----
+fs.rmSync(path.join(dir, "state.json"), { force: true });
+let hits = 0, cards = 0;
+io.get = async (url) => {
+  const p = new URL(url).pathname;
+  if (p.endsWith("/fixtures")) return { errors: [], response: [] };
+  if (p.endsWith("/currentMatches")) { hits += 1; return { status: "success", data: [world.cm], info: { hitsToday: hits, hitsLimit: 100 } }; }
+  if (p.endsWith("/match_scorecard")) { hits += 10; cards++; return { status: "success", data: world.card, info: { hitsToday: hits, hitsLimit: 100 } }; }
+  throw new Error("unexpected " + p);
+};
+const D0 = Date.parse("2026-10-16T08:00:00Z"), got = [];
+const live = (r, w, o, more = {}) => ({ ...cmBase, id: "odi", dateTimeGMT: "2026-10-16T08:00:00", matchStarted: true, tossWinner: "Bangladesh", tossChoice: "bat", score: [{ r, w, o, inning: "Bangladesh Inning 1" }], ...more });
+world.cm = { ...cmBase, id: "odi", dateTimeGMT: "2026-10-16T08:00:00" }; world.card = { scorecard: [] };
+for (let t = D0 - 4 * 60 * MIN; t <= D0 + 8.5 * 60 * MIN; t += 5 * MIN) {
+  const m = (t - D0) / MIN;
+  if (m >= -30) world.cm = live(0, 0, 0);
+  if (m >= 0) world.cm = live(Math.round(m * 1.2), Math.floor(m / 40), +(m / 4).toFixed(1));
+  if (m >= 100) world.card = { scorecard: [{ inning: "Bangladesh Inning 1", batting: [bat("Towhid Hridoy", 61, 50, 6, 1)], bowling: [] }] };
+  if (m >= 215) { world.cm = live(286, 7, 50, { score: [{ r: 286, w: 7, o: 50, inning: "Bangladesh Inning 1" }, { r: 10, w: 0, o: 2, inning: "Afghanistan Inning 1" }] });
+    world.card = { scorecard: [{ inning: "Bangladesh Inning 1", batting: [bat("Towhid Hridoy", 104, 90, 9, 3)], bowling: [bowl("Rashid Khan", 10, 45, 4)] }] }; }
+  if (m >= 470) world.cm = { ...world.cm, matchEnded: true, status: "Bangladesh won by 42 runs", matchWinner: "Bangladesh" };
+  for (const msg of await run(t)) got.push([m, msg]);
+}
+const when = (re) => (got.find(([, msg]) => re.test(msg)) || [null])[0];
+assert.ok(hits <= 100, `stays inside the free 100 hits (used ${hits})`);
+assert.ok(when(/TOSS/) <= -20, "toss alert before the start");
+assert.ok(when(/FIFTY/) - 100 <= 60, "fifty within the hour");
+assert.ok(when(/INNINGS BREAK/) - 215 <= 10, "innings break within 10 minutes");
+assert.ok(when(/HUNDRED/) - 215 <= 10, "hundred by the innings break");
+assert.ok(when(/RESULT/) - 470 <= 10, "result within 10 minutes");
+assert.ok(!got.some(([, msg]) => /Catching up/.test(msg)), "nothing labelled late on a normal day");
+console.log(`ODI on the free plan: ${hits} hits, ${cards} scorecards`);
+
+// ---- Hits run out mid-match, then the allowance resets: the late moments say so ----
+fs.rmSync(path.join(dir, "state.json"), { force: true });
+hits = 0; got.length = 0;
+let limit = 100;
+io.get = async (url) => {
+  const p = new URL(url).pathname;
+  if (p.endsWith("/fixtures")) return { errors: [], response: [] };
+  if (hits >= limit) return { status: "failure", reason: "hits limit" };
+  if (p.endsWith("/currentMatches")) { hits += 1; return { status: "success", data: [world.cm], info: { hitsToday: hits, hitsLimit: limit } }; }
+  if (p.endsWith("/match_scorecard")) { hits += 10; return { status: "success", data: world.card, info: { hitsToday: hits, hitsLimit: limit } }; }
+};
+world.cm = live(100, 2, 20); world.card = { scorecard: [] };
+await run(D0); await run(D0 + 10 * MIN);
+hits = 97; // used up elsewhere
+for (let t = D0 + 20 * MIN; t <= D0 + 180 * MIN; t += 5 * MIN) await run(t);
+world.cm = { ...live(286, 7, 50), matchEnded: true, status: "Bangladesh won by 42 runs", matchWinner: "Bangladesh" };
+hits = 0; // the free allowance resets
+let late = [];
+for (let t = D0 + 185 * MIN; t <= D0 + 260 * MIN && !late.length; t += 5 * MIN) late = await run(t);
+assert.ok(late.length && late.every((msg) => /Catching up/.test(msg)), "late moments are labelled");
+assert.ok(late.some((msg) => /RESULT/.test(msg)), "and the result still arrives once hits are back");
+
 fs.rmSync(dir, { recursive: true, force: true });
 console.log("All alert checks passed");

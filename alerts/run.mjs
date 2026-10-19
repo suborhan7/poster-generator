@@ -102,40 +102,59 @@ async function football(state) {
 async function cricket(state) {
   if (!env.CRICKETDATA_KEY) return [];
   const c = (state.cricket ||= { matches: {}, lastList: 0 });
-  if (c.day !== today) Object.assign(c, { day: today, hitsLeft: null });
   const C = CFG.cricket, base = "https://api.cricapi.com/v1", key = `apikey=${env.CRICKETDATA_KEY}`;
-  const canHit = () => c.hitsLeft == null || c.hitsLeft > C.reserveHits;
-  const track = (j) => { if (j && j.info && j.info.hitsLimit != null) c.hitsLeft = j.info.hitsLimit - j.info.hitsToday; };
+  // The free plan has 100 hits a day and a scorecard costs about 10 of them (the list costs 1),
+  // so scorecards are kept for the moments that matter. The cost is measured from the API's own counter.
+  const cardCost = c.cardCost || C.scorecardHits;
+  const left = () => (c.hitsLeft == null ? 100 : c.hitsLeft);
+  const track = (j) => {
+    if (!j || !j.info || j.info.hitsLimit == null) return null;
+    const before = c.hitsLeft; c.hitsLeft = j.info.hitsLimit - j.info.hitsToday; c.hitsAt = now;
+    return before == null ? null : before - c.hitsLeft;
+  };
 
   const tracked = Object.values(c.matches);
   const busy = tracked.some((m) => (m.started && !m.ended) || (!m.started && now >= m.start - 45 * MIN));
-  // The free plan has 100 hits a day, so even during a match the list is checked at most every listEveryMinutes.
-  const wait = (busy ? C.listEveryMinutes : C.idleCheckMinutes) * MIN;
-  if (now - c.lastList < wait - 30 * 1000 || !canHit()) return [];
+  // During a match the list is checked every 10 minutes, slowing down as the day's hits run low.
+  // When they're nearly gone, one check an hour still runs, so we notice as soon as the allowance resets.
+  const every = left() <= C.reserveHits ? 60 : !busy ? C.idleCheckMinutes : left() > 40 ? C.listEveryMinutes : left() > 15 ? 20 : 30;
+  if (now - c.lastList < every * MIN - 30 * 1000) return [];
 
   const j = await get(`${base}/currentMatches?${key}&offset=0`);
   track(j);
-  if (!j || j.status !== "success") { if (j) console.log("CricketData said:", String(j.reason || j.status).slice(0, 200)); return []; }
+  if (!j || j.status !== "success") { if (j) console.log("CricketData said:", String(j.reason || j.status).slice(0, 200)); c.lastList = now; return []; }
+  const gap = c.lastList ? now - c.lastList : 0;
   c.lastList = now;
 
+  const followed = (j.data || []).filter((m) => isFollowedCricket(m, C));
+  // Your first team (Bangladesh) gets the scorecards first.
+  const first = C.teams[0];
+  followed.sort((a, b) => ((b.teams || []).includes(first) ? 1 : 0) - ((a.teams || []).includes(first) ? 1 : 0));
   const out = [];
-  for (const m of j.data || []) {
-    if (!isFollowedCricket(m, C)) continue;
+  for (const m of followed) {
     const prev = c.matches[m.id], innings = (m.score || []).length;
     const rec = (c.matches[m.id] = { ...(prev || {}), start: Date.parse(m.dateTimeGMT + "Z") || now, started: !!m.matchStarted, ended: !!m.matchEnded, seen: now });
     let card = null;
-    const changed = !prev || prev.innings !== innings || (m.matchEnded && !prev.ended);
-    const due = m.matchStarted && (!rec.cardAt || now - rec.cardAt >= C.scorecardEveryMinutes * MIN);
-    if (m.matchStarted && (changed || due) && canHit()) {
+    // Always worth a scorecard: an innings just ended or the match just finished (fifties, hundreds, wicket hauls).
+    const changed = m.matchStarted && (!prev || prev.innings !== innings || (m.matchEnded && !prev.ended));
+    // Mid-innings check, at most hourly, only while plenty of hits are left (more for the first team's games).
+    const mine = (m.teams || []).includes(first);
+    const due = m.matchStarted && !m.matchEnded && (!rec.cardAt || now - rec.cardAt >= C.scorecardEveryMinutes * MIN)
+      && left() - cardCost >= (mine ? 40 : 65);
+    if ((changed || due) && left() - cardCost >= C.reserveHits) {
       const s = await get(`${base}/match_scorecard?${key}&id=${m.id}`);
-      track(s);
-      if (s && s.status === "success" && s.data) { card = s.data; rec.cardAt = now; out.push(...cricketCardAlerts(m, card, SITE)); }
+      const used = track(s);
+      if (used && used > 1 && used < 50) c.cardCost = used;
+      if (s && s.status === "success" && s.data) { card = s.data; rec.cardAt = now; }
     }
-    out.push(...cricketMatchAlerts(m, prev, SITE, card));
+    const these = [...(card ? cricketCardAlerts(m, card, SITE) : []), ...cricketMatchAlerts(m, prev, SITE, card)];
+    // A live match not looked at for a long while (the day's hits ran out): say so, so an old moment isn't taken as live.
+    if (prev && prev.started && !prev.ended && gap > 45 * MIN) these.forEach((a) => { a.text = `⏰ <i>Catching up, this happened earlier</i>\n${a.text}`; });
+    out.push(...these);
     rec.innings = innings;
   }
   for (const [id, m] of Object.entries(c.matches)) if (now - m.seen > 2 * 24 * 60 * MIN) delete c.matches[id];
-  console.log(`Cricket: ${Object.keys(c.matches).length} followed matches, ${c.hitsLeft ?? "?"} free hits left today`);
+  console.log(`Cricket: ${followed.length} followed matches now, ${c.hitsLeft ?? "?"} free hits left, scorecard costs ${cardCost}`);
   return out;
 }
 
