@@ -69,29 +69,65 @@ window.BPG = window.BPG || {};
   }
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
   // One line in, every field filled: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL".
+  // With a free AI key (smartfill.js) it reads any wording, Banglish too; without one, or if the AI fails, the rules in quickfill.js do it.
   function quickBox(parent, t, example) {
+    const ai = !!BPG.aiKey();
     const d = document.createElement("div"); d.className = "field wide quick";
-    const l = document.createElement("label"); l.htmlFor = "f_quick"; l.textContent = "Quick fill: type it in one line, short team names work";
+    const l = document.createElement("label"); l.htmlFor = "f_quick";
+    l.textContent = ai ? "Quick fill (AI): write it any way, Banglish works" : "Quick fill: type it in one line, short team names work";
     const row = document.createElement("div"); row.className = "quick-row";
-    const i = document.createElement("input"); i.type = "text"; i.id = "f_quick"; i.placeholder = example; i.autocomplete = "off";
+    const i = document.createElement("input"); i.type = "text"; i.id = "f_quick"; i.autocomplete = "off";
+    i.placeholder = example || "Type the update any way you like";
     const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
     const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
-    const go = () => {
-      const { values, labels } = BPG.quickApply(t, i.value);
-      if (!labels.length) { note.textContent = "Couldn't read that. Try: " + example; return; }
+    const done = (values, msg) => {
       state.values[state.tpl] = { ...(state.values[state.tpl] || {}), ...values }; persist();
-      renderFields(); draw();
-      const n = $("f_quick").parentNode.nextSibling; $("f_quick").value = i.value;
-      n.textContent = "Filled " + labels.join(", ") + ". Check the rest below.";
+      const typed = i.value; renderFields(); draw();
+      $("f_quick").value = typed; $("f_quick").parentNode.nextSibling.textContent = msg;
+    };
+    const rules = (why) => {
+      const { values, labels } = example ? BPG.quickApply(t, i.value) : { values: {}, labels: [] };
+      if (!labels.length) { note.textContent = (why ? why + " " : "") + (example ? "Couldn't read that. Try: " + example : ""); return; }
+      done(values, (why ? why + " Used basic fill: " : "Filled ") + labels.join(", ") + ". Check the rest below.");
+    };
+    const go = async () => {
+      if (!i.value.trim()) return;
+      if (!ai) return rules();
+      b.disabled = true; note.textContent = "Reading it with AI…";
+      try {
+        const { values, labels } = await BPG.smartFill(t, i.value);
+        if (!labels.length) return rules("The AI found nothing to fill.");
+        done(values, "AI filled " + labels.join(", ") + ". Check it below.");
+      } catch (e) {
+        rules(e.message && e.message.length < 120 ? e.message.replace(/\.?$/, ".") : "The AI didn't answer.");
+      } finally { b.disabled = false; }
     };
     b.onclick = go;
     i.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); go(); } });
-    row.append(i, b); d.append(l, row, note); parent.appendChild(d);
+    row.append(i, b); d.append(l, row, note, aiSetup()); parent.appendChild(d);
+  }
+  // The free AI key: made once at aistudio.google.com/apikey, saved on this phone only.
+  function aiSetup() {
+    const det = document.createElement("details"); det.className = "ai-setup";
+    const has = !!BPG.aiKey();
+    const sum = document.createElement("summary"); sum.textContent = has ? "Smart fill is on (free AI key saved)" : "Make quick fill smarter with free AI";
+    const p = document.createElement("p"); p.className = "hint";
+    p.innerHTML = 'Free, no card needed. 1) Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with Google. 2) Tap <b>Create API key</b> and copy it. 3) Paste it here. The key stays on this phone; what you type in quick fill is sent to Google to be read.';
+    const row = document.createElement("div"); row.className = "quick-row";
+    const k = document.createElement("input"); k.type = "password"; k.id = "f_aikey"; k.autocomplete = "off"; k.placeholder = has ? "Key saved" : "Paste your key";
+    const save = document.createElement("button"); save.type = "button"; save.textContent = has ? "Remove" : "Save";
+    save.onclick = () => {
+      if (has) BPG.setAiKey(""); else if (k.value.trim()) BPG.setAiKey(k.value); else return;
+      renderFields(); $("f_quick").parentNode.nextSibling.textContent = has ? "AI key removed. Quick fill uses the basic rules." : "AI key saved. Type anything and tap Fill.";
+    };
+    if (!has) row.append(k);
+    row.append(save); det.append(sum, p, row);
+    return det;
   }
   function renderFields() {
     const box = $("fields"), t = T[state.tpl]; box.innerHTML = "";
     const ex = BPG.quickExample(t);
-    if (ex) quickBox(box, t, ex);
+    if (ex || BPG.aiKey()) quickBox(box, t, ex);
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));

@@ -41,6 +41,7 @@ Features on every card:
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/smartfill.js` | Smart fill: sends the quick fill note to Google's free Gemini AI (your own free key) and gets back which field each piece goes in | To change the AI's instructions or the models it tries |
 | `js/quickfill.js` | Quick fill: reads one typed line and fills the form; holds the team short forms (PAK, SL, BAN…) | To teach it a new team or short form |
 | `js/caption.js` | Writes the caption and hashtags from the card | To change caption wording or the comment line |
 | `js/series.js` | Series mode: saved series, reading results, leaderboards, points table, series-score and match-preview designs | To change how stats are worked out or how those cards look |
@@ -126,6 +127,7 @@ It opens full screen from its own icon, works offline, and always picks up the n
 ## Tips
 
 - **Quick fill:** on cricket and football cards, type the whole thing in one line, like `Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL` or `Mustafizur 5/23 (8.3) BAN vs SA`, and press Enter. Short team names become full names.
+- **Smart fill (free AI):** under the quick fill box, open *Make quick fill smarter with free AI*, make a free key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (no card needed) and paste it. Then quick fill reads any wording, English, Banglish or Bangla (`litton 52 otut 38 bole 5 ta char 2 ta chokka bd vs sa`), and works on every card, including the Rants cards' headline, body and stat boxes. The key stays on your phone; what you type is sent to Google to be read. If the AI is busy or offline, the normal quick fill takes over, and that one now understands common Banglish too (`ta char`, `chokka`, `bole`, `over e`, `otut`, `bonam`).
 
 - Prepare both result cards (win and loss) before the last over, so you can post first.
 - Use cutout PNGs of players (remove.bg or Canva's background remover) for the best look.
