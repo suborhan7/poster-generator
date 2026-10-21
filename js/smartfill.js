@@ -71,22 +71,12 @@ Rules:
     } finally { clearTimeout(timer); }
   }
 
-  // Resolves with { values, labels, via: "ai" } or throws; the caller falls back to BPG.quickApply.
-  BPG.smartFill = async (tpl, text, key = BPG.aiKey()) => {
+  // Sends one request, trying each free model in turn. Throws a short message the studio can show.
+  async function run(body, key) {
     if (!key) throw new Error("no key");
-    const body = {
-      contents: [{ role: "user", parts: [{ text: prompt(tpl, text) }] }],
-      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: schema(tpl) },
-    };
     let last;
     for (const m of MODELS) {
-      try {
-        const got = await ask(m, key, body, 15000);
-        const fields = fieldsOf(tpl), values = {};
-        fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "" && grounded(f, String(v).trim(), text)) values[f.id] = String(v).trim(); });
-        const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
-        return { values, labels, via: "ai" };
-      } catch (e) {
+      try { return await ask(m, key, body, 15000); } catch (e) {
         last = e;
         // A bad key won't work on any model; a missing model or a busy one might on the next.
         if (e.status === 400 && /api key/i.test(e.message)) throw new Error("That AI key doesn't work. Check it in Smart fill.");
@@ -96,5 +86,34 @@ Rules:
     }
     if (last && (last.status === 429 || last.status >= 500)) throw new Error("The free AI is busy right now.");
     throw new Error("The AI didn't answer.");
+  }
+  const json = (text, schema) => ({
+    contents: [{ role: "user", parts: [{ text }] }],
+    generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: schema },
+  });
+
+  // Resolves with { values, labels, via: "ai" } or throws; the caller falls back to BPG.quickApply.
+  BPG.smartFill = async (tpl, text, key = BPG.aiKey()) => {
+    const got = await run(json(prompt(tpl, text), schema(tpl)), key);
+    const fields = fieldsOf(tpl), values = {};
+    fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "" && grounded(f, String(v).trim(), text)) values[f.id] = String(v).trim(); });
+    const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
+    return { values, labels, via: "ai" };
+  };
+
+  // "Make a poster": picks which card fits a typed note. Resolves with a key of BPG.TEMPLATES.
+  BPG.pickCard = async (text, key = BPG.aiKey()) => {
+    const T = BPG.TEMPLATES, cats = BPG.CATS || {};
+    const list = Object.entries(T).map(([k, t]) => `- ${k}: ${t.name} (${cats[t.cat] || t.cat})${t.big ? `, big word ${t.big}` : ""}. Fields: ${t.fields.map((f) => f[1].replace(/\s*\(.*\)$/, "")).join(", ")}`).join("\n");
+    const got = await run(json(`You choose the poster card for a sports page (cricket and football, Bangladesh). The cards:
+${list}
+
+The user's note (English, Banglish or Bangla):
+"""${text}"""
+
+Pick the one card that fits the note best. A batter's fifty is "fifty", a hundred is "century", a five-wicket haul is "fifer"; Test matches use the Test cricket cards when the note says Test. When the note is an opinion or a match story, pick a Borhan Rants card. Answer with the card's key.`,
+      { type: "OBJECT", properties: { card: { type: "STRING", enum: Object.keys(T) } }, required: ["card"] }), key);
+    if (!got || !T[got.card]) throw new Error("The AI couldn't pick a card.");
+    return got.card;
   };
 })();
