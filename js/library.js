@@ -48,12 +48,14 @@ window.BPG = window.BPG || {};
   BPG.lib = {
     ok: () => "indexedDB" in window,
     norm,
-    async add(name, blob) {
+    // src marks where a photo came from (zip name + path), so importing the same zip twice doesn't double it.
+    async add(name, blob, src) {
       const clean = String(name || "").trim().replace(/\s+/g, " ");
       if (!clean) throw new Error("Type the player's name first.");
       const small = await shrink(blob);
-      return tx("readwrite", (s) => s.add({ name: clean, key: norm(clean), blob: small, added: Date.now() }));
+      return tx("readwrite", (s) => s.add({ name: clean, key: norm(clean), blob: small, added: Date.now(), src: src || "" }));
     },
+    all: () => tx("readonly", (s) => s.getAll()),
     // Best matches first, newest first within a match.
     async find(q) {
       const all = await tx("readonly", (s) => s.getAll());
