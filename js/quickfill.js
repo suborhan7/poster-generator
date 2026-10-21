@@ -165,6 +165,15 @@ window.BPG = window.BPG || {};
   const risky = new Set(["in", "us", "can", "city", "real", "united", "oz", "nam", "bel", "ire"]);
 
   BPG.teamName = (s) => lookup.get(String(s || "").trim().toLowerCase()) || "";
+  // Is this team named anywhere in the text, by full name or a short form? Smart fill uses it so the AI can't guess a team.
+  BPG.teamMentioned = (text, team) => {
+    const full = BPG.teamName(team) || String(team || "").trim();
+    if (!full) return false;
+    const t = " " + String(text || "").toLowerCase().replace(/[^\p{L}\p{N}&/'-]+/gu, " ") + " ";
+    const names = [full.toLowerCase(), full.toLowerCase().replace(/\s+/g, ""), ...(TEAMS[full] || [])];
+    if (SHORT[full]) names.push(SHORT[full].toLowerCase());
+    return names.some((n) => t.includes(" " + n + " "));
+  };
   BPG.teamShort = (full) => SHORT[full] || String(full || "").slice(0, 3).toUpperCase();
 
   const title = (s) => s.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());

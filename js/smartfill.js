@@ -31,6 +31,7 @@ The user typed this quick note. It may be English, Banglish (Bangla in English l
 
 Rules:
 - Put each fact from the note in the field it belongs to. Leave a field as "" when the note doesn't give it. Never invent numbers, names or scores.
+- Never guess a team or opponent from who the player is or who they usually play: fill team fields only with teams written in the note.
 - Copy numbers exactly. Follow each field's example for the format (e.g. "52*" for not out, "5/23" style figures, "67'" for a minute, team short names like BAN when the label asks for a short name).
 - Spell player and team names properly in English (e.g. "mushi" is Mushfiqur Rahim, "bd" is Bangladesh) when you are sure who is meant.
 - Headlines, body text, tags and other free text: short and punchy, in English, cleaned up from the note. Write them in Bangla script only if the note is in Bangla script.
@@ -41,6 +42,18 @@ Rules:
     const props = {};
     fieldsOf(tpl).forEach((f) => { props[f.id] = { type: "STRING" }; });
     return { type: "OBJECT", properties: props, propertyOrdering: Object.keys(props) };
+  };
+
+  // The AI sometimes "helps" by guessing (e.g. an opponent you never typed). Drop a team that isn't named in the note,
+  // and a short number field whose numbers aren't in the note.
+  const TEAM_FIELDS = /^(team|opp|t1|t2|winner|loser|abbr)$/;
+  const grounded = (f, v, text) => {
+    if (TEAM_FIELDS.test(f.id)) return BPG.teamMentioned(text, v) || String(text).toLowerCase().includes(v.toLowerCase());
+    if (!f.long && v.length <= 12 && /^[\d\s.*\/'()+:-]+$/.test(v)) {
+      const typed = String(text).match(/\d+(?:\.\d+)?/g) || [];
+      return (v.match(/\d+(?:\.\d+)?/g) || []).every((n) => typed.includes(n));
+    }
+    return true;
   };
 
   async function ask(model, key, body, ms) {
@@ -70,7 +83,7 @@ Rules:
       try {
         const got = await ask(m, key, body, 15000);
         const fields = fieldsOf(tpl), values = {};
-        fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "") values[f.id] = String(v).trim(); });
+        fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "" && grounded(f, String(v).trim(), text)) values[f.id] = String(v).trim(); });
         const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
         return { values, labels, via: "ai" };
       } catch (e) {
