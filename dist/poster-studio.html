@@ -71,6 +71,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .quick-row input { flex: 1; min-width: 0; }
 .quick-row button { flex: none; padding: 0 18px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; }
 .field.quick .hint:empty { display: none; }
+.quick-row button:disabled { opacity: .6; cursor: wait; }
+.ai-setup summary { font-size: 13px; color: var(--muted); cursor: pointer; }
+.ai-setup[open] { display: flex; flex-direction: column; gap: 8px; }
+.ai-setup a { color: var(--accent); }
 .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
 .field input, .field textarea, .field select {
   font: 500 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
@@ -246,7 +250,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "19 Oct 2026 · v37";
+BPG.VERSION = "21 Oct 2026 · v38";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -2418,6 +2422,14 @@ window.BPG = window.BPG || {};
 
   BPG.quickParse = (text) => {
     let t = " " + String(text || "").replace(/[–—]/g, "-").replace(/\s+/g, " ") + " ";
+    // Banglish into the English the rules below read: "5 ta char 2 ta chokka", "38 bole", "8.3 over e", "52 otut".
+    t = t.replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:char|chaar|boundary|boundaries)\b|(\d{1,2})\s*(?:ta|t)\s*4(?=\s|[,.;]|$)/gi, (m, a, b) => ` ${a || b} fours `)
+      .replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:chokka|chakka|chhokka|chaka|choka)\b|(\d{1,2})\s*(?:ta|t)\s*6(?=\s|[,.;]|$)/gi, (m, a, b) => ` ${a || b} sixes `)
+      .replace(/(\d{1,3})\s*(?:bol|bole|bal|bale|balle|ball\s+e|bol\s+e)\b/gi, "$1 balls")
+      .replace(/(\d{1,2}(?:\.\d)?)\s*(?:over|ovar|obhar)\s+e\b/gi, "$1 overs")
+      .replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:wicket|wkt|uikat|uiket)s?\s*(?:nise|nilo|niyeche|niyechen)?\s*(\d{1,3})\s*(?:run|ran|rane?)\s*(?:e|diye|dia)?\b/gi, "$1/$2")
+      .replace(/(\d{1,3})\s*\*?\s*(?:otut|oporajito|apparajita)\b/gi, "$1*")
+      .replace(/\b(?:bonam|biruddhe|er\s+against)\b/gi, " vs ");
     t = t.replace(/(\d{1,3})\s*\*?\s*(?:not out|n\.o\.?|no)(?=[\s,.;]|$)/gi, "$1*");
     const out = {};
     const take = (re, fn) => { const m = t.match(re); if (m) { fn(m); t = t.replace(m[0], " "); } return !!m; };
@@ -2446,7 +2458,7 @@ window.BPG = window.BPG || {};
     take(/\b(\d{1,2})\s*x\s*6s?\b|\b(\d{1,2})\s*(?:sixes|six|6s)\b|\b(?:6s|sixes)\s*[:=-]?\s*(\d{1,2})\b/i, (m) => { out.sixes = m[1] || m[2] || m[3]; });
     // Separate runs and balls if typed apart: "52* 38b", "52 runs 38 balls"
     if (!out.balls) take(/\b(\d{1,3})\s*(?:b|balls?)\b/i, (m) => { out.balls = m[1]; });
-    if (!out.runs) take(/\b(\d{1,3}\*?)\s*(?:runs?|r)\b|(?:^|\s)(\d{1,3}\*)(?=\s)/i, (m) => { out.runs = m[1] || m[2]; });
+    if (!out.runs) take(/\b(\d{1,3}\*?)\s*(?:runs?|r|ran)\b|(?:^|\s)(\d{1,3}\*)(?=\s)/i, (m) => { out.runs = m[1] || m[2]; });
     if (!out.overs) take(/\b([\d]{1,2}(?:\.\d)?)\s*(?:ov|overs?)\b/i, (m) => { out.overs = m[1]; });
     take(/\b(\d{1,3})\s*'(?=\s)|\b(\d{1,3})(?:st|nd|rd|th)?\s*(?:min|minute)\b/i, (m) => { out.minute = (m[1] || m[2]) + "'"; });
 
@@ -2467,7 +2479,7 @@ window.BPG = window.BPG || {};
     left.forEach((n) => { if (!out.team) out.team = n; else if (!out.opp && n !== out.team) out.opp = n; });
 
     // Whatever words are left are the player's name.
-    const words = t.replace(/\b(vs?|versus|against|for|and|scored|scores|hits|smashes|takes|took|not out|no|runs?|balls?|wkts?|wickets?)\b/gi, " ")
+    const words = t.replace(/\b(vs?|versus|against|for|and|scored|scores|hits|smashes|takes|took|not out|no|runs?|balls?|wkts?|wickets?|e|ta|te|er|ke|re|korse|korlo|korche|koreche|korechen|korsen|nise|nilo|niyeche|dilo|dise|diye|dia|goal|gol|kore|ar|o|run|minute|min)\b/gi, " ")
       .replace(/[^\p{L}\s'.-]/gu, " ").replace(/\s+/g, " ").trim();
     if (words) out.player = title(words);
     return out;
@@ -2511,6 +2523,96 @@ window.BPG = window.BPG || {};
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
   })[tpl.layout] || "";
+})();
+
+</script>
+<script>
+// Smart fill: the quick fill box asks a free AI (Google Gemini, with your own free key) which field each piece of a
+// typed note belongs in, so you can write it any way you like, in English, Banglish or Bangla.
+// No key, no internet, or the AI fails? It falls back to the normal quick fill (quickfill.js).
+// The key stays on this phone (localStorage); the note you type is sent to Google to be read.
+window.BPG = window.BPG || {};
+
+(() => {
+  const KEY = "bpg_ai_key";
+  // Free-tier models, best first. The "latest" names follow Google's newest Flash models, so this keeps working.
+  const MODELS = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
+  const API = "https://generativelanguage.googleapis.com/v1beta/models/";
+
+  BPG.aiKey = () => { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } };
+  BPG.setAiKey = (k) => { try { k ? localStorage.setItem(KEY, k.trim()) : localStorage.removeItem(KEY); } catch (e) {} };
+
+  // Fields a card can be filled from: its own fields plus the big headline word when it has one.
+  const fieldsOf = (tpl) => {
+    const list = tpl.fields.map(([id, label, example, , type]) => ({ id, label, example: example || "", long: type === "area" }));
+    if (tpl.big) list.push({ id: "__big", label: "Big headline word", example: tpl.big, long: false });
+    return list;
+  };
+
+  const prompt = (tpl, text) => {
+    const fields = fieldsOf(tpl).map((f) => `- ${f.id}: ${f.label}${f.example ? ` (example: ${f.example})` : ""}${f.long ? " [a few sentences]" : ""}`).join("\n");
+    return `You fill in the form for one sports poster on the page "Borhan Rants About Sports" (cricket and football, Bangladesh).
+The card is "${tpl.name}". Its fields:
+${fields}
+
+The user typed this quick note. It may be English, Banglish (Bangla in English letters, e.g. "52 run 38 bole, 5 ta char 2 ta chokka") or Bangla:
+"""${text}"""
+
+Rules:
+- Put each fact from the note in the field it belongs to. Leave a field as "" when the note doesn't give it. Never invent numbers, names or scores.
+- Copy numbers exactly. Follow each field's example for the format (e.g. "52*" for not out, "5/23" style figures, "67'" for a minute, team short names like BAN when the label asks for a short name).
+- Spell player and team names properly in English (e.g. "mushi" is Mushfiqur Rahim, "bd" is Bangladesh) when you are sure who is meant.
+- Headlines, body text, tags and other free text: short and punchy, in English, cleaned up from the note. Write them in Bangla script only if the note is in Bangla script.
+- Text in *stars* is coloured on the card; keep stars the user typed.`;
+  };
+
+  const schema = (tpl) => {
+    const props = {};
+    fieldsOf(tpl).forEach((f) => { props[f.id] = { type: "STRING" }; });
+    return { type: "OBJECT", properties: props, propertyOrdering: Object.keys(props) };
+  };
+
+  async function ask(model, key, body, ms) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms);
+    try {
+      const res = await fetch(`${API}${model}:generateContent`, {
+        method: "POST", signal: ctl.signal,
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { const err = new Error((data.error && data.error.message) || `HTTP ${res.status}`); err.status = res.status; throw err; }
+      const out = (((data.candidates || [])[0] || {}).content || {}).parts || [];
+      return JSON.parse(out.map((p) => p.text || "").join("").replace(/^```(?:json)?|```$/g, "").trim());
+    } finally { clearTimeout(timer); }
+  }
+
+  // Resolves with { values, labels, via: "ai" } or throws; the caller falls back to BPG.quickApply.
+  BPG.smartFill = async (tpl, text, key = BPG.aiKey()) => {
+    if (!key) throw new Error("no key");
+    const body = {
+      contents: [{ role: "user", parts: [{ text: prompt(tpl, text) }] }],
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: schema(tpl) },
+    };
+    let last;
+    for (const m of MODELS) {
+      try {
+        const got = await ask(m, key, body, 15000);
+        const fields = fieldsOf(tpl), values = {};
+        fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "") values[f.id] = String(v).trim(); });
+        const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
+        return { values, labels, via: "ai" };
+      } catch (e) {
+        last = e;
+        // A bad key won't work on any model; a missing model or a busy one might on the next.
+        if (e.status === 400 && /api key/i.test(e.message)) throw new Error("That AI key doesn't work. Check it in Smart fill.");
+        if (e.status === 403) throw new Error("That AI key isn't allowed. Make a new one at aistudio.google.com/apikey.");
+        if (e.name === "AbortError") throw new Error("The AI took too long.");
+      }
+    }
+    if (last && (last.status === 429 || last.status >= 500)) throw new Error("The free AI is busy right now.");
+    throw new Error("The AI didn't answer.");
+  };
 })();
 
 </script>
@@ -3395,29 +3497,65 @@ window.BPG = window.BPG || {};
   }
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
   // One line in, every field filled: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL".
+  // With a free AI key (smartfill.js) it reads any wording, Banglish too; without one, or if the AI fails, the rules in quickfill.js do it.
   function quickBox(parent, t, example) {
+    const ai = !!BPG.aiKey();
     const d = document.createElement("div"); d.className = "field wide quick";
-    const l = document.createElement("label"); l.htmlFor = "f_quick"; l.textContent = "Quick fill: type it in one line, short team names work";
+    const l = document.createElement("label"); l.htmlFor = "f_quick";
+    l.textContent = ai ? "Quick fill (AI): write it any way, Banglish works" : "Quick fill: type it in one line, short team names work";
     const row = document.createElement("div"); row.className = "quick-row";
-    const i = document.createElement("input"); i.type = "text"; i.id = "f_quick"; i.placeholder = example; i.autocomplete = "off";
+    const i = document.createElement("input"); i.type = "text"; i.id = "f_quick"; i.autocomplete = "off";
+    i.placeholder = example || "Type the update any way you like";
     const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
     const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
-    const go = () => {
-      const { values, labels } = BPG.quickApply(t, i.value);
-      if (!labels.length) { note.textContent = "Couldn't read that. Try: " + example; return; }
+    const done = (values, msg) => {
       state.values[state.tpl] = { ...(state.values[state.tpl] || {}), ...values }; persist();
-      renderFields(); draw();
-      const n = $("f_quick").parentNode.nextSibling; $("f_quick").value = i.value;
-      n.textContent = "Filled " + labels.join(", ") + ". Check the rest below.";
+      const typed = i.value; renderFields(); draw();
+      $("f_quick").value = typed; $("f_quick").parentNode.nextSibling.textContent = msg;
+    };
+    const rules = (why) => {
+      const { values, labels } = example ? BPG.quickApply(t, i.value) : { values: {}, labels: [] };
+      if (!labels.length) { note.textContent = (why ? why + " " : "") + (example ? "Couldn't read that. Try: " + example : ""); return; }
+      done(values, (why ? why + " Used basic fill: " : "Filled ") + labels.join(", ") + ". Check the rest below.");
+    };
+    const go = async () => {
+      if (!i.value.trim()) return;
+      if (!ai) return rules();
+      b.disabled = true; note.textContent = "Reading it with AI…";
+      try {
+        const { values, labels } = await BPG.smartFill(t, i.value);
+        if (!labels.length) return rules("The AI found nothing to fill.");
+        done(values, "AI filled " + labels.join(", ") + ". Check it below.");
+      } catch (e) {
+        rules(e.message && e.message.length < 120 ? e.message.replace(/\.?$/, ".") : "The AI didn't answer.");
+      } finally { b.disabled = false; }
     };
     b.onclick = go;
     i.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); go(); } });
-    row.append(i, b); d.append(l, row, note); parent.appendChild(d);
+    row.append(i, b); d.append(l, row, note, aiSetup()); parent.appendChild(d);
+  }
+  // The free AI key: made once at aistudio.google.com/apikey, saved on this phone only.
+  function aiSetup() {
+    const det = document.createElement("details"); det.className = "ai-setup";
+    const has = !!BPG.aiKey();
+    const sum = document.createElement("summary"); sum.textContent = has ? "Smart fill is on (free AI key saved)" : "Make quick fill smarter with free AI";
+    const p = document.createElement("p"); p.className = "hint";
+    p.innerHTML = 'Free, no card needed. 1) Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> and sign in with Google. 2) Tap <b>Create API key</b> and copy it. 3) Paste it here. The key stays on this phone; what you type in quick fill is sent to Google to be read.';
+    const row = document.createElement("div"); row.className = "quick-row";
+    const k = document.createElement("input"); k.type = "password"; k.id = "f_aikey"; k.autocomplete = "off"; k.placeholder = has ? "Key saved" : "Paste your key";
+    const save = document.createElement("button"); save.type = "button"; save.textContent = has ? "Remove" : "Save";
+    save.onclick = () => {
+      if (has) BPG.setAiKey(""); else if (k.value.trim()) BPG.setAiKey(k.value); else return;
+      renderFields(); $("f_quick").parentNode.nextSibling.textContent = has ? "AI key removed. Quick fill uses the basic rules." : "AI key saved. Type anything and tap Fill.";
+    };
+    if (!has) row.append(k);
+    row.append(save); det.append(sum, p, row);
+    return det;
   }
   function renderFields() {
     const box = $("fields"), t = T[state.tpl]; box.innerHTML = "";
     const ex = BPG.quickExample(t);
-    if (ex) quickBox(box, t, ex);
+    if (ex || BPG.aiKey()) quickBox(box, t, ex);
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));

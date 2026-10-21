@@ -171,6 +171,14 @@ window.BPG = window.BPG || {};
 
   BPG.quickParse = (text) => {
     let t = " " + String(text || "").replace(/[–—]/g, "-").replace(/\s+/g, " ") + " ";
+    // Banglish into the English the rules below read: "5 ta char 2 ta chokka", "38 bole", "8.3 over e", "52 otut".
+    t = t.replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:char|chaar|boundary|boundaries)\b|(\d{1,2})\s*(?:ta|t)\s*4(?=\s|[,.;]|$)/gi, (m, a, b) => ` ${a || b} fours `)
+      .replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:chokka|chakka|chhokka|chaka|choka)\b|(\d{1,2})\s*(?:ta|t)\s*6(?=\s|[,.;]|$)/gi, (m, a, b) => ` ${a || b} sixes `)
+      .replace(/(\d{1,3})\s*(?:bol|bole|bal|bale|balle|ball\s+e|bol\s+e)\b/gi, "$1 balls")
+      .replace(/(\d{1,2}(?:\.\d)?)\s*(?:over|ovar|obhar)\s+e\b/gi, "$1 overs")
+      .replace(/(\d{1,2})\s*(?:ta|t)?\s*(?:wicket|wkt|uikat|uiket)s?\s*(?:nise|nilo|niyeche|niyechen)?\s*(\d{1,3})\s*(?:run|ran|rane?)\s*(?:e|diye|dia)?\b/gi, "$1/$2")
+      .replace(/(\d{1,3})\s*\*?\s*(?:otut|oporajito|apparajita)\b/gi, "$1*")
+      .replace(/\b(?:bonam|biruddhe|er\s+against)\b/gi, " vs ");
     t = t.replace(/(\d{1,3})\s*\*?\s*(?:not out|n\.o\.?|no)(?=[\s,.;]|$)/gi, "$1*");
     const out = {};
     const take = (re, fn) => { const m = t.match(re); if (m) { fn(m); t = t.replace(m[0], " "); } return !!m; };
@@ -199,7 +207,7 @@ window.BPG = window.BPG || {};
     take(/\b(\d{1,2})\s*x\s*6s?\b|\b(\d{1,2})\s*(?:sixes|six|6s)\b|\b(?:6s|sixes)\s*[:=-]?\s*(\d{1,2})\b/i, (m) => { out.sixes = m[1] || m[2] || m[3]; });
     // Separate runs and balls if typed apart: "52* 38b", "52 runs 38 balls"
     if (!out.balls) take(/\b(\d{1,3})\s*(?:b|balls?)\b/i, (m) => { out.balls = m[1]; });
-    if (!out.runs) take(/\b(\d{1,3}\*?)\s*(?:runs?|r)\b|(?:^|\s)(\d{1,3}\*)(?=\s)/i, (m) => { out.runs = m[1] || m[2]; });
+    if (!out.runs) take(/\b(\d{1,3}\*?)\s*(?:runs?|r|ran)\b|(?:^|\s)(\d{1,3}\*)(?=\s)/i, (m) => { out.runs = m[1] || m[2]; });
     if (!out.overs) take(/\b([\d]{1,2}(?:\.\d)?)\s*(?:ov|overs?)\b/i, (m) => { out.overs = m[1]; });
     take(/\b(\d{1,3})\s*'(?=\s)|\b(\d{1,3})(?:st|nd|rd|th)?\s*(?:min|minute)\b/i, (m) => { out.minute = (m[1] || m[2]) + "'"; });
 
@@ -220,7 +228,7 @@ window.BPG = window.BPG || {};
     left.forEach((n) => { if (!out.team) out.team = n; else if (!out.opp && n !== out.team) out.opp = n; });
 
     // Whatever words are left are the player's name.
-    const words = t.replace(/\b(vs?|versus|against|for|and|scored|scores|hits|smashes|takes|took|not out|no|runs?|balls?|wkts?|wickets?)\b/gi, " ")
+    const words = t.replace(/\b(vs?|versus|against|for|and|scored|scores|hits|smashes|takes|took|not out|no|runs?|balls?|wkts?|wickets?|e|ta|te|er|ke|re|korse|korlo|korche|koreche|korechen|korsen|nise|nilo|niyeche|dilo|dise|diye|dia|goal|gol|kore|ar|o|run|minute|min)\b/gi, " ")
       .replace(/[^\p{L}\s'.-]/gu, " ").replace(/\s+/g, " ").trim();
     if (words) out.player = title(words);
     return out;

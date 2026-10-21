@@ -58,6 +58,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .quick-row input { flex: 1; min-width: 0; }
 .quick-row button { flex: none; padding: 0 18px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; }
 .field.quick .hint:empty { display: none; }
+.quick-row button:disabled { opacity: .6; cursor: wait; }
+.ai-setup summary { font-size: 13px; color: var(--muted); cursor: pointer; }
+.ai-setup[open] { display: flex; flex-direction: column; gap: 8px; }
+.ai-setup a { color: var(--accent); }
 .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
 .field input, .field textarea, .field select {
   font: 500 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
