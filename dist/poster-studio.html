@@ -69,14 +69,24 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .field.wide { grid-column: 1 / -1; }
 .quick-row { display: flex; gap: 8px; }
 .quick-row input { flex: 1; min-width: 0; }
+#aiBox .quick-row button { min-height: 40px; }
 .quick-row button { flex: none; padding: 0 18px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700; cursor: pointer; }
 .field.quick .hint:empty { display: none; }
 .quick-row button:disabled { opacity: .6; cursor: wait; }
 .ai-setup summary { font-size: 13px; color: var(--muted); cursor: pointer; }
 .ai-setup[open] { display: flex; flex-direction: column; gap: 8px; }
 .ai-setup a { color: var(--accent); }
+.quick-row button:disabled { opacity: .6; }
+.lib-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.lib-grid:empty { display: none; }
+.lib-item { position: relative; }
+.lib-pick { display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--chip); cursor: pointer; }
+.lib-pick[aria-pressed="true"] { border-color: var(--accent); }
+.lib-pick img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lib-del { position: absolute; top: 3px; right: 3px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 16px; line-height: 1; cursor: pointer; }
+.field.lib .ghost { align-self: flex-start; }
 .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
-.field input, .field textarea, .field select {
+#aiBox input, .field input, .field textarea, .field select {
   font: 500 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
   border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
 }
@@ -158,6 +168,12 @@ img { max-width: 100%; }
 
 <div class="wrap">
   <div class="rail">
+    <section class="box" id="aiBox">
+      <span class="label">Make a poster with AI</span>
+      <div class="quick-row"><input id="aiNote" type="text" autocomplete="off" aria-label="Tell the AI what poster you want" placeholder="e.g. Shakib 52*(38) vs India, 4 ta char 2 ta chokka"><button type="button" id="aiGo">Make</button></div>
+      <p class="hint" id="aiStatus">Type the update any way you like. The AI picks the card, fills it, and your saved photo of the player goes on it.</p>
+    </section>
+
     <section class="box">
       <span class="label">Sport</span>
       <div class="seg" id="cats"></div>
@@ -177,6 +193,14 @@ img { max-width: 100%; }
       <span class="label">Photo</span>
       <div class="fields">
         <div class="field wide"><label for="photo1">Player photo</label><input id="photo1" type="file" accept="image/*"></div>
+        <div class="field wide lib" id="libWrap">
+          <label for="libName">My photo library (saved on this phone)</label>
+          <div class="quick-row"><input id="libName" type="text" placeholder="Player name" autocomplete="off" list="dl_players"><button type="button" id="libAddBtn">Add photos</button></div>
+          <input id="libAdd" type="file" accept="image/*" multiple hidden>
+          <div class="lib-grid" id="libGrid"></div>
+          <p class="hint" id="libStatus"></p>
+          <button class="ghost" id="libSave" type="button" hidden>Save this photo to my library</button>
+        </div>
         <div class="field wide"><label>Use the photo as</label><div class="seg" id="cutMode" role="group" aria-label="Photo style"><button type="button" data-v="full" aria-pressed="true">Full photo</button><button type="button" data-v="cut" aria-pressed="false">Cutout</button></div><p class="hint" id="cutStatus"></p><button class="ghost" id="cutFix" type="button" hidden>Fix the cutout (bring back a bat, erase background)</button></div>
         <div class="field wide"><label>Photo finish</label><div class="seg" id="proMode" role="group" aria-label="Photo finish"><button type="button" data-v="pro" aria-pressed="true">Pro (punchy colour, crisp, fine grain)</button><button type="button" data-v="natural" aria-pressed="false">Natural</button></div></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
@@ -250,7 +274,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "21 Oct 2026 · v40";
+BPG.VERSION = "21 Oct 2026 · v41";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -2609,22 +2633,12 @@ Rules:
     } finally { clearTimeout(timer); }
   }
 
-  // Resolves with { values, labels, via: "ai" } or throws; the caller falls back to BPG.quickApply.
-  BPG.smartFill = async (tpl, text, key = BPG.aiKey()) => {
+  // Sends one request, trying each free model in turn. Throws a short message the studio can show.
+  async function run(body, key) {
     if (!key) throw new Error("no key");
-    const body = {
-      contents: [{ role: "user", parts: [{ text: prompt(tpl, text) }] }],
-      generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: schema(tpl) },
-    };
     let last;
     for (const m of MODELS) {
-      try {
-        const got = await ask(m, key, body, 15000);
-        const fields = fieldsOf(tpl), values = {};
-        fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "" && grounded(f, String(v).trim(), text)) values[f.id] = String(v).trim(); });
-        const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
-        return { values, labels, via: "ai" };
-      } catch (e) {
+      try { return await ask(m, key, body, 15000); } catch (e) {
         last = e;
         // A bad key won't work on any model; a missing model or a busy one might on the next.
         if (e.status === 400 && /api key/i.test(e.message)) throw new Error("That AI key doesn't work. Check it in Smart fill.");
@@ -2634,6 +2648,35 @@ Rules:
     }
     if (last && (last.status === 429 || last.status >= 500)) throw new Error("The free AI is busy right now.");
     throw new Error("The AI didn't answer.");
+  }
+  const json = (text, schema) => ({
+    contents: [{ role: "user", parts: [{ text }] }],
+    generationConfig: { temperature: 0.2, responseMimeType: "application/json", responseSchema: schema },
+  });
+
+  // Resolves with { values, labels, via: "ai" } or throws; the caller falls back to BPG.quickApply.
+  BPG.smartFill = async (tpl, text, key = BPG.aiKey()) => {
+    const got = await run(json(prompt(tpl, text), schema(tpl)), key);
+    const fields = fieldsOf(tpl), values = {};
+    fields.forEach((f) => { const v = got && got[f.id]; if (v !== undefined && v !== null && String(v).trim() !== "" && grounded(f, String(v).trim(), text)) values[f.id] = String(v).trim(); });
+    const labels = fields.filter((f) => f.id in values).map((f) => f.label.replace(/\s*\(.*\)$/, ""));
+    return { values, labels, via: "ai" };
+  };
+
+  // "Make a poster": picks which card fits a typed note. Resolves with a key of BPG.TEMPLATES.
+  BPG.pickCard = async (text, key = BPG.aiKey()) => {
+    const T = BPG.TEMPLATES, cats = BPG.CATS || {};
+    const list = Object.entries(T).map(([k, t]) => `- ${k}: ${t.name} (${cats[t.cat] || t.cat})${t.big ? `, big word ${t.big}` : ""}. Fields: ${t.fields.map((f) => f[1].replace(/\s*\(.*\)$/, "")).join(", ")}`).join("\n");
+    const got = await run(json(`You choose the poster card for a sports page (cricket and football, Bangladesh). The cards:
+${list}
+
+The user's note (English, Banglish or Bangla):
+"""${text}"""
+
+Pick the one card that fits the note best. A batter's fifty is "fifty", a hundred is "century", a five-wicket haul is "fifer"; Test matches use the Test cricket cards when the note says Test. When the note is an opinion or a match story, pick a Borhan Rants card. Answer with the card's key.`,
+      { type: "OBJECT", properties: { card: { type: "STRING", enum: Object.keys(T) } }, required: ["card"] }), key);
+    if (!got || !T[got.card]) throw new Error("The AI couldn't pick a card.");
+    return got.card;
   };
 })();
 
@@ -3448,6 +3491,75 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Photo library: player photos saved on this phone (IndexedDB), found again by the player's name.
+// BPG.lib.add(name, blob), BPG.lib.find(name), BPG.lib.remove(id), BPG.lib.count().
+// Nothing is uploaded. Clearing the browser's site data deletes the library.
+window.BPG = window.BPG || {};
+
+(() => {
+  const DB = "bpg_library", STORE = "photos";
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open(DB, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => { dbp = null; rej(r.error); };
+  }));
+  const tx = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(STORE, mode), out = fn(t.objectStore(STORE));
+      t.oncomplete = () => res(out && "result" in out ? out.result : undefined);
+      t.onerror = () => rej(t.error);
+    });
+  };
+
+  // "Shakib Al Hasan", "shakib al-hasan" and "Shakib  Al Hasan" are the same player.
+  const norm = (s) => String(s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-zঀ-৿]+/g, " ").trim();
+  // How well a saved name matches what was typed: 3 same name, 2 every typed word is in it ("Shakib" → Shakib Al Hasan), 1 a long word matches.
+  const score = (saved, q) => {
+    const a = norm(saved), b = norm(q);
+    if (!a || !b) return 0;
+    if (a === b) return 3;
+    const aw = a.split(" "), bw = b.split(" ");
+    if (bw.every((w) => aw.includes(w)) || aw.every((w) => bw.includes(w))) return 2;
+    return bw.some((w) => w.length >= 4 && aw.includes(w)) ? 1 : 0;
+  };
+
+  // Big phone photos are shrunk to 2000 px on the long side before saving, so the library doesn't fill the phone.
+  async function shrink(blob) {
+    if (blob.type === "image/png") return blob; // a cutout keeps its see-through background
+    try {
+      const img = await createImageBitmap(blob), s = Math.min(1, 2000 / Math.max(img.width, img.height));
+      if (s === 1 && blob.size < 1.5e6) return blob;
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return await new Promise((res) => c.toBlob((b) => res(b || blob), "image/jpeg", 0.92));
+    } catch (e) { return blob; }
+  }
+
+  BPG.lib = {
+    ok: () => "indexedDB" in window,
+    norm,
+    async add(name, blob) {
+      const clean = String(name || "").trim().replace(/\s+/g, " ");
+      if (!clean) throw new Error("Type the player's name first.");
+      const small = await shrink(blob);
+      return tx("readwrite", (s) => s.add({ name: clean, key: norm(clean), blob: small, added: Date.now() }));
+    },
+    // Best matches first, newest first within a match.
+    async find(q) {
+      const all = await tx("readonly", (s) => s.getAll());
+      return all.map((p) => ({ ...p, score: score(p.name, q) })).filter((p) => p.score > 0)
+        .sort((x, y) => y.score - x.score || y.added - x.added);
+    },
+    remove: (id) => tx("readwrite", (s) => s.delete(id)),
+    count: () => tx("readonly", (s) => s.count()),
+  };
+})();
+
+</script>
+<script>
 // The form, the live preview and the download/share buttons.
 window.BPG = window.BPG || {};
 
@@ -3518,6 +3630,12 @@ window.BPG = window.BPG || {};
     d.append(l, i); parent.appendChild(d);
   }
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
+  // A new note is a new poster: fields it doesn't mention are emptied, not left over from the last one.
+  function fillCard(values) {
+    const fresh = {}; T[state.tpl].fields.forEach(([id]) => { fresh[id] = ""; });
+    state.values[state.tpl] = { ...fresh, ...values }; persist();
+    renderFields(); draw(); nameChanged();
+  }
   // One line in, every field filled: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL".
   // With a free AI key (smartfill.js) it reads any wording, Banglish too; without one, or if the AI fails, the rules in quickfill.js do it.
   function quickBox(parent, t, example) {
@@ -3531,10 +3649,7 @@ window.BPG = window.BPG || {};
     const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
     const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
     const done = (values, msg) => {
-      // A new note is a new poster: fields it doesn't mention are emptied, not left over from the last one.
-      const fresh = {}; t.fields.forEach(([id]) => { fresh[id] = ""; });
-      state.values[state.tpl] = { ...fresh, ...values }; persist();
-      const typed = i.value; renderFields(); draw();
+      const typed = i.value; fillCard(values);
       $("f_quick").value = typed; $("f_quick").parentNode.nextSibling.textContent = msg;
     };
     const rules = (why) => {
@@ -3583,7 +3698,7 @@ window.BPG = window.BPG || {};
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
-    t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => setVal(id, v)));
+    t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
     if (!t.fields.some(([id]) => ["winner", "team", "t1", "abbr"].includes(id)))
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
@@ -3606,7 +3721,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); }
+  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -3681,9 +3796,10 @@ window.BPG = window.BPG || {};
     const p = photos[1]; if (!p || !p.cutImg || !BPG.editCutout) return;
     BPG.editCutout(p, (fixed) => { fixed.bpgFocus = (BPG.findSubject && BPG.findSubject(fixed)) || p.cutImg.bpgFocus; p.cutImg = fixed; if (cutMode === "cut") Object.assign(p, { img: fixed, cut: true }); draw(); });
   });
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
-    const f = e.target.files[0]; if (!f) return;
-    const raw = await loadImage(f), isPng = isCutout(raw);
+  // Every photo goes through here, picked from the phone or from the photo library.
+  // extra: { blob } keeps the file so it can be saved to the library; { libId, auto } marks a library photo.
+  async function usePhoto(n, raw, extra = {}) {
+    const isPng = isCutout(raw);
     // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
     const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
     const graded = isPng || !BPG.gradePhoto ? img : BPG.gradePhoto(img), use = proMode === "pro" ? graded : img;
@@ -3691,11 +3807,115 @@ window.BPG = window.BPG || {};
     const focus = BPG.findSubject ? BPG.findSubject(img) : null;
     if (focus) focus.small = en.small;
     img.bpgFocus = graded.bpgFocus = focus;
-    photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng }; showCutMode(); draw();
+    photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (n === 1) showLibrary();
+  }
+  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    await usePhoto(n, await loadImage(f), { blob: f });
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // ---------- Photo library (library.js) ----------
+  // When the player's name is filled, their newest saved photo goes on the card by itself.
+  // A photo you picked yourself is never replaced; one the library put there is, when the name changes.
+  const NAME_FIELDS = ["player", "batter", "bowler", "name", "potm", "p1"];
+  const playerName = () => {
+    const vals = state.values[state.tpl] || {}, t = T[state.tpl];
+    const id = NAME_FIELDS.find((f) => t.fields.some((x) => x[0] === f) && String(vals[f] || "").trim());
+    return id ? String(vals[id]).trim() : "";
+  };
+  let libTimer = null, libUrls = [];
+  const libStatus = (m) => { $("libStatus").textContent = m; };
+  function nameChanged() {
+    if (!BPG.lib || !BPG.lib.ok()) return;
+    clearTimeout(libTimer);
+    libTimer = setTimeout(async () => {
+      const name = playerName();
+      if (name) $("libName").value = name;
+      const found = await showLibrary();
+      const p = photos[1];
+      if (found.length && T[state.tpl] && !T[state.tpl].noPhoto && (!p || p.auto) && (!p || p.libId !== found[0].id)) {
+        await useLibPhoto(found[0], true);
+      }
+    }, 350);
+  }
+  async function useLibPhoto(item, auto) {
+    try { await usePhoto(1, await loadImage(item.blob), { libId: item.id, auto: !!auto, blob: item.blob }); }
+    catch (e) { libStatus("Couldn't open that photo."); }
+  }
+  async function showLibrary() {
+    const grid = $("libGrid"), name = $("libName").value.trim();
+    libUrls.forEach((u) => URL.revokeObjectURL(u)); libUrls = []; grid.innerHTML = "";
+    const p = photos[1];
+    $("libSave").hidden = !p || !p.blob || !!p.libId;
+    if (!name) { libStatus("Type a player's name to see their saved photos."); return []; }
+    let found = [];
+    try { found = await BPG.lib.find(name); } catch (e) { libStatus("The photo library isn't available in this browser."); return []; }
+    found.slice(0, 12).forEach((item) => {
+      const d = document.createElement("div"); d.className = "lib-item";
+      const pick = document.createElement("button"); pick.type = "button"; pick.className = "lib-pick"; pick.title = item.name;
+      pick.setAttribute("aria-pressed", String(!!(p && p.libId === item.id)));
+      const im = document.createElement("img"), u = URL.createObjectURL(item.blob); libUrls.push(u); im.src = u; im.alt = item.name;
+      pick.appendChild(im); pick.onclick = () => useLibPhoto(item, false);
+      const del = document.createElement("button"); del.type = "button"; del.className = "lib-del"; del.textContent = "×"; del.setAttribute("aria-label", "Delete this photo from the library");
+      del.onclick = async () => {
+        if (!confirm(`Delete this photo of ${item.name} from your library?`)) return;
+        await BPG.lib.remove(item.id); if (photos[1] && photos[1].libId === item.id) photos[1].libId = null; showLibrary();
+      };
+      d.append(pick, del); grid.appendChild(d);
+    });
+    libStatus(found.length ? `${found.length} saved photo${found.length > 1 ? "s" : ""} of ${found[0].name}. Tap one to use it.` : `No saved photos of ${name} yet. Tap Add photos to save some.`);
+    return found;
+  }
+  $("libName").addEventListener("input", () => { clearTimeout(libTimer); libTimer = setTimeout(showLibrary, 300); });
+  $("libAddBtn").addEventListener("click", () => {
+    if (!$("libName").value.trim()) { libStatus("Type the player's name first, then tap Add photos."); $("libName").focus(); return; }
+    $("libAdd").click();
+  });
+  $("libAdd").addEventListener("change", async (e) => {
+    const files = [...e.target.files], name = $("libName").value.trim(); e.target.value = "";
+    if (!files.length || !name) return;
+    libStatus(`Saving ${files.length} photo${files.length > 1 ? "s" : ""}…`);
+    try { for (const f of files) await BPG.lib.add(name, f); } catch (err) { libStatus(err.message || "Couldn't save the photos."); return; }
+    const found = await showLibrary();
+    if (found.length && (!photos[1] || photos[1].auto)) await useLibPhoto(found[0], true);
+  });
+  $("libSave").addEventListener("click", async () => {
+    const p = photos[1], name = $("libName").value.trim() || playerName();
+    if (!p || !p.blob) return;
+    if (!name) { libStatus("Type the player's name above, then tap Save again."); $("libName").focus(); return; }
+    try { p.libId = await BPG.lib.add(name, p.blob); $("libName").value = name; await showLibrary(); libStatus(`Saved to ${name}'s photos.`); }
+    catch (err) { libStatus(err.message || "Couldn't save the photo."); }
+  });
+
+  // ---------- Make a poster with AI ----------
+  // One note in: the AI picks the card (BPG.pickCard), fills it (BPG.smartFill), and the library adds the photo.
+  const aiStatus = (m) => { $("aiStatus").textContent = m; };
+  async function makePoster() {
+    const text = $("aiNote").value.trim(); if (!text) return;
+    if (!BPG.aiKey()) {
+      aiStatus("Add your free AI key first: it's under the quick fill box in Details (Make quick fill smarter with free AI).");
+      const d = document.querySelector(".ai-setup"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      return;
+    }
+    $("aiGo").disabled = true;
+    try {
+      aiStatus("Picking the card…");
+      const key = await BPG.pickCard(text);
+      state.tpl = key; state.cat = T[key].cat; persist(); renderAll();
+      aiStatus(`${T[key].name} card. Filling it in…`);
+      const { values, labels } = await BPG.smartFill(T[key], text);
+      fillCard(values);
+      aiStatus(`Made a ${T[key].name} card${labels.length ? " with " + labels.join(", ") : ""}. Check it, then download.`);
+    } catch (e) {
+      aiStatus((e.message || "The AI didn't answer.") + " Try again, or pick the card and use quick fill.");
+    } finally { $("aiGo").disabled = false; }
+  }
+  $("aiGo").addEventListener("click", makePoster);
+  $("aiNote").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); makePoster(); } });
   showCutMode();
   // Photo finish: Pro (graded, see BPG.gradePhoto, plus fine grain when drawn) or Natural. Remembered on this phone.
   let proMode = "pro";

@@ -68,6 +68,12 @@ window.BPG = window.BPG || {};
     d.append(l, i); parent.appendChild(d);
   }
   function setVal(id, v) { (state.values[state.tpl] = state.values[state.tpl] || {})[id] = v; persist(); draw(); }
+  // A new note is a new poster: fields it doesn't mention are emptied, not left over from the last one.
+  function fillCard(values) {
+    const fresh = {}; T[state.tpl].fields.forEach(([id]) => { fresh[id] = ""; });
+    state.values[state.tpl] = { ...fresh, ...values }; persist();
+    renderFields(); draw(); nameChanged();
+  }
   // One line in, every field filled: "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL".
   // With a free AI key (smartfill.js) it reads any wording, Banglish too; without one, or if the AI fails, the rules in quickfill.js do it.
   function quickBox(parent, t, example) {
@@ -81,10 +87,7 @@ window.BPG = window.BPG || {};
     const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
     const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
     const done = (values, msg) => {
-      // A new note is a new poster: fields it doesn't mention are emptied, not left over from the last one.
-      const fresh = {}; t.fields.forEach(([id]) => { fresh[id] = ""; });
-      state.values[state.tpl] = { ...fresh, ...values }; persist();
-      const typed = i.value; renderFields(); draw();
+      const typed = i.value; fillCard(values);
       $("f_quick").value = typed; $("f_quick").parentNode.nextSibling.textContent = msg;
     };
     const rules = (why) => {
@@ -133,7 +136,7 @@ window.BPG = window.BPG || {};
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
-    t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => setVal(id, v)));
+    t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
     if (!t.fields.some(([id]) => ["winner", "team", "t1", "abbr"].includes(id)))
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
@@ -156,7 +159,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); }
+  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -231,9 +234,10 @@ window.BPG = window.BPG || {};
     const p = photos[1]; if (!p || !p.cutImg || !BPG.editCutout) return;
     BPG.editCutout(p, (fixed) => { fixed.bpgFocus = (BPG.findSubject && BPG.findSubject(fixed)) || p.cutImg.bpgFocus; p.cutImg = fixed; if (cutMode === "cut") Object.assign(p, { img: fixed, cut: true }); draw(); });
   });
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
-    const f = e.target.files[0]; if (!f) return;
-    const raw = await loadImage(f), isPng = isCutout(raw);
+  // Every photo goes through here, picked from the phone or from the photo library.
+  // extra: { blob } keeps the file so it can be saved to the library; { libId, auto } marks a library photo.
+  async function usePhoto(n, raw, extra = {}) {
+    const isPng = isCutout(raw);
     // Small photos are scaled up and sharpened once here, so the card isn't blurry (see enhance.js).
     const en = isPng || !BPG.enhancePhoto ? { img: raw, w: raw.width, h: raw.height, small: false } : BPG.enhancePhoto(raw), img = en.img;
     const graded = isPng || !BPG.gradePhoto ? img : BPG.gradePhoto(img), use = proMode === "pro" ? graded : img;
@@ -241,11 +245,115 @@ window.BPG = window.BPG || {};
     const focus = BPG.findSubject ? BPG.findSubject(img) : null;
     if (focus) focus.small = en.small;
     img.bpgFocus = graded.bpgFocus = focus;
-    photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng }; showCutMode(); draw();
+    photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
     if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (n === 1) showLibrary();
+  }
+  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    await usePhoto(n, await loadImage(f), { blob: f });
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // ---------- Photo library (library.js) ----------
+  // When the player's name is filled, their newest saved photo goes on the card by itself.
+  // A photo you picked yourself is never replaced; one the library put there is, when the name changes.
+  const NAME_FIELDS = ["player", "batter", "bowler", "name", "potm", "p1"];
+  const playerName = () => {
+    const vals = state.values[state.tpl] || {}, t = T[state.tpl];
+    const id = NAME_FIELDS.find((f) => t.fields.some((x) => x[0] === f) && String(vals[f] || "").trim());
+    return id ? String(vals[id]).trim() : "";
+  };
+  let libTimer = null, libUrls = [];
+  const libStatus = (m) => { $("libStatus").textContent = m; };
+  function nameChanged() {
+    if (!BPG.lib || !BPG.lib.ok()) return;
+    clearTimeout(libTimer);
+    libTimer = setTimeout(async () => {
+      const name = playerName();
+      if (name) $("libName").value = name;
+      const found = await showLibrary();
+      const p = photos[1];
+      if (found.length && T[state.tpl] && !T[state.tpl].noPhoto && (!p || p.auto) && (!p || p.libId !== found[0].id)) {
+        await useLibPhoto(found[0], true);
+      }
+    }, 350);
+  }
+  async function useLibPhoto(item, auto) {
+    try { await usePhoto(1, await loadImage(item.blob), { libId: item.id, auto: !!auto, blob: item.blob }); }
+    catch (e) { libStatus("Couldn't open that photo."); }
+  }
+  async function showLibrary() {
+    const grid = $("libGrid"), name = $("libName").value.trim();
+    libUrls.forEach((u) => URL.revokeObjectURL(u)); libUrls = []; grid.innerHTML = "";
+    const p = photos[1];
+    $("libSave").hidden = !p || !p.blob || !!p.libId;
+    if (!name) { libStatus("Type a player's name to see their saved photos."); return []; }
+    let found = [];
+    try { found = await BPG.lib.find(name); } catch (e) { libStatus("The photo library isn't available in this browser."); return []; }
+    found.slice(0, 12).forEach((item) => {
+      const d = document.createElement("div"); d.className = "lib-item";
+      const pick = document.createElement("button"); pick.type = "button"; pick.className = "lib-pick"; pick.title = item.name;
+      pick.setAttribute("aria-pressed", String(!!(p && p.libId === item.id)));
+      const im = document.createElement("img"), u = URL.createObjectURL(item.blob); libUrls.push(u); im.src = u; im.alt = item.name;
+      pick.appendChild(im); pick.onclick = () => useLibPhoto(item, false);
+      const del = document.createElement("button"); del.type = "button"; del.className = "lib-del"; del.textContent = "×"; del.setAttribute("aria-label", "Delete this photo from the library");
+      del.onclick = async () => {
+        if (!confirm(`Delete this photo of ${item.name} from your library?`)) return;
+        await BPG.lib.remove(item.id); if (photos[1] && photos[1].libId === item.id) photos[1].libId = null; showLibrary();
+      };
+      d.append(pick, del); grid.appendChild(d);
+    });
+    libStatus(found.length ? `${found.length} saved photo${found.length > 1 ? "s" : ""} of ${found[0].name}. Tap one to use it.` : `No saved photos of ${name} yet. Tap Add photos to save some.`);
+    return found;
+  }
+  $("libName").addEventListener("input", () => { clearTimeout(libTimer); libTimer = setTimeout(showLibrary, 300); });
+  $("libAddBtn").addEventListener("click", () => {
+    if (!$("libName").value.trim()) { libStatus("Type the player's name first, then tap Add photos."); $("libName").focus(); return; }
+    $("libAdd").click();
+  });
+  $("libAdd").addEventListener("change", async (e) => {
+    const files = [...e.target.files], name = $("libName").value.trim(); e.target.value = "";
+    if (!files.length || !name) return;
+    libStatus(`Saving ${files.length} photo${files.length > 1 ? "s" : ""}…`);
+    try { for (const f of files) await BPG.lib.add(name, f); } catch (err) { libStatus(err.message || "Couldn't save the photos."); return; }
+    const found = await showLibrary();
+    if (found.length && (!photos[1] || photos[1].auto)) await useLibPhoto(found[0], true);
+  });
+  $("libSave").addEventListener("click", async () => {
+    const p = photos[1], name = $("libName").value.trim() || playerName();
+    if (!p || !p.blob) return;
+    if (!name) { libStatus("Type the player's name above, then tap Save again."); $("libName").focus(); return; }
+    try { p.libId = await BPG.lib.add(name, p.blob); $("libName").value = name; await showLibrary(); libStatus(`Saved to ${name}'s photos.`); }
+    catch (err) { libStatus(err.message || "Couldn't save the photo."); }
+  });
+
+  // ---------- Make a poster with AI ----------
+  // One note in: the AI picks the card (BPG.pickCard), fills it (BPG.smartFill), and the library adds the photo.
+  const aiStatus = (m) => { $("aiStatus").textContent = m; };
+  async function makePoster() {
+    const text = $("aiNote").value.trim(); if (!text) return;
+    if (!BPG.aiKey()) {
+      aiStatus("Add your free AI key first: it's under the quick fill box in Details (Make quick fill smarter with free AI).");
+      const d = document.querySelector(".ai-setup"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      return;
+    }
+    $("aiGo").disabled = true;
+    try {
+      aiStatus("Picking the card…");
+      const key = await BPG.pickCard(text);
+      state.tpl = key; state.cat = T[key].cat; persist(); renderAll();
+      aiStatus(`${T[key].name} card. Filling it in…`);
+      const { values, labels } = await BPG.smartFill(T[key], text);
+      fillCard(values);
+      aiStatus(`Made a ${T[key].name} card${labels.length ? " with " + labels.join(", ") : ""}. Check it, then download.`);
+    } catch (e) {
+      aiStatus((e.message || "The AI didn't answer.") + " Try again, or pick the card and use quick fill.");
+    } finally { $("aiGo").disabled = false; }
+  }
+  $("aiGo").addEventListener("click", makePoster);
+  $("aiNote").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); makePoster(); } });
   showCutMode();
   // Photo finish: Pro (graded, see BPG.gradePhoto, plus fine grain when drawn) or Natural. Remembered on this phone.
   let proMode = "pro";
