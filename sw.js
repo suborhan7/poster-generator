@@ -1,8 +1,8 @@
 // Lets the studio open offline and install as an app.
 // Network first: when you're online you always get the newest version; the saved copy is only used offline.
-const CACHE = "borhan-studio-v4";
+const CACHE = "borhan-studio-v5";
 const FILES = ["./", "index.html", "css/styles.css", "manifest.webmanifest", "icons/icon-192.png",
-  "js/config.js", "js/templates.js", "js/engine.js", "js/layouts.js", "js/cricket.js", "js/testcards.js", "js/quickfill.js", "js/smartfill.js", "js/library.js", "js/caption.js", "js/series.js", "js/app.js", "js/series-ui.js", "js/cutout.js", "js/cutfix.js", "js/enhance.js"];
+  "js/config.js", "js/templates.js", "js/engine.js", "js/layouts.js", "js/cricket.js", "js/testcards.js", "js/quickfill.js", "js/smartfill.js", "js/zip.js", "js/library.js", "js/caption.js", "js/series.js", "js/app.js", "js/series-ui.js", "js/cutout.js", "js/cutfix.js", "js/enhance.js"];
 
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => { e.waitUntil(self.clients.claim()); });

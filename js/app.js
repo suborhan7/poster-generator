@@ -329,6 +329,40 @@ window.BPG = window.BPG || {};
     catch (err) { libStatus(err.message || "Couldn't save the photo."); }
   });
 
+  // A zip from the computer: one folder per player ("Shakib Al Hasan/1.jpg") or the name in the file ("shakib-al-hasan-2.jpg").
+  $("libZipBtn").addEventListener("click", () => $("libZip").click());
+  $("libZip").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    try {
+      libStatus("Opening the zip…");
+      const items = await BPG.unzip(f), names = BPG.zipNames(items.map((x) => x.path));
+      if (!items.length) { libStatus("No photos found in that zip."); return; }
+      const have = new Set((await BPG.lib.all()).map((x) => x.src).filter(Boolean));
+      let added = 0, skipped = 0, failed = 0; const players = new Set();
+      for (let i = 0; i < items.length; i++) {
+        libStatus(`Importing ${i + 1} of ${items.length}…`);
+        const src = `${f.name}:${items[i].path}`;
+        if (have.has(src) || !names[i]) { skipped++; continue; }
+        try { await BPG.lib.add(names[i], await items[i].blob(), src); added++; players.add(names[i]); } catch (err) { failed++; }
+      }
+      await showLibrary();
+      if (!added && skipped && !failed) { libStatus(`All ${skipped} photos in that zip are already in your library.`); return; }
+      libStatus(`Imported ${added} photo${added === 1 ? "" : "s"} of ${players.size} player${players.size === 1 ? "" : "s"}` +
+        (skipped ? `, skipped ${skipped} already saved` : "") + (failed ? `, ${failed} couldn't be read` : "") + ".");
+      nameChanged();
+    } catch (err) { libStatus(err.message || "Couldn't read that zip."); }
+  });
+  // Backup: every saved photo in one zip, a folder per player, which Import can read back on any phone.
+  $("libBackup").addEventListener("click", async () => {
+    const all = await BPG.lib.all();
+    if (!all.length) { libStatus("The library is empty, nothing to back up."); return; }
+    libStatus("Making the backup…");
+    const n = {}, files = all.map((x) => { n[x.name] = (n[x.name] || 0) + 1; return { path: `${x.name.replace(/[\/:*?"<>|]/g, "")}/${n[x.name]}.${x.blob.type === "image/png" ? "png" : "jpg"}`, blob: x.blob }; });
+    const zip = await BPG.zip(files), name = `borhan-photo-library-${new Date().toISOString().slice(0, 10)}.zip`;
+    await saveBlob(zip, name);
+    libStatus(`Backed up ${all.length} photos to ${name}. Keep it in Google Drive; Import it back on any phone.`);
+  });
+
   // ---------- Make a poster with AI ----------
   // One note in: the AI picks the card (BPG.pickCard), fills it (BPG.smartFill), and the library adds the photo.
   const aiStatus = (m) => { $("aiStatus").textContent = m; };

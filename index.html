@@ -56,6 +56,8 @@
           <div class="lib-grid" id="libGrid"></div>
           <p class="hint" id="libStatus"></p>
           <button class="ghost" id="libSave" type="button" hidden>Save this photo to my library</button>
+          <div class="lib-tools"><button class="ghost" id="libZipBtn" type="button">Import a zip of photos</button><button class="ghost" id="libBackup" type="button">Back up library (zip)</button></div>
+          <input id="libZip" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden>
         </div>
         <div class="field wide"><label>Use the photo as</label><div class="seg" id="cutMode" role="group" aria-label="Photo style"><button type="button" data-v="full" aria-pressed="true">Full photo</button><button type="button" data-v="cut" aria-pressed="false">Cutout</button></div><p class="hint" id="cutStatus"></p><button class="ghost" id="cutFix" type="button" hidden>Fix the cutout (bring back a bat, erase background)</button></div>
         <div class="field wide"><label>Photo finish</label><div class="seg" id="proMode" role="group" aria-label="Photo finish"><button type="button" data-v="pro" aria-pressed="true">Pro (punchy colour, crisp, fine grain)</button><button type="button" data-v="natural" aria-pressed="false">Natural</button></div></div>
@@ -137,6 +139,7 @@
 <script src="js/enhance.js"></script>
 <script src="js/cutout.js"></script>
 <script src="js/cutfix.js"></script>
+<script src="js/zip.js"></script>
 <script src="js/library.js"></script>
 <script src="js/app.js"></script>
 <script src="js/series-ui.js"></script>

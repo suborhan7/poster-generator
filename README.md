@@ -41,6 +41,7 @@ Features on every card:
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/zip.js` | Reads and writes .zip files in the browser, and works out a player's name from a folder or file name | To change how names are read from a zip |
 | `js/library.js` | Photo library: player photos saved on the phone (IndexedDB) and found by name | To change how names are matched |
 | `js/smartfill.js` | Smart fill: sends the quick fill note to Google's free Gemini AI (your own free key) and gets back which field each piece goes in | To change the AI's instructions or the models it tries |
 | `js/quickfill.js` | Quick fill: reads one typed line and fills the form; holds the team short forms (PAK, SL, BAN…) | To teach it a new team or short form |
@@ -131,6 +132,7 @@ It opens full screen from its own icon, works offline, and always picks up the n
 - **Smart fill (free AI):** under the quick fill box, open *Make quick fill smarter with free AI*, make a free key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (no card needed) and paste it. Then quick fill reads any wording, English, Banglish or Bangla (`litton 52 otut 38 bole 5 ta char 2 ta chokka bd vs sa`), and works on every card, including the Rants cards' headline, body and stat boxes. The key stays on your phone; what you type is sent to Google to be read. If the AI is busy or offline, the normal quick fill takes over, and that one now understands common Banglish too (`ta char`, `chokka`, `bole`, `over e`, `otut`, `bonam`).
 - **Make a poster with AI:** the box at the top. Type the update any way you like (`Shakib 52*(38) vs India, 4 ta char 2 ta chokka`); the AI picks the card, fills it, and your saved photo of the player goes on it. Needs the free AI key from Smart fill.
 - **Photo library:** under Photo, type a player's name and tap *Add photos* to save their photos on this phone (several at once is fine), or tap *Save this photo to my library* after picking one. Whenever that player's name is filled in, their newest saved photo goes on the card by itself; tap another thumbnail to switch, × to delete. The library lives in this browser only, so clearing site data deletes it.
+- **Library zip import and backup:** *Import a zip of photos* loads many photos at once. Give each player a folder named after them (`Shakib Al Hasan/1.jpg`), or put the name in the file (`shakib-al-hasan-2.jpg`). Importing the same zip again skips photos already saved. *Back up library (zip)* saves everything as one zip in that same layout; keep it in Google Drive and import it on a new phone.
 
 - Prepare both result cards (win and loss) before the last over, so you can post first.
 - Use cutout PNGs of players (remove.bg or Canva's background remover) for the best look.
