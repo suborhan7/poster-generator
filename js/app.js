@@ -81,7 +81,9 @@ window.BPG = window.BPG || {};
     const b = document.createElement("button"); b.type = "button"; b.textContent = "Fill";
     const note = document.createElement("p"); note.className = "hint"; note.setAttribute("aria-live", "polite");
     const done = (values, msg) => {
-      state.values[state.tpl] = { ...(state.values[state.tpl] || {}), ...values }; persist();
+      // A new note is a new poster: fields it doesn't mention are emptied, not left over from the last one.
+      const fresh = {}; t.fields.forEach(([id]) => { fresh[id] = ""; });
+      state.values[state.tpl] = { ...fresh, ...values }; persist();
       const typed = i.value; renderFields(); draw();
       $("f_quick").value = typed; $("f_quick").parentNode.nextSibling.textContent = msg;
     };
