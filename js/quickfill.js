@@ -281,6 +281,7 @@ window.BPG = window.BPG || {};
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
     matchcard: "BAN 1-0 BHU",
+    lineup: "BAN vs BHU",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
   })[tpl.layout] || "";

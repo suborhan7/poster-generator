@@ -11,7 +11,7 @@ window.BPG = window.BPG || {};
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
-  const photos = { 1: null, 2: null };
+  const photos = { 1: null, 2: null, 3: null };
   let logoImg = null;
 
   try {
@@ -143,6 +143,7 @@ window.BPG = window.BPG || {};
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
     const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
     $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
@@ -252,11 +253,27 @@ window.BPG = window.BPG || {};
     if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+  [1, 2, 3].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    await usePhoto(n, await loadImage(f), { blob: f });
+    const img = await loadImage(f);
+    if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
+    await usePhoto(n, img, { blob: f });
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // The tournament logo stays on this phone (shrunk to 600 px), so it is added once per tournament.
+  function keepTourLogo(img) {
+    try {
+      const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem("bpg_tourlogo", c.toDataURL("image/png"));
+    } catch (e) {}
+  }
+  try {
+    const saved = localStorage.getItem("bpg_tourlogo");
+    if (saved) { const i = new Image(); i.onload = () => { photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+  } catch (e) {}
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem("bpg_tourlogo"); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.

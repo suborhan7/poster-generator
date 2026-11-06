@@ -207,6 +207,7 @@ img { max-width: 100%; }
         <div class="field wide"><label>Use the photo as</label><div class="seg" id="cutMode" role="group" aria-label="Photo style"><button type="button" data-v="full" aria-pressed="true">Full photo</button><button type="button" data-v="cut" aria-pressed="false">Cutout</button></div><p class="hint" id="cutStatus"></p><button class="ghost" id="cutFix" type="button" hidden>Fix the cutout (bring back a bat, erase background)</button></div>
         <div class="field wide"><label>Photo finish</label><div class="seg" id="proMode" role="group" aria-label="Photo finish"><button type="button" data-v="pro" aria-pressed="true">Pro (punchy colour, crisp, fine grain)</button><button type="button" data-v="natural" aria-pressed="false">Natural</button></div></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
+        <div class="field wide" id="photo3Wrap" hidden><label for="photo3" id="photo3Label">Tournament logo</label><input id="photo3" type="file" accept="image/*"><button class="ghost" id="photo3Clear" type="button" hidden>Remove the logo</button></div>
         <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
         <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0"></div>
         <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
@@ -583,13 +584,20 @@ BPG.TEMPLATES = {
   fresult: { cat: "football", name: "Full-time score", layout: "fscore",
     hint: "Put *stars* around words in the headline to colour them.",
     fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
-  matchcard: { cat: "football", name: "Match card (crest vs crest)", layout: "matchcard", noCut: true,
-    photo1: "Home crest (optional, the flag is used for countries)", photo2: "Away crest (optional)",
-    hint: "No player photo: both teams' crests or flags with the score between them. Leave the goals empty for a match-day preview (status = kick-off time). Live 67' turns the status red. One scorer per line or comma between.",
-    fields: [["tournament","Tournament","SAFF Championship 2026",true],["stage","Small heading","Match day 1"],["status","Status (Full time, Half time, Live 67', 7:00 PM)","Full time"],
+  matchcard: { cat: "football", name: "Match card (full time / live / kick-off)", layout: "matchcard", noCut: true,
+    photo1: "Home crest (optional, the flag is used for countries)", photo2: "Away crest (optional)", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Clean tournament look. Leave the goals empty for a kick-off card. Status Live 67' shows a red dot. Full time works out the winner line for you unless you type your own. Card colour is any hex like #1640C8.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["stage","Heading","Match day 1"],["status","Status (Full time, Half time, Live 67', Kick off)","Full time"],
       ["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
       ["g1","Home scorers","Ibrahim 68'",true],["g2","Away scorers","",true],
-      ["headline","Your line (optional, *stars* colour words)","*Ibrahim* opens the account",true],["info","Info line","Dhaka | 5 Nov 2026",true]] },
+      ["headline","Bottom line (empty = WINNER: team)","",true],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
+  lineup: { cat: "football", name: "Starting XI (tournament look)", layout: "lineup", noCut: true,
+    photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One player per line: shirt number, then the name, e.g. 20 Gyeltshen Zangpo (GK). Substitutes one per line or with commas.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["team","Team","Bhutan"],["opp","Opponent","Bangladesh"],["title","Top word","Starting"],
+      ["players","Starting XI","20 Gyeltshen Zangpo (GK)\n7 Chencho Gyeltshen (C)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n16 Tshelthrim Namgyel\n18 Kinzang Tashi Tobden",true,"area"],
+      ["subs","Substitutes","1 Locho Nima, 2 Tandin Tshewang, 5 Deychog Drakar Dorji, 9 Kinzang Tenzin, 11 Kinga Wangchuk, 12 Kinley Penjor, 13 Jigdrel Wangchuk, 17 Jetsuen Dorji, 19 Sonam Dorji, 21 Dhendup Namgyel, 22 Jigme Tshelthrium, 23 Bikash Pradhan",true,"area"],
+      ["info","Info line","Kick-off 7:00 PM | Dhaka",true],["bgc","Card colour (optional)",""]] },
   fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
@@ -2047,133 +2055,7 @@ window.BPG = window.BPG || {};
       k.brandCorner(g, g.footerY);
     },
   };
-  // ---------- Match card: crest vs crest ----------
-  // No player photo. Both teams as round medallions (uploaded crest, else the country's flag, else the short name),
-  // the score between them, each side lit in its own jersey colour, with brush strokes rising from both corners.
-  // Empty goals = match-day preview (VS, status = kick-off time). "Live 67'" turns the status pill red.
-  function sideColours(g, team) {
-    const tc = g.teamTheme && BPG.TEAM_COLORS[BPG.teamName ? BPG.teamName(team) : team];
-    return tc ? { accent: tc.accent, stroke: tc.stroke, hot: tc.hot } : { accent: g.accent, stroke: g.stroke || "#3A4660", hot: g.hot || g.accent } // unknown team: a calm slate glow, not a wash of the accent;
-  }
-  function medallion(k, g, cx, cy, r, team, pic, col) {
-    const ctx = k.ctx, full = BPG.teamName ? BPG.teamName(team) || team : team;
-    const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 1.9);
-    glow.addColorStop(0, k.hexA(col.stroke, 0.55)); glow.addColorStop(1, k.hexA(col.stroke, 0));
-    ctx.fillStyle = glow; ctx.fillRect(cx - r * 2, cy - r * 2, r * 4, r * 4);
-    const crest = pic && (pic.plain || pic.orig || pic.img), flag = crest ? null : flagImg(full);
-    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = crest ? "#FFFFFF" : col.stroke; ctx.fill(); ctx.restore();
-    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
-    if (crest) {
-      const box = r * 1.42, sc = Math.min(box / crest.width, box / crest.height);
-      ctx.drawImage(crest, cx - (crest.width * sc) / 2, cy - (crest.height * sc) / 2, crest.width * sc, crest.height * sc);
-    } else if (flag) {
-      const sc = Math.max((2 * r) / flag.width, (2 * r) / flag.height);
-      ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc);
-      const gloss = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
-      gloss.addColorStop(0, "rgba(255,255,255,0.22)"); gloss.addColorStop(0.5, "rgba(255,255,255,0)"); gloss.addColorStop(1, "rgba(0,0,0,0.3)");
-      ctx.fillStyle = gloss; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
-    } else {
-      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
-      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, r * 1.5, Math.round(r * 0.8), k.D), k.D); ctx.fillStyle = col.accent;
-      ctx.fillText(sh, cx, cy + r * 0.28); ctx.textAlign = "left";
-    }
-    ctx.restore();
-    // Ring in the team's colour, with a thin light edge outside it.
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 10; ctx.strokeStyle = col.accent; ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx, cy, r + 12, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.stroke();
-  }
-  L.matchcard = {
-    standard: false, ownSweep: true,
-    draw(k, g) {
-      const ctx = k.ctx, { W, H } = g, cx = W / 2;
-      const c1 = sideColours(g, g.val("t1")), c2 = sideColours(g, g.val("t2"));
-      const s1 = String(g.val("s1") || "").trim(), s2 = String(g.val("s2") || "").trim(), played = s1 !== "" || s2 !== "";
-      const tall = H / W > 1.5, r = tall ? 160 : 132, gap = W * 0.3;
-      const span = g.footerY - g.st, midY = Math.round(g.st + span * (tall ? 0.36 : 0.42));
-      // Each half lit in its own team's colour.
-      [[0, c1], [W, c2]].forEach(([x, c]) => {
-        const gl = ctx.createRadialGradient(x, midY, 0, x, midY, W * 0.85);
-        gl.addColorStop(0, k.hexA(c.stroke, 0.5)); gl.addColorStop(1, k.hexA(c.stroke, 0));
-        ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
-      });
-      // Scorers: one per line, or a comma before the next name (so "Mbappe 12', 55'" stays one line).
-      const split = (v) => String(v || "").split(/\n|·|,\s*(?=[^\d\s])/).map((x) => x.trim()).filter(Boolean).slice(0, 5);
-      const lists = [split(g.val("g1")), split(g.val("g2"))], nameY = midY + r + 76;
-      const most = Math.max(lists[0].length, lists[1].length);
-      // Brush strokes from both bottom corners, each in its team's colours, starting under the scorers.
-      const sweepTop = nameY + (most ? 50 + (most - 1) * 40 : 0) + 30;
-      if (g.teamTheme) { k.paintSweep(Object.assign({}, g, c1), sweepTop, "left"); k.paintSweep(Object.assign({}, g, c2), sweepTop + 40, "right"); }
-      k.header(g);
-      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
-
-      // Top: tournament (small), then the stage as the heading.
-      let y = g.st + 46;
-      const tour = cap(g.val("tournament"));
-      if (tour) { ctx.font = k.font(k.fit(tour, W - 2 * PAD, 28, k.C, 700, 18), k.C, 700); k.spaced(6); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(tour, cx, y); k.spaced(0); y += 20; }
-      const stage = cap(g.val("stage"));
-      if (stage) { const ss = k.fit(stage, W - 2 * PAD, tall ? 104 : 88, k.D, "", 40); y += ss * 0.9; ctx.font = k.font(ss, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(stage, cx, y); }
-
-      // Middle: the two medallions with the score (or VS) between them.
-      const xs = [cx - gap, cx + gap];
-      medallion(k, g, xs[0], midY, r, g.val("t1"), g.photos[1], c1);
-      medallion(k, g, xs[1], midY, r, g.val("t2"), g.photos[2], c2);
-      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
-      const room = 2 * (gap - r) - 30;
-      if (played) {
-        const n1 = num(s1), n2 = num(s2), size = tall ? 176 : 160;
-        ctx.font = k.font(size, k.D);
-        const w1 = ctx.measureText(s1 || "0").width, wd = ctx.measureText("-").width, w2 = ctx.measureText(s2 || "0").width;
-        const sc = Math.min(1, room / (w1 + wd + w2 + 40)), fs = Math.round(size * sc);
-        ctx.font = k.font(fs, k.D);
-        const base = midY + fs * 0.36, half = (w1 + wd + w2 + 40) * sc / 2;
-        ctx.textAlign = "left";
-        ctx.fillStyle = n1 >= n2 ? "#FFFFFF" : "rgba(255,255,255,0.6)"; ctx.fillText(s1 || "0", cx - half, base);
-        ctx.fillStyle = g.accent; ctx.fillText("-", cx - half + w1 * sc + 20 * sc, base);
-        ctx.fillStyle = n2 >= n1 ? "#FFFFFF" : "rgba(255,255,255,0.6)"; ctx.fillText(s2 || "0", cx + half - w2 * sc, base);
-        ctx.textAlign = "center";
-      } else {
-        ctx.font = k.font(tall ? 120 : 108, k.D); ctx.fillStyle = g.accent; ctx.fillText("VS", cx, midY + 40);
-      }
-      // Status pill above the score: accent, or red with a dot when live.
-      const status = cap(g.val("status"));
-      if (status) {
-        const live = /LIVE/.test(status), fill = live ? "#FF3B3B" : g.accent, ink = live ? "#FFFFFF" : k.inkOn(g.accent);
-        ctx.font = k.font(k.fit(status, room - 40, 30, k.C, 700, 18), k.C, 700); k.spaced(4);
-        const tw = ctx.measureText(status).width + (live ? 26 : 0), ph = 50, py = midY - (played ? 150 : 128) - ph;
-        ctx.shadowBlur = 0; ctx.fillStyle = fill; k.roundRect(cx - tw / 2 - 24, py, tw + 48, ph, 25); ctx.fill();
-        ctx.fillStyle = ink; ctx.fillText(status, cx + (live ? 13 : 0), py + 36);
-        if (live) { ctx.beginPath(); ctx.arc(cx - tw / 2 + 4, py + 25, 8, 0, Math.PI * 2); ctx.fill(); }
-        k.spaced(0); ctx.shadowBlur = 18;
-      }
-
-      // Team names under the medallions, scorers under the names.
-      const colW = Math.min(W / 2 - PAD - 10, 2 * (xs[0] - PAD) + 40);
-      let lowest = nameY;
-      [g.val("t1"), g.val("t2")].forEach((tm, i) => {
-        const nm = cap(tm); if (!nm) return;
-        ctx.font = k.font(k.fit(nm, colW, 58, k.H, 900, 28), k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, xs[i], nameY, colW);
-        lists[i].forEach((line, j) => {
-          const ly = nameY + 50 + j * 40;
-          ctx.font = k.font(tall ? 36 : 32, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillText(cap(line), xs[i], ly, colW);
-          lowest = Math.max(lowest, ly);
-        });
-      });
-
-      // Your line, centred above the bottom row.
-      const hl = String(g.val("headline") || "").trim();
-      if (hl) {
-        const maxH = g.footerY - 70 - (lowest + 40);
-        let lay = k.layoutRich(cap(hl), W - 2 * PAD, tall ? 84 : 70, k.D, 2, 40);
-        while (lay.lines.length * lay.size * 1.02 > maxH && lay.size > 40) lay = k.layoutRich(cap(hl), W - 2 * PAD, lay.size - 4, k.D, 2, 40);
-        const top = Math.max(lowest + 40, g.footerY - 70 - lay.lines.length * lay.size * 1.02);
-        k.drawRich(lay, cx, top + lay.size * 0.9, lay.size * 1.02, k.D, "#FFFFFF", g.accent, "center");
-      }
-      ctx.restore(); ctx.restore(); ctx.textAlign = "left";
-      infoLine(k, g, g.val("info"), PAD, g.footerY, "left");
-      k.brandCorner(g, g.footerY);
-    },
-  };
+  BPG.flagImg = flagImg; // the tournament cards (tournament.js) use the same flags
 })();
 
 </script>
@@ -2407,6 +2289,313 @@ window.BPG = window.BPG || {};
       }
       ctx.restore();
       foot(k, g, g.val("info"));
+    },
+  };
+})();
+
+</script>
+<script>
+// Tournament cards: the clean "official broadcast" look (match card, starting XI).
+// Rich royal-blue background with our own stadium-dial ring and ribbons, the tournament logo on top,
+// a frosted panel with both teams, and big clear numbers. No brush strokes on these cards.
+//
+// Photos: 1 = home crest (match card) or a player photo (starting XI), 2 = away crest, 3 = tournament logo
+// (kept on this phone, so it only has to be added once per tournament).
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseInt(String(s).replace(/[^\d-]/g, ""), 10) || 0;
+  const C = { cream: "#FFE6BF", gold: "#FFD23F", cyan: "#4FB3FF", live: "#FF3B3B" };
+
+  // Card colour: typed hex, else royal blue.
+  function baseColour(g) {
+    const v = String(g.val("bgc") || "").trim().replace("#", "");
+    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : "#1640C8";
+  }
+  function mix(hex, to, f) {
+    const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
+    const ch = (s) => Math.round(((a >> s) & 255) * (1 - f) + ((b >> s) & 255) * f);
+    return "#" + [16, 8, 0].map((s) => ch(s).toString(16).padStart(2, "0")).join("");
+  }
+
+  // Background: gradient, floodlight glow, faint wave lines, a dial ring top-right and two ribbons bottom-left.
+  function tourBg(k, g, noRibbon) {
+    const ctx = k.ctx, { W, H } = g, base = baseColour(g);
+    const gr = ctx.createLinearGradient(0, 0, 0, H);
+    gr.addColorStop(0, mix(base, "#FFFFFF", 0.06)); gr.addColorStop(0.55, base); gr.addColorStop(1, mix(base, "#000000", 0.45));
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W / 2, -H * 0.05, 0, W / 2, -H * 0.05, H * 0.7);
+    glow.addColorStop(0, "rgba(255,255,255,0.22)"); glow.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    // Faint wave lines across the whole card.
+    ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.045)"; ctx.lineWidth = 2;
+    for (let y = -40; y < H + 40; y += 26) {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 20) ctx.lineTo(x, y + Math.sin(x / 90 + y / 70) * 14);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // Dial ring: a thick soft ring with teeth, half off the top-right edge.
+    const rx = W * 1.0, ry = g.st + H * 0.14, rr = W * 0.3;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2); ctx.lineWidth = 120; ctx.strokeStyle = "rgba(130,180,255,0.30)"; ctx.stroke();
+    ctx.fillStyle = "rgba(190,220,255,0.30)";
+    for (let i = 0; i < 40; i++) {
+      const a = (i / 40) * Math.PI * 2, r1 = rr - 50, r2 = rr + 44, w = 0.045;
+      ctx.beginPath();
+      ctx.moveTo(rx + Math.cos(a - w) * r1, ry + Math.sin(a - w) * r1);
+      ctx.lineTo(rx + Math.cos(a) * r2, ry + Math.sin(a) * r2);
+      ctx.lineTo(rx + Math.cos(a + w) * r1, ry + Math.sin(a + w) * r1);
+      ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(rx, ry, rr - 90, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(190,220,255,0.25)"; ctx.setLineDash([4, 14]); ctx.stroke();
+    ctx.restore();
+    // Two ribbons sweeping up from the bottom-left corner: green, with a thin gold one beside it.
+    const ribbon = (off, width, c1, c2, alpha) => {
+      ctx.save(); ctx.globalAlpha = alpha; ctx.lineCap = "round";
+      const lg = ctx.createLinearGradient(0, H, W * 0.4, H * 0.5);
+      lg.addColorStop(0, c1); lg.addColorStop(1, c2);
+      ctx.strokeStyle = lg; ctx.lineWidth = width;
+      ctx.beginPath(); ctx.moveTo(-60, H * 0.5 + off);
+      ctx.bezierCurveTo(W * 0.16, H * 0.62 + off, W * 0.02, H * 0.86 + off, W * 0.32 + off, H + 80);
+      ctx.stroke(); ctx.restore();
+    };
+    if (noRibbon) return;
+    ribbon(0, 110, "#0E8A44", "#38E07B", 0.85);
+    ribbon(70, 26, "#E8B21C", "#FFE27A", 0.8);
+  }
+
+  // Tournament logo (photo 3), or the tournament name in heavy letters. Returns the bottom y.
+  function tourTop(k, g, cx, top, maxW, maxH, align) {
+    const ctx = k.ctx, logo = g.photos[3] && (g.photos[3].plain || g.photos[3].img), name = cap(g.val("tournament"));
+    if (logo) {
+      const sc = Math.min(maxW / logo.width, maxH / logo.height), w = logo.width * sc, h = logo.height * sc;
+      ctx.drawImage(logo, align === "right" ? cx - w : cx - w / 2, top, w, h);
+      return top + h;
+    }
+    if (!name) return top;
+    ctx.save(); ctx.textAlign = align === "right" ? "right" : "center";
+    const words = name.split(/\s+/), mid = Math.ceil(words.length / 2), lines = words.length > 2 ? [words.slice(0, mid).join(" "), words.slice(mid).join(" ")] : [name];
+    let y = top;
+    lines.forEach((l, i) => {
+      const s = k.fit(l, maxW, i ? 40 : 56, k.H, 900, 22); y += s * (i ? 1.1 : 0.95);
+      ctx.font = k.font(s, k.H, 900); ctx.fillStyle = i ? "rgba(255,255,255,0.85)" : "#FFFFFF"; ctx.fillText(l, cx, y);
+    });
+    ctx.restore();
+    return y + 10;
+  }
+
+  // A team: the uploaded crest as it is, else the flag on a rounded tile, else the short name on a tile.
+  // (cx, cy) is the centre; returns the half height used.
+  function teamBadge(k, g, cx, cy, size, team, pic) {
+    const ctx = k.ctx, full = (BPG.teamName && BPG.teamName(team)) || team;
+    const crest = pic && (pic.plain || pic.orig || pic.img);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
+    if (crest) {
+      const sc = Math.min(size / crest.width, size / crest.height);
+      ctx.drawImage(crest, cx - (crest.width * sc) / 2, cy - (crest.height * sc) / 2, crest.width * sc, crest.height * sc);
+      ctx.restore(); return size / 2;
+    }
+    const w = size, h = Math.round(size * 0.68), x = cx - w / 2, y = cy - h / 2, flag = BPG.flagImg && BPG.flagImg(full);
+    ctx.fillStyle = "#FFFFFF"; k.roundRect(x - 6, y - 6, w + 12, h + 12, 26); ctx.fill(); ctx.restore();
+    ctx.save(); k.roundRect(x, y, w, h, 20); ctx.clip();
+    if (flag) ctx.drawImage(flag, x, y, w, h);
+    else {
+      ctx.fillStyle = "#0B1A4A"; ctx.fillRect(x, y, w, h);
+      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, w * 0.8, Math.round(h * 0.62), k.D), k.D); ctx.fillStyle = C.cream; ctx.fillText(sh, cx, cy + h * 0.22);
+    }
+    const gloss = ctx.createLinearGradient(0, y, 0, y + h);
+    gloss.addColorStop(0, "rgba(255,255,255,0.28)"); gloss.addColorStop(0.45, "rgba(255,255,255,0)"); gloss.addColorStop(1, "rgba(0,0,0,0.22)");
+    ctx.fillStyle = gloss; ctx.fillRect(x, y, w, h);
+    ctx.restore();
+    return h / 2 + 6;
+  }
+
+  function infoLine(k, g, text, x, base) {
+    const ctx = k.ctx, bits = String(text || "").split("|").map((b) => b.trim()).filter(Boolean);
+    if (!bits.length) return;
+    ctx.save(); ctx.textAlign = "left"; ctx.font = k.font(28, k.C, 700); k.spaced(2);
+    let cx = x;
+    bits.forEach((b, i) => {
+      if (i) { ctx.fillStyle = C.gold; ctx.fillText("  |  ", cx, base); cx += ctx.measureText("  |  ").width; }
+      ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.fillText(cap(b), cx, base, g.W * 0.6); cx += Math.min(ctx.measureText(cap(b)).width, g.W * 0.6);
+    });
+    k.spaced(0); ctx.restore();
+  }
+
+  // ---------- Match card: full time, live, half time, or kick-off ----------
+  L.matchcard = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, cx = W / 2, tall = g.H / W > 1.5;
+      tourBg(k, g);
+      const s1 = String(g.val("s1") || "").trim(), s2 = String(g.val("s2") || "").trim(), played = s1 !== "" || s2 !== "";
+      const status = cap(g.val("status")) || (played ? "FULL TIME" : "KICK OFF"), live = /LIVE/.test(status);
+      const finished = played && /FULL|FT|AET|PEN/.test(status);
+
+      // Top: tournament logo or name, then the stage in cream.
+      let y = tourTop(k, g, cx, g.st + (tall ? 30 : 10), W * 0.5, tall ? 250 : 190, "center");
+      const stage = cap(g.val("stage"));
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 16;
+      if (stage) { const s = k.fit(stage, W - 2 * PAD, tall ? 104 : 92, k.D, "", 40); y += s + (tall ? 40 : 26); ctx.font = k.font(s, k.D); ctx.fillStyle = C.cream; ctx.fillText(stage, cx, y); }
+      ctx.restore();
+
+      // Bottom line (your line, or the winner worked out for you) sits under the panel.
+      const typed = String(g.val("headline") || "").trim();
+      const t1 = cap(g.val("t1")), t2 = cap(g.val("t2"));
+      const auto = finished ? (num(s1) === num(s2) ? "*DRAW*" : `WINNER: *${num(s1) > num(s2) ? t1 : t2}*`) : "";
+      const bottomText = typed ? cap(typed) : auto;
+
+      // Work out the panel's content height first, so the panel hugs it and sits centred in the space.
+      const split = (v) => String(v || "").split(/\n|·|,\s*(?=[^\d\s])/).map((x) => x.trim()).filter(Boolean).slice(0, 4);
+      const lists = [split(g.val("g1")), split(g.val("g2"))], nSc = Math.max(lists[0].length, lists[1].length);
+      const size = tall ? 270 : 240, xs = [W * 0.22, W * 0.78], px = 60, pw = W - 120;
+      const ss = k.fit(status, pw - 80, tall ? 88 : 80, k.D, "", 36);
+      let padTop = tall ? 44 : 34, gap = tall ? 70 : 56;
+      const half = g.photos[1] || g.photos[2] ? size / 2 : size * 0.34 + 6;
+      const nameOff = tall ? 96 : 84, scH = nSc ? (tall ? 52 : 46) + (nSc - 1) * (tall ? 42 : 38) : 0;
+      const content = padTop + ss + gap + 2 * half + nameOff + scH + (tall ? 60 : 50);
+      const avTop = y + (tall ? 60 : 44), avBot = g.footerY - (bottomText ? (tall ? 170 : 140) : 70);
+      // Spare room: half of it opens up the panel (more air around the status and teams), the rest goes around it.
+      const extra = Math.max(0, avBot - avTop - content), grow = extra * 0.55;
+      padTop += grow * 0.25; gap += grow * 0.35;
+      const ph = Math.min(content + grow, avBot - avTop), pt = Math.round(avTop + (avBot - avTop - ph) * 0.4), pb = pt + ph;
+      ctx.save();
+      const pg = ctx.createLinearGradient(0, pt, 0, pb);
+      pg.addColorStop(0, "rgba(255,255,255,0.20)"); pg.addColorStop(1, "rgba(255,255,255,0.07)");
+      ctx.fillStyle = pg; k.roundRect(px, pt, pw, ph, 46); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.55)"; k.roundRect(px, pt, pw, ph, 46); ctx.stroke();
+      ctx.restore();
+
+      // Status at the top of the panel.
+      ctx.save(); ctx.textAlign = "center";
+      const sy = pt + padTop + ss * 0.9;
+      ctx.font = k.font(ss, k.D);
+      if (live) {
+        const tw = ctx.measureText(status).width;
+        ctx.fillStyle = C.live; ctx.beginPath(); ctx.arc(cx - tw / 2 - 30, sy - ss * 0.36, ss * 0.16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillText(status, cx + 14, sy);
+      } else { ctx.fillStyle = C.gold; ctx.fillText(status, cx, sy); }
+
+      // Teams, score in the middle.
+      const by = Math.round(sy + ss * 0.1 + gap + half);
+      const halves = [teamBadge(k, g, xs[0], by, size, g.val("t1"), g.photos[1]), teamBadge(k, g, xs[1], by, size, g.val("t2"), g.photos[2])];
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
+      if (played) {
+        const txt = `${s1 || "0"} - ${s2 || "0"}`, fs = k.fit(txt, W * 0.24, tall ? 200 : 180, k.D, "", 60);
+        ctx.font = k.font(fs, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(txt, cx, by + fs * 0.36);
+      } else {
+        ctx.font = k.font(tall ? 120 : 108, k.D); ctx.fillStyle = C.cream; ctx.fillText("VS", cx, by + 40);
+      }
+      // Names and scorers under each team.
+      const nameY = by + Math.max(...halves) + nameOff - 6, colW = W * 0.4;
+      [[t1, lists[0]], [t2, lists[1]]].forEach(([nm, list], i) => {
+        if (nm) { ctx.font = k.font(k.fit(nm, colW, tall ? 72 : 64, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, xs[i], nameY); }
+        list.forEach((line, j) => {
+          ctx.font = k.font(tall ? 34 : 30, k.C, 700); k.spaced(1); ctx.fillStyle = C.cream;
+          ctx.fillText("⚽ " + cap(line), xs[i], nameY + (tall ? 52 : 46) + j * (tall ? 42 : 38), colW); k.spaced(0);
+        });
+      });
+      ctx.restore(); ctx.restore();
+
+      // Under the panel: the winner or your line, *stars* in gold.
+      if (bottomText) {
+        const lay = k.layoutRich(bottomText, W - 2 * PAD, tall ? 76 : 64, k.H, 1, 30, 900);
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+        k.drawRich(lay, cx, Math.min(pb + (tall ? 110 : 92), g.footerY - 64), lay.size, k.H, "#FFFFFF", C.gold, "center", 900);
+        ctx.restore();
+      }
+      infoLine(k, g, g.val("info"), PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
+  // ---------- Starting XI ----------
+  // "20 Gyeltshen Zangpo (GK)" one per line. Subs: one per line or comma between.
+  L.lineup = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, tall = H / W > 1.5;
+      tourBg(k, g, true);
+      // Optional player photo on the right, fading into the card colour.
+      const base = baseColour(g), photo = g.photos[1] && (g.photos[1].plain || g.photos[1].img);
+      const photoTop = g.st + (tall ? 420 : 330);
+      if (photo) {
+        const bw = W * 0.6, bh = g.footerY - photoTop + 60, bx = W - bw;
+        const sc = Math.max(bw / photo.width, bh / photo.height), dw = photo.width * sc, dh = photo.height * sc;
+        const f = photo.bpgFocus, fx = f ? (f.x + f.w / 2) / photo.width : 0.5, fy = f ? f.y / photo.height : 0.15;
+        ctx.save(); ctx.beginPath(); ctx.rect(bx, photoTop, bw, bh); ctx.clip();
+        ctx.drawImage(photo, Math.min(bx, Math.max(bx + bw - dw, bx + bw / 2 - dw * fx)), Math.min(photoTop, Math.max(photoTop + bh - dh, photoTop + 40 - dh * fy)), dw, dh);
+        ctx.restore();
+        const dark = mix(base, "#000000", 0.3);
+        const side = ctx.createLinearGradient(bx, 0, bx + bw * 0.55, 0);
+        side.addColorStop(0, k.hexA(dark, 1)); side.addColorStop(1, k.hexA(dark, 0));
+        ctx.fillStyle = side; ctx.fillRect(bx - 2, photoTop, bw * 0.55 + 2, bh);
+        const topF = ctx.createLinearGradient(0, photoTop, 0, photoTop + 160);
+        topF.addColorStop(0, k.hexA(base, 1)); topF.addColorStop(1, k.hexA(base, 0));
+        ctx.fillStyle = topF; ctx.fillRect(bx, photoTop - 2, bw, 162);
+        const low = ctx.createLinearGradient(0, g.footerY - 420, 0, g.footerY + 40);
+        low.addColorStop(0, k.hexA(dark, 0)); low.addColorStop(1, k.hexA(dark, 0.95));
+        ctx.fillStyle = low; ctx.fillRect(bx, g.footerY - 420, bw, H - g.footerY + 420);
+      }
+
+      // Top-left: team vs opponent as small tiles.
+      const tile = tall ? 150 : 132, ty = g.st + 40 + tile * 0.34;
+      teamBadge(k, g, PAD + tile / 2, ty, tile, g.val("team"), g.photos[2]);
+      ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(tall ? 50 : 44, k.H, 900); ctx.fillStyle = "#FFFFFF";
+      ctx.fillText("VS", PAD + tile + 62, ty + 16);
+      ctx.restore();
+      if (g.val("opp")) teamBadge(k, g, PAD + tile * 1.5 + 124, ty, tile, g.val("opp"), null);
+      // Top-right: tournament logo or name.
+      tourTop(k, g, W - PAD, g.st + 20, W * 0.36, tall ? 300 : 250, "right");
+
+      // STARTING / XI
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 14;
+      const head = cap(g.val("title") || "Starting"), hs = k.fit(head, W * 0.5, tall ? 104 : 92, k.H, 900, 40);
+      let y = ty + tile * 0.34 + 30 + hs * 0.9;
+      ctx.font = k.font(hs, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(head, PAD, y);
+      const xiS = tall ? 300 : 250; y += xiS * 0.84 + 22;
+      ctx.font = k.font(xiS, k.D); ctx.fillText("XI", PAD - 6, y);
+      ctx.restore();
+
+      // The eleven, sized to the space left.
+      const rows = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 11).map((l) => {
+        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); return m ? [m[1], m[2]] : ["", l];
+      });
+      const subs = String(g.val("subs") || "").split(/\n|,|\//).map((x) => x.trim()).filter(Boolean);
+      const subsLines = Math.ceil(subs.length / 2), subsH = subs.length ? 70 + subsLines * (tall ? 40 : 34) : 0;
+      const listTop = y + (tall ? 50 : 34), listBottom = g.footerY - 56;
+      const step = Math.min(tall ? 74 : 62, (listBottom - listTop) / Math.max(1, rows.length));
+      const fs = Math.round(step * 0.62), listW = (photo || subs.length ? W * 0.56 - 16 : W * 0.66) - PAD;
+      rows.forEach(([n, name], i) => {
+        const by = listTop + step * (i + 0.8);
+        ctx.font = k.font(Math.round(fs * 1.25), k.D); ctx.fillStyle = C.cyan; ctx.fillText(n, PAD, by);
+        const nw = listW - fs * 2.1, hs = k.fit(cap(name), nw, fs, k.H, 800, 16);
+        // A long name switches to the narrow font instead of shrinking.
+        if (hs < fs * 0.85) ctx.font = k.font(k.fit(cap(name), nw, Math.round(fs * 1.1), k.C, 700, 16), k.C, 700); else ctx.font = k.font(hs, k.H, 800);
+        ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(name), PAD + fs * 2.1, by);
+      });
+
+      // Substitutes, bottom-right, two per line with the shirt numbers in colour.
+      if (subs.length) {
+        const sx = W * (photo ? 0.5 : 0.56), sw = W - PAD - sx, sTop = g.footerY - 56 - subsH;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 12;
+        ctx.font = k.font(k.fit("SUBSTITUTES", sw, tall ? 60 : 52, k.H, 900, 24), k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText("SUBSTITUTES", sx, sTop + 48);
+        const lineH = tall ? 40 : 34, sz = tall ? 30 : 26;
+        for (let i = 0; i < subsLines; i++) {
+          let x = sx; const by = sTop + 70 + lineH * (i + 0.7);
+          subs.slice(i * 2, i * 2 + 2).forEach((s, j) => {
+            const m = s.match(/^(\d{1,2})\s+(.*)$/), part = [[m ? m[1] + " " : "", C.cyan], [cap(m ? m[2] : s) + (j === 0 && subs[i * 2 + 1] ? " / " : ""), "#FFFFFF"]];
+            part.forEach(([t, col]) => { ctx.font = k.font(sz, k.C, 700); ctx.fillStyle = col; const mw = Math.max(0, sx + sw - x); ctx.fillText(t, x, by, mw); x += Math.min(ctx.measureText(t).width, mw); });
+          });
+        }
+        ctx.restore();
+      }
+      infoLine(k, g, g.val("info"), PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
     },
   };
 })();
@@ -2696,6 +2885,7 @@ window.BPG = window.BPG || {};
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
     matchcard: "BAN 1-0 BHU",
+    lineup: "BAN vs BHU",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
   })[tpl.layout] || "";
@@ -2849,6 +3039,7 @@ window.BPG = window.BPG || {};
     toss: (v) => `${v("player")} ${v("stamp")}. ${v("detail")}`,
     goal: (v) => `⚽ GOAL! ${v("player")} scores for ${v("team")} (${v("minute")}). ${v("score")}. Assist: ${v("assist")}.`,
     matchcard: (v) => (String(v("s1")).trim() || String(v("s2")).trim() ? `${v("status") || "FT"}: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}` : `${v("stage") || "Match day"}: ${v("t1")} vs ${v("t2")}, ${v("status")}`) + ` | ${v("tournament")}\n${[v("g1"), v("g2")].filter((x) => String(x).trim()).join(" · ")}\n${v("headline")}`,
+    lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
     rating: (v) => `${v("player")} vs ${v("opp")}: ${v("rating")}/10. ${v("stats")}`,
@@ -3807,7 +3998,7 @@ window.BPG = window.BPG || {};
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
-  const photos = { 1: null, 2: null };
+  const photos = { 1: null, 2: null, 3: null };
   let logoImg = null;
 
   try {
@@ -3939,6 +4130,7 @@ window.BPG = window.BPG || {};
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
     const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
     $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
@@ -4048,11 +4240,27 @@ window.BPG = window.BPG || {};
     if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+  [1, 2, 3].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    await usePhoto(n, await loadImage(f), { blob: f });
+    const img = await loadImage(f);
+    if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
+    await usePhoto(n, img, { blob: f });
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // The tournament logo stays on this phone (shrunk to 600 px), so it is added once per tournament.
+  function keepTourLogo(img) {
+    try {
+      const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem("bpg_tourlogo", c.toDataURL("image/png"));
+    } catch (e) {}
+  }
+  try {
+    const saved = localStorage.getItem("bpg_tourlogo");
+    if (saved) { const i = new Image(); i.onload = () => { photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+  } catch (e) {}
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem("bpg_tourlogo"); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.
