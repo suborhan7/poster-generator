@@ -257,7 +257,7 @@ window.BPG = window.BPG || {};
     const f = e.target.files[0]; if (!f) return;
     const img = await loadImage(f);
     if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
-    await usePhoto(n, img, { blob: f });
+    await usePhoto(n, img, { blob: f, tpl: T[state.tpl].layout }); // crests only show on the card they were added for
     e.target.value = ""; // so picking the same photo again still works
   }));
 

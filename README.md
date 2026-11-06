@@ -22,7 +22,7 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
 | Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss |
-| Football | Goal, Full-time score, Match card and Starting XI (clean tournament look: tournament logo, flags or crests, full time / live / kick-off, winner line), Red card, Player rating |
+| Football | Goal, Full-time score, Match card, Starting XI and Tournament photo frame (clean tournament look: tournament logo, waving flags or crests, ribbons around the edges, full time / live / kick-off, winner line), Red card, Player rating |
 | General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Breaking news, Photo frame |
 
 Features on every card:

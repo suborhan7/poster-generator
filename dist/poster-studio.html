@@ -591,6 +591,10 @@ BPG.TEMPLATES = {
       ["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
       ["g1","Home scorers","Ibrahim 68'",true],["g2","Away scorers","",true],
       ["headline","Bottom line (empty = WINNER: team)","",true],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
+  tframe: { cat: "football", name: "Tournament photo frame", layout: "tframe", noCut: true,
+    photo1: "Photo from the tournament", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Pick any photo from the tournament: it fills the card with the tournament ribbons around the edges. Text is optional; leave it empty for a clean photo.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["tag","Small line (optional)","Match day 1"],["headline","Headline (optional, *stars* colour words)","*Ibrahim* wins it for Bangladesh",true],["info","Info line (optional)","",true]] },
   lineup: { cat: "football", name: "Starting XI (tournament look)", layout: "lineup", noCut: true,
     photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)",
     hint: "One player per line: shirt number, then the name, e.g. 20 Gyeltshen Zangpo (GK). Substitutes one per line or with commas.",
@@ -2337,11 +2341,17 @@ window.BPG = window.BPG || {};
       ctx.stroke();
     }
     ctx.restore();
-    // Dial ring: a thick soft ring with teeth, half off the top-right edge.
+    saffEdges(k, g, { ribbons: !noRibbon });
+  }
+
+  // The tournament's edge graphics, drawn by us: a toothed dial ring top-right and broad twisting ribbons.
+  // frame: true puts ribbons on all four sides (for the photo frame), with a gold ribbon beside each.
+  function saffEdges(k, g, o) {
+    const ctx = k.ctx, { W, H } = g;
     const rx = W * 1.0, ry = g.st + H * 0.14, rr = W * 0.3;
     ctx.save();
-    ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2); ctx.lineWidth = 120; ctx.strokeStyle = "rgba(130,180,255,0.30)"; ctx.stroke();
-    ctx.fillStyle = "rgba(190,220,255,0.30)";
+    ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2); ctx.lineWidth = 120; ctx.strokeStyle = o.frame ? "rgba(70,120,240,0.85)" : "rgba(130,180,255,0.30)"; ctx.stroke();
+    ctx.fillStyle = o.frame ? "rgba(160,200,255,0.9)" : "rgba(190,220,255,0.30)";
     for (let i = 0; i < 40; i++) {
       const a = (i / 40) * Math.PI * 2, r1 = rr - 50, r2 = rr + 44, w = 0.045;
       ctx.beginPath();
@@ -2350,21 +2360,55 @@ window.BPG = window.BPG || {};
       ctx.lineTo(rx + Math.cos(a + w) * r1, ry + Math.sin(a + w) * r1);
       ctx.fill();
     }
-    ctx.beginPath(); ctx.arc(rx, ry, rr - 90, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(190,220,255,0.25)"; ctx.setLineDash([4, 14]); ctx.stroke();
+    ctx.beginPath(); ctx.arc(rx, ry, rr - 90, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(190,220,255,0.35)"; ctx.setLineDash([4, 14]); ctx.stroke();
     ctx.restore();
-    // Two ribbons sweeping up from the bottom-left corner: green, with a thin gold one beside it.
-    const ribbon = (off, width, c1, c2, alpha) => {
-      ctx.save(); ctx.globalAlpha = alpha; ctx.lineCap = "round";
-      const lg = ctx.createLinearGradient(0, H, W * 0.4, H * 0.5);
-      lg.addColorStop(0, c1); lg.addColorStop(1, c2);
-      ctx.strokeStyle = lg; ctx.lineWidth = width;
-      ctx.beginPath(); ctx.moveTo(-60, H * 0.5 + off);
-      ctx.bezierCurveTo(W * 0.16, H * 0.62 + off, W * 0.02, H * 0.86 + off, W * 0.32 + off, H + 80);
-      ctx.stroke(); ctx.restore();
+    if (!o.ribbons) return;
+    const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3; };
+    // A ribbon along a curve: the bright face and the darker back show as it twists, zig-zags on the face.
+    const band = (P, width, twist, front, back, tex) => {
+      const N = 160, pts = [];
+      for (let i = 0; i <= N; i++) {
+        const t = i / N, x = bez(P[0], P[2], P[4], P[6], t), y = bez(P[1], P[3], P[5], P[7], t);
+        const t2 = Math.min(1, t + 0.004), dx = bez(P[0], P[2], P[4], P[6], t2) - x, dy = bez(P[1], P[3], P[5], P[7], t2) - y, l = Math.hypot(dx, dy) || 1;
+        const c = Math.cos(t * Math.PI * twist + 0.35), hw = (width / 2) * (0.35 + 0.65 * Math.abs(c));
+        pts.push({ x, y, nx: -dy / l, ny: dx / l, tx: dx / l, ty: dy / l, hw, face: Math.abs(c) > 0.32, t }); // the darker back shows only at the folds
+      }
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 24;
+      for (let i = 0; i < N; i++) {
+        const a = pts[i], b = pts[i + 1];
+        ctx.beginPath();
+        ctx.moveTo(a.x + a.nx * a.hw, a.y + a.ny * a.hw); ctx.lineTo(b.x + b.nx * b.hw, b.y + b.ny * b.hw);
+        ctx.lineTo(b.x - b.nx * b.hw, b.y - b.ny * b.hw); ctx.lineTo(a.x - a.nx * a.hw, a.y - a.ny * a.hw); ctx.closePath();
+        ctx.fillStyle = a.face ? front(a.t) : back; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = ctx.fillStyle; ctx.stroke();
+        if (i === 0) ctx.shadowBlur = 0;
+      }
+      if (tex) {
+        // zig-zag rows across the face
+        ctx.strokeStyle = "rgba(255,255,255,0.32)"; ctx.lineWidth = 3;
+        for (let i = 2; i < N; i += 4) {
+          const a = pts[i]; if (!a.face || a.hw < width * 0.15) continue;
+          ctx.beginPath();
+          for (let j = 0; j <= 8; j++) { const sgn = j / 8 * 2 - 1, z = j % 2 ? 9 : -9; const px = a.x + a.nx * a.hw * sgn * 0.9 + a.tx * z, py = a.y + a.ny * a.hw * sgn * 0.9 + a.ty * z; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+          ctx.stroke();
+        }
+      }
+      // light edge on the outer side
+      ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, q.x + q.nx * q.hw, q.y + q.ny * q.hw));
+      ctx.strokeStyle = "rgba(220,255,220,0.45)"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
     };
-    if (noRibbon) return;
-    ribbon(0, 110, "#0E8A44", "#38E07B", 0.85);
-    ribbon(70, 26, "#E8B21C", "#FFE27A", 0.8);
+    const green = (t) => `rgb(${Math.round(24 + 40 * (1 - t))},${Math.round(196 + 50 * (1 - t))},${Math.round(84 + 20 * t)})`;
+    const gold = () => "#F4C430", deep = "#11924A";
+    const sw = o.frame ? 0.75 : 1; // thinner on a photo, so the photo stays the star
+    // Left side, from the middle down to the bottom corner.
+    band([-170, H * 0.42, W * 0.16 * sw, H * 0.5, -W * 0.08, H * 0.8, W * 0.22 * sw, H + 140], W * 0.24 * sw, 1.6, green, deep, true);
+    band([-W * 0.08, H + 40, W * 0.06, H * 0.95, W * 0.22, H * 0.97, W * 0.34, H + 100], W * 0.07, 1.0, gold, "#C99A1A", false);
+    if (!o.frame) return;
+    // Bottom-right corner, rising up the right edge.
+    band([W + 170, H * 0.62, W * 0.88, H * 0.72, W * 1.06, H * 0.9, W * 0.76, H + 140], W * 0.17, 1.5, green, deep, true);
+    band([W + 60, H * 0.84, W * 0.93, H * 0.9, W * 0.9, H * 1.0, W * 0.82, H + 60], W * 0.06, 1.0, gold, "#C99A1A", false);
+    // Top-left corner.
+    band([-160, H * 0.16, W * 0.06, H * 0.1, W * 0.08, H * 0.02, W * 0.26, -120], W * 0.12, 1.3, green, deep, true);
   }
 
   // Tournament logo (photo 3), or the tournament name in heavy letters. Returns the bottom y.
@@ -2391,27 +2435,65 @@ window.BPG = window.BPG || {};
   // (cx, cy) is the centre; returns the half height used.
   function teamBadge(k, g, cx, cy, size, team, pic) {
     const ctx = k.ctx, full = (BPG.teamName && BPG.teamName(team)) || team;
-    const crest = pic && (pic.plain || pic.orig || pic.img);
+    const crest = pic && (!pic.tpl || pic.tpl === g.t.layout) && (pic.plain || pic.orig || pic.img);
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
     if (crest) {
       const sc = Math.min(size / crest.width, size / crest.height);
       ctx.drawImage(crest, cx - (crest.width * sc) / 2, cy - (crest.height * sc) / 2, crest.width * sc, crest.height * sc);
       ctx.restore(); return size / 2;
     }
-    const w = size, h = Math.round(size * 0.68), x = cx - w / 2, y = cy - h / 2, flag = BPG.flagImg && BPG.flagImg(full);
-    ctx.fillStyle = "#FFFFFF"; k.roundRect(x - 6, y - 6, w + 12, h + 12, 26); ctx.fill(); ctx.restore();
-    ctx.save(); k.roundRect(x, y, w, h, 20); ctx.clip();
-    if (flag) ctx.drawImage(flag, x, y, w, h);
-    else {
+    ctx.restore();
+    const flag = BPG.flagImg && BPG.flagImg(full), shape = BPG.flagShape || "wave";
+    // No flag (a club with no crest uploaded): the short name.
+    const fallback = (x, y, w, h) => {
       ctx.fillStyle = "#0B1A4A"; ctx.fillRect(x, y, w, h);
       const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
-      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, w * 0.8, Math.round(h * 0.62), k.D), k.D); ctx.fillStyle = C.cream; ctx.fillText(sh, cx, cy + h * 0.22);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, w * 0.7, Math.round(h * 0.5), k.D), k.D); ctx.fillStyle = C.cream; ctx.fillText(sh, cx, cy + h * 0.17); ctx.textAlign = "left";
+    };
+    const paintIn = (path, x, y, w, h) => {
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
+      path(); ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.restore();
+      ctx.save(); path(); ctx.clip();
+      if (flag) { const sc = Math.max(w / flag.width, h / flag.height); ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc); }
+      else fallback(x, y, w, h);
+      const gl = ctx.createLinearGradient(x, y, x + w * 0.6, y + h);
+      gl.addColorStop(0, "rgba(255,255,255,0.3)"); gl.addColorStop(0.5, "rgba(255,255,255,0)"); gl.addColorStop(1, "rgba(0,0,0,0.25)");
+      ctx.fillStyle = gl; ctx.fillRect(x, y, w, h); ctx.restore();
+      ctx.save(); path(); ctx.lineWidth = 6; ctx.strokeStyle = "#FFFFFF"; ctx.stroke(); ctx.restore();
+    };
+    if (shape === "circle") {
+      const r = size * 0.4;
+      paintIn(() => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); }, cx - r, cy - r, 2 * r, 2 * r);
+      return r + 4;
     }
-    const gloss = ctx.createLinearGradient(0, y, 0, y + h);
-    gloss.addColorStop(0, "rgba(255,255,255,0.28)"); gloss.addColorStop(0.45, "rgba(255,255,255,0)"); gloss.addColorStop(1, "rgba(0,0,0,0.22)");
-    ctx.fillStyle = gloss; ctx.fillRect(x, y, w, h);
-    ctx.restore();
-    return h / 2 + 6;
+    if (shape === "shield") {
+      const w = size * 0.74, h = size * 0.86, x = cx - w / 2, y = cy - h / 2, rc = 18;
+      paintIn(() => {
+        ctx.beginPath(); ctx.moveTo(x + rc, y); ctx.lineTo(x + w - rc, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rc);
+        ctx.lineTo(x + w, y + h * 0.5); ctx.bezierCurveTo(x + w, y + h * 0.78, cx + w * 0.18, y + h * 0.9, cx, y + h);
+        ctx.bezierCurveTo(cx - w * 0.18, y + h * 0.9, x, y + h * 0.78, x, y + h * 0.5);
+        ctx.lineTo(x, y + rc); ctx.quadraticCurveTo(x, y, x + rc, y); ctx.closePath();
+      }, x, y, w, h);
+      return h / 2 + 4;
+    }
+    // "wave": the flag as cloth in the wind (thin strips nudged up and down and shaded), no frame.
+    const w = Math.round(size * 1.02), h = Math.round(size * 0.68), amp = size * 0.05;
+    const off = document.createElement("canvas"); off.width = w; off.height = h + 2 * amp + 4;
+    const o = off.getContext("2d"), strip = 3;
+    const src = document.createElement("canvas"); src.width = w; src.height = h;
+    const sctx = src.getContext("2d");
+    if (flag) sctx.drawImage(flag, 0, 0, w, h);
+    else { sctx.fillStyle = "#0B1A4A"; sctx.fillRect(0, 0, w, h); const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3); sctx.textAlign = "center"; sctx.font = k.font(Math.round(h * 0.5), k.D); sctx.fillStyle = C.cream; sctx.fillText(sh, w / 2, h * 0.68); }
+    for (let x = 0; x < w; x += strip) {
+      const t = x / w, ph = t * Math.PI * 2.1 + 0.4, dy = Math.sin(ph) * amp * (0.3 + t * 0.7);
+      o.drawImage(src, x, 0, strip, h, x, amp + 2 + dy, strip + 0.6, h);
+      const shd = Math.cos(ph);
+      o.fillStyle = shd > 0 ? `rgba(255,255,255,${0.16 * shd})` : `rgba(0,0,0,${-0.3 * shd})`;
+      o.fillRect(x, amp + 2 + dy, strip + 0.6, h);
+    }
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 34; ctx.shadowOffsetY = 14;
+    ctx.translate(cx, cy); ctx.rotate(-0.04); ctx.drawImage(off, -w / 2, -off.height / 2); ctx.restore();
+    return h / 2 + amp;
   }
 
   function infoLine(k, g, text, x, base) {
@@ -2521,7 +2603,7 @@ window.BPG = window.BPG || {};
       const ctx = k.ctx, { W, H } = g, tall = H / W > 1.5;
       tourBg(k, g, true);
       // Optional player photo on the right, fading into the card colour.
-      const base = baseColour(g), photo = g.photos[1] && (g.photos[1].plain || g.photos[1].img);
+      const base = baseColour(g), photo = g.photos[1] && g.photos[1].tpl !== "matchcard" && (g.photos[1].plain || g.photos[1].img);
       const photoTop = g.st + (tall ? 420 : 330);
       if (photo) {
         const bw = W * 0.6, bh = g.footerY - photoTop + 60, bx = W - bw;
@@ -2595,6 +2677,48 @@ window.BPG = window.BPG || {};
         ctx.restore();
       }
       infoLine(k, g, g.val("info"), PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
+  // ---------- Tournament photo frame ----------
+  // Any photo from the tournament, full size, with the tournament's ribbons and ring around the edges.
+  L.tframe = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
+      const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null; // a crest is not a photo
+      if (ph) {
+        k.coverImg(ph.img, 0, 0, W, H);
+        // Darken the very edges a little so the ribbons stand out.
+        const vg = ctx.createRadialGradient(cx, H * 0.45, W * 0.35, cx, H * 0.45, W * 0.95);
+        vg.addColorStop(0, "rgba(5,15,60,0)"); vg.addColorStop(1, "rgba(5,15,60,0.45)");
+        ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      } else { tourBg(k, g, true); k.photoHint(g, H * 0.45); }
+      const tag = cap(g.val("tag")), hl = String(g.val("headline") || "").trim();
+      // Fade into deep blue only behind the text at the bottom.
+      if (tag || hl) {
+        const from = g.footerY - (tall ? 520 : 440), gr = ctx.createLinearGradient(0, from, 0, H);
+        gr.addColorStop(0, "rgba(8,22,90,0)"); gr.addColorStop(0.5, "rgba(8,22,90,0.75)"); gr.addColorStop(1, "rgba(6,16,70,0.95)");
+        ctx.fillStyle = gr; ctx.fillRect(0, from, W, H - from);
+      }
+      saffEdges(k, g, { ribbons: true, frame: true });
+      // Tournament logo or name, small, top centre.
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18;
+      tourTop(k, g, cx, g.st + 20, W * 0.34, tall ? 170 : 140, "center");
+      ctx.restore();
+      // Tag and headline at the bottom, centred.
+      let base = g.footerY - 62;
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      if (hl) {
+        let lay = k.layoutRich(cap(hl), W - 2 * PAD - 80, tall ? 96 : 84, k.D, 2, 44);
+        const top = base - (lay.lines.length - 1) * lay.size * 1.02;
+        k.drawRich(lay, cx, top, lay.size * 1.02, k.D, "#FFFFFF", C.gold, "center");
+        base = top - lay.size - 14;
+      }
+      if (tag) { ctx.textAlign = "center"; ctx.font = k.font(k.fit(tag, W * 0.6, 36, k.C, 700, 20), k.C, 700); k.spaced(5); ctx.fillStyle = C.cream; ctx.fillText(tag, cx, base); k.spaced(0); }
+      ctx.restore();
+      infoLine(k, g, g.val("info"), PAD + 40, g.footerY);
       k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
     },
   };
@@ -3039,6 +3163,7 @@ window.BPG = window.BPG || {};
     toss: (v) => `${v("player")} ${v("stamp")}. ${v("detail")}`,
     goal: (v) => `⚽ GOAL! ${v("player")} scores for ${v("team")} (${v("minute")}). ${v("score")}. Assist: ${v("assist")}.`,
     matchcard: (v) => (String(v("s1")).trim() || String(v("s2")).trim() ? `${v("status") || "FT"}: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}` : `${v("stage") || "Match day"}: ${v("t1")} vs ${v("t2")}, ${v("status")}`) + ` | ${v("tournament")}\n${[v("g1"), v("g2")].filter((x) => String(x).trim()).join(" · ")}\n${v("headline")}`,
+    tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
     lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
@@ -4244,7 +4369,7 @@ window.BPG = window.BPG || {};
     const f = e.target.files[0]; if (!f) return;
     const img = await loadImage(f);
     if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
-    await usePhoto(n, img, { blob: f });
+    await usePhoto(n, img, { blob: f, tpl: T[state.tpl].layout }); // crests only show on the card they were added for
     e.target.value = ""; // so picking the same photo again still works
   }));
 
