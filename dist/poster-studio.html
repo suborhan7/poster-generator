@@ -277,7 +277,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "21 Oct 2026 · v42";
+BPG.VERSION = "6 Nov 2026 · v43";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -314,6 +314,7 @@ BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", test: 
 // Add a team: copy a line. The name must match the full name the quick fill uses (e.g. "Sri Lanka").
 // Flags for the squad card, by team name (ISO country codes; flag images come from the free flag-icons set).
 BPG.FLAG_CODES = {
+  "Bhutan": "bt", "Maldives": "mv",
   "Bangladesh": "bd", "India": "in", "Pakistan": "pk", "Sri Lanka": "lk", "Australia": "au", "England": "gb-eng", "South Africa": "za", "New Zealand": "nz", "Afghanistan": "af", "Zimbabwe": "zw", "Ireland": "ie", "Netherlands": "nl", "Nepal": "np", "Scotland": "gb-sct", "UAE": "ae", "Oman": "om", "USA": "us", "Namibia": "na", "Canada": "ca", "Hong Kong": "hk", "Uganda": "ug", "Papua New Guinea": "pg", "Argentina": "ar", "Brazil": "br", "France": "fr", "Portugal": "pt", "Spain": "es", "Germany": "de", "Italy": "it", "Belgium": "be", "Croatia": "hr", "Uruguay": "uy", "Morocco": "ma", "Japan": "jp", "Colombia": "co", "Ecuador": "ec", "Chile": "cl", "Paraguay": "py", "Peru": "pe", "Venezuela": "ve", "Bolivia": "bo", "Saudi Arabia": "sa", "South Korea": "kr", "Switzerland": "ch", "Denmark": "dk", "Senegal": "sn", "Egypt": "eg", "Nigeria": "ng", "Mexico": "mx", "Qatar": "qa", "Iran": "ir", "Ghana": "gh", "Cameroon": "cm", "Ivory Coast": "ci", "Algeria": "dz", "Tunisia": "tn", "Poland": "pl", "Austria": "at", "Turkey": "tr", "Serbia": "rs", "Wales": "gb-wls", "Norway": "no", "Sweden": "se", "Ukraine": "ua",
 };
 
@@ -331,6 +332,8 @@ BPG.TEAM_COLORS = {
   "Zimbabwe": { bg: "#2A0909", accent: "#FCE300", stroke: "#C80F0F", hot: "#2DB35A" },
   "Ireland": { bg: "#042C1C", accent: "#A9E36E", stroke: "#169B62", hot: "#FF883E" },
   "Netherlands": { bg: "#2A1200", accent: "#FF7A00", stroke: "#E85A00", hot: "#FFFFFF" },
+  "Bhutan": { bg: "#2A1402", accent: "#FFCC33", stroke: "#FF6A13", hot: "#E4002B" },
+  "Maldives": { bg: "#2A0508", accent: "#3DCB6E", stroke: "#D21034", hot: "#FFFFFF" },
   "Nepal": { bg: "#2A0610", accent: "#3D7CFF", stroke: "#DC143C", hot: "#FFFFFF" },
   "Argentina": { bg: "#0C2340", accent: "#75AADB", stroke: "#3E7CC0", hot: "#F6B40E" },
   "Brazil": { bg: "#063B22", accent: "#FFDF00", stroke: "#009C3B", hot: "#2A63C8" },
@@ -580,6 +583,13 @@ BPG.TEMPLATES = {
   fresult: { cat: "football", name: "Full-time score", layout: "fscore",
     hint: "Put *stars* around words in the headline to colour them.",
     fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
+  matchcard: { cat: "football", name: "Match card (crest vs crest)", layout: "matchcard", noCut: true,
+    photo1: "Home crest (optional, the flag is used for countries)", photo2: "Away crest (optional)",
+    hint: "No player photo: both teams' crests or flags with the score between them. Leave the goals empty for a match-day preview (status = kick-off time). Live 67' turns the status red. One scorer per line or comma between.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["stage","Small heading","Match day 1"],["status","Status (Full time, Half time, Live 67', 7:00 PM)","Full time"],
+      ["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
+      ["g1","Home scorers","Ibrahim 68'",true],["g2","Away scorers","",true],
+      ["headline","Your line (optional, *stars* colour words)","*Ibrahim* opens the account",true],["info","Info line","Dhaka | 5 Nov 2026",true]] },
   fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
@@ -2037,6 +2047,133 @@ window.BPG = window.BPG || {};
       k.brandCorner(g, g.footerY);
     },
   };
+  // ---------- Match card: crest vs crest ----------
+  // No player photo. Both teams as round medallions (uploaded crest, else the country's flag, else the short name),
+  // the score between them, each side lit in its own jersey colour, with brush strokes rising from both corners.
+  // Empty goals = match-day preview (VS, status = kick-off time). "Live 67'" turns the status pill red.
+  function sideColours(g, team) {
+    const tc = g.teamTheme && BPG.TEAM_COLORS[BPG.teamName ? BPG.teamName(team) : team];
+    return tc ? { accent: tc.accent, stroke: tc.stroke, hot: tc.hot } : { accent: g.accent, stroke: g.stroke || "#3A4660", hot: g.hot || g.accent } // unknown team: a calm slate glow, not a wash of the accent;
+  }
+  function medallion(k, g, cx, cy, r, team, pic, col) {
+    const ctx = k.ctx, full = BPG.teamName ? BPG.teamName(team) || team : team;
+    const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 1.9);
+    glow.addColorStop(0, k.hexA(col.stroke, 0.55)); glow.addColorStop(1, k.hexA(col.stroke, 0));
+    ctx.fillStyle = glow; ctx.fillRect(cx - r * 2, cy - r * 2, r * 4, r * 4);
+    const crest = pic && (pic.plain || pic.orig || pic.img), flag = crest ? null : flagImg(full);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = crest ? "#FFFFFF" : col.stroke; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    if (crest) {
+      const box = r * 1.42, sc = Math.min(box / crest.width, box / crest.height);
+      ctx.drawImage(crest, cx - (crest.width * sc) / 2, cy - (crest.height * sc) / 2, crest.width * sc, crest.height * sc);
+    } else if (flag) {
+      const sc = Math.max((2 * r) / flag.width, (2 * r) / flag.height);
+      ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc);
+      const gloss = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+      gloss.addColorStop(0, "rgba(255,255,255,0.22)"); gloss.addColorStop(0.5, "rgba(255,255,255,0)"); gloss.addColorStop(1, "rgba(0,0,0,0.3)");
+      ctx.fillStyle = gloss; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    } else {
+      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, r * 1.5, Math.round(r * 0.8), k.D), k.D); ctx.fillStyle = col.accent;
+      ctx.fillText(sh, cx, cy + r * 0.28); ctx.textAlign = "left";
+    }
+    ctx.restore();
+    // Ring in the team's colour, with a thin light edge outside it.
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 10; ctx.strokeStyle = col.accent; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, r + 12, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.stroke();
+  }
+  L.matchcard = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, cx = W / 2;
+      const c1 = sideColours(g, g.val("t1")), c2 = sideColours(g, g.val("t2"));
+      const s1 = String(g.val("s1") || "").trim(), s2 = String(g.val("s2") || "").trim(), played = s1 !== "" || s2 !== "";
+      const tall = H / W > 1.5, r = tall ? 160 : 132, gap = W * 0.3;
+      const span = g.footerY - g.st, midY = Math.round(g.st + span * (tall ? 0.36 : 0.42));
+      // Each half lit in its own team's colour.
+      [[0, c1], [W, c2]].forEach(([x, c]) => {
+        const gl = ctx.createRadialGradient(x, midY, 0, x, midY, W * 0.85);
+        gl.addColorStop(0, k.hexA(c.stroke, 0.5)); gl.addColorStop(1, k.hexA(c.stroke, 0));
+        ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+      });
+      // Scorers: one per line, or a comma before the next name (so "Mbappe 12', 55'" stays one line).
+      const split = (v) => String(v || "").split(/\n|·|,\s*(?=[^\d\s])/).map((x) => x.trim()).filter(Boolean).slice(0, 5);
+      const lists = [split(g.val("g1")), split(g.val("g2"))], nameY = midY + r + 76;
+      const most = Math.max(lists[0].length, lists[1].length);
+      // Brush strokes from both bottom corners, each in its team's colours, starting under the scorers.
+      const sweepTop = nameY + (most ? 50 + (most - 1) * 40 : 0) + 30;
+      if (g.teamTheme) { k.paintSweep(Object.assign({}, g, c1), sweepTop, "left"); k.paintSweep(Object.assign({}, g, c2), sweepTop + 40, "right"); }
+      k.header(g);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
+
+      // Top: tournament (small), then the stage as the heading.
+      let y = g.st + 46;
+      const tour = cap(g.val("tournament"));
+      if (tour) { ctx.font = k.font(k.fit(tour, W - 2 * PAD, 28, k.C, 700, 18), k.C, 700); k.spaced(6); ctx.fillStyle = "rgba(255,255,255,0.78)"; ctx.fillText(tour, cx, y); k.spaced(0); y += 20; }
+      const stage = cap(g.val("stage"));
+      if (stage) { const ss = k.fit(stage, W - 2 * PAD, tall ? 104 : 88, k.D, "", 40); y += ss * 0.9; ctx.font = k.font(ss, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(stage, cx, y); }
+
+      // Middle: the two medallions with the score (or VS) between them.
+      const xs = [cx - gap, cx + gap];
+      medallion(k, g, xs[0], midY, r, g.val("t1"), g.photos[1], c1);
+      medallion(k, g, xs[1], midY, r, g.val("t2"), g.photos[2], c2);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
+      const room = 2 * (gap - r) - 30;
+      if (played) {
+        const n1 = num(s1), n2 = num(s2), size = tall ? 176 : 160;
+        ctx.font = k.font(size, k.D);
+        const w1 = ctx.measureText(s1 || "0").width, wd = ctx.measureText("-").width, w2 = ctx.measureText(s2 || "0").width;
+        const sc = Math.min(1, room / (w1 + wd + w2 + 40)), fs = Math.round(size * sc);
+        ctx.font = k.font(fs, k.D);
+        const base = midY + fs * 0.36, half = (w1 + wd + w2 + 40) * sc / 2;
+        ctx.textAlign = "left";
+        ctx.fillStyle = n1 >= n2 ? "#FFFFFF" : "rgba(255,255,255,0.6)"; ctx.fillText(s1 || "0", cx - half, base);
+        ctx.fillStyle = g.accent; ctx.fillText("-", cx - half + w1 * sc + 20 * sc, base);
+        ctx.fillStyle = n2 >= n1 ? "#FFFFFF" : "rgba(255,255,255,0.6)"; ctx.fillText(s2 || "0", cx + half - w2 * sc, base);
+        ctx.textAlign = "center";
+      } else {
+        ctx.font = k.font(tall ? 120 : 108, k.D); ctx.fillStyle = g.accent; ctx.fillText("VS", cx, midY + 40);
+      }
+      // Status pill above the score: accent, or red with a dot when live.
+      const status = cap(g.val("status"));
+      if (status) {
+        const live = /LIVE/.test(status), fill = live ? "#FF3B3B" : g.accent, ink = live ? "#FFFFFF" : k.inkOn(g.accent);
+        ctx.font = k.font(k.fit(status, room - 40, 30, k.C, 700, 18), k.C, 700); k.spaced(4);
+        const tw = ctx.measureText(status).width + (live ? 26 : 0), ph = 50, py = midY - (played ? 150 : 128) - ph;
+        ctx.shadowBlur = 0; ctx.fillStyle = fill; k.roundRect(cx - tw / 2 - 24, py, tw + 48, ph, 25); ctx.fill();
+        ctx.fillStyle = ink; ctx.fillText(status, cx + (live ? 13 : 0), py + 36);
+        if (live) { ctx.beginPath(); ctx.arc(cx - tw / 2 + 4, py + 25, 8, 0, Math.PI * 2); ctx.fill(); }
+        k.spaced(0); ctx.shadowBlur = 18;
+      }
+
+      // Team names under the medallions, scorers under the names.
+      const colW = Math.min(W / 2 - PAD - 10, 2 * (xs[0] - PAD) + 40);
+      let lowest = nameY;
+      [g.val("t1"), g.val("t2")].forEach((tm, i) => {
+        const nm = cap(tm); if (!nm) return;
+        ctx.font = k.font(k.fit(nm, colW, 58, k.H, 900, 28), k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, xs[i], nameY, colW);
+        lists[i].forEach((line, j) => {
+          const ly = nameY + 50 + j * 40;
+          ctx.font = k.font(tall ? 36 : 32, k.C, 600); ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillText(cap(line), xs[i], ly, colW);
+          lowest = Math.max(lowest, ly);
+        });
+      });
+
+      // Your line, centred above the bottom row.
+      const hl = String(g.val("headline") || "").trim();
+      if (hl) {
+        const maxH = g.footerY - 70 - (lowest + 40);
+        let lay = k.layoutRich(cap(hl), W - 2 * PAD, tall ? 84 : 70, k.D, 2, 40);
+        while (lay.lines.length * lay.size * 1.02 > maxH && lay.size > 40) lay = k.layoutRich(cap(hl), W - 2 * PAD, lay.size - 4, k.D, 2, 40);
+        const top = Math.max(lowest + 40, g.footerY - 70 - lay.lines.length * lay.size * 1.02);
+        k.drawRich(lay, cx, top + lay.size * 0.9, lay.size * 1.02, k.D, "#FFFFFF", g.accent, "center");
+      }
+      ctx.restore(); ctx.restore(); ctx.textAlign = "left";
+      infoLine(k, g, g.val("info"), PAD, g.footerY, "left");
+      k.brandCorner(g, g.footerY);
+    },
+  };
 })();
 
 </script>
@@ -2299,6 +2436,8 @@ window.BPG = window.BPG || {};
     "Netherlands": ["ned", "nl", "holland"],
     "Scotland": ["sco"],
     "Nepal": ["nep"],
+    "Bhutan": ["bhu", "btn"],
+    "Maldives": ["mdv", "mald"],
     "UAE": ["uae"],
     "Oman": ["oma", "omn"],
     "USA": ["usa", "us"],
@@ -2426,7 +2565,7 @@ window.BPG = window.BPG || {};
   const SHORT = {
     "Bangladesh": "BAN", "Pakistan": "PAK", "Sri Lanka": "SL", "India": "IND", "Australia": "AUS", "England": "ENG",
     "South Africa": "SA", "New Zealand": "NZ", "Afghanistan": "AFG", "West Indies": "WI", "Zimbabwe": "ZIM", "Ireland": "IRE",
-    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
+    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "Bhutan": "BHU", "Maldives": "MDV", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
     "Canada": "CAN", "Hong Kong": "HK", "Argentina": "ARG", "Brazil": "BRA", "France": "FRA", "Germany": "GER", "Spain": "ESP",
     "Portugal": "POR", "Italy": "ITA", "Belgium": "BEL", "Croatia": "CRO", "Uruguay": "URU", "Morocco": "MAR", "Japan": "JPN", "Mexico": "MEX", "Colombia": "COL", "Ecuador": "ECU", "Chile": "CHI", "Paraguay": "PAR", "Peru": "PER", "Venezuela": "VEN", "Bolivia": "BOL", "Saudi Arabia": "KSA", "South Korea": "KOR", "Switzerland": "SUI", "Denmark": "DEN", "Senegal": "SEN", "Egypt": "EGY", "Nigeria": "NGA",
     "Uganda": "UGA", "Papua New Guinea": "PNG", "Qatar": "QAT", "Iran": "IRN", "Ghana": "GHA", "Cameroon": "CMR", "Ivory Coast": "CIV", "Algeria": "ALG", "Tunisia": "TUN", "Poland": "POL", "Austria": "AUT", "Turkey": "TUR", "Serbia": "SRB", "Wales": "WAL", "Norway": "NOR", "Sweden": "SWE", "Ukraine": "UKR", "Bayern Munich": "BAY", "Al Nassr": "NAS", "Al Hilal": "HIL", "Paris Saint-Germain": "PSG", "Juventus": "JUV", "AC Milan": "MIL", "Inter Milan": "INT", "Inter Miami": "MIA", "Atletico Madrid": "ATM", "Borussia Dortmund": "BVB", "Tottenham": "TOT", "Newcastle": "NEW", "Bayer Leverkusen": "B04",
@@ -2536,7 +2675,7 @@ window.BPG = window.BPG || {};
     put("score", p.score); put("overs", p.scoreOvers || p.overs);
     put("minute", p.minute); put("assist", p.assist);
     if (p.goals1 !== undefined) { put("t1", p.team); put("s1", p.goals1); put("t2", p.opp); put("s2", p.goals2); put("score", `${p.team} ${p.goals1}-${p.goals2} ${p.opp}`); }
-    else if (tpl.layout === "result" || tpl.layout === "fscore") { put("t1", p.team); put("t2", p.opp); }
+    else if (tpl.layout === "result" || tpl.layout === "fscore" || tpl.layout === "matchcard") { put("t1", p.team); put("t2", p.opp); }
     const labels = Object.keys(set).map((id) => tpl.fields.find((f) => f[0] === id)[1].replace(/\s*\(.*\)$/, ""));
     return { values: set, labels };
   };
@@ -2556,6 +2695,7 @@ window.BPG = window.BPG || {};
     testbowl: "Taijul 6/39 (24.4) BAN vs PAK",
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
+    matchcard: "BAN 1-0 BHU",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
   })[tpl.layout] || "";
@@ -2708,6 +2848,7 @@ window.BPG = window.BPG || {};
     form: (v) => `${v("player")}, ${v("title")}: ${v("scores")}`,
     toss: (v) => `${v("player")} ${v("stamp")}. ${v("detail")}`,
     goal: (v) => `⚽ GOAL! ${v("player")} scores for ${v("team")} (${v("minute")}). ${v("score")}. Assist: ${v("assist")}.`,
+    matchcard: (v) => (String(v("s1")).trim() || String(v("s2")).trim() ? `${v("status") || "FT"}: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}` : `${v("stage") || "Match day"}: ${v("t1")} vs ${v("t2")}, ${v("status")}`) + ` | ${v("tournament")}\n${[v("g1"), v("g2")].filter((x) => String(x).trim()).join(" · ")}\n${v("headline")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
     rating: (v) => `${v("player")} vs ${v("opp")}: ${v("rating")}/10. ${v("stats")}`,
@@ -3798,6 +3939,8 @@ window.BPG = window.BPG || {};
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
+    $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -3902,7 +4045,7 @@ window.BPG = window.BPG || {};
     img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
-    if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {

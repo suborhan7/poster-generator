@@ -143,6 +143,8 @@ window.BPG = window.BPG || {};
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
+    $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -247,7 +249,7 @@ window.BPG = window.BPG || {};
     img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
-    if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
   [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
