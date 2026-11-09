@@ -16,14 +16,22 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 2. Under **Build and deployment**, set Source to **Deploy from a branch**, Branch to **main**, and Folder to **/ (root)**. Then click **Save**.
 3. After a minute the site is live at `https://suborhan7.github.io/poster-generator/`. Every push to `main` updates it automatically.
 
-## Cards included (25)
+## Find a card fast
+
+The picker works like an app shelf: type in the **search box** (English, Banglish or Bangla: `fifty`, `pachas`, `uikat`, `গোল`, `table`), or tap a group pill (🏏 Cricket, 🔴 Test, ⚽ Football, 📰 News & talk, 🆚 Compare, 👥 Line-ups, 📊 Tables & series, 🏆 Tournaments, 🔥 Borhan Rants, ✨ Big text) and pick an emoji tile. **🕘 Recent** keeps your last 8 cards. The bar under the tiles says what the picked card is for.
+
+Card names, emojis, groups and search words all live in `js/catalog.js`. Renaming a card there never breaks saved work, because the card's key stays the same.
+
+## Cards included (81)
 
 | Group | Cards |
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
-| Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss |
-| Football | Goal, Full-time score, Red card, Player rating |
-| General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Breaking news, Photo frame |
+| Stylish | Runs milestone, Wicket haul, Goal moment, Result, Big number / record: one huge worn headline (`219* RUNS!`). Font library: 33 free fonts in tabs Bold headlines, Modern, Athletic, Editorial, Creative, Bangla (Sports Timeline set), live previews, ★ My fonts, Clean/Worn/Rough texture |
+| Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss, Playing XI (tournament look), Chase tracker (required rate, win chance bar), Partnership, Team of the week |
+| Football | Goal, Full-time score, Transfer, Match card, Starting XI and Tournament photo frame, Fixtures, Match stats, XI on the pitch (formations) (clean tournament look: tournament logo, waving flags or crests, ribbons around the edges, full time / live / kick-off, winner line), Red card, Player rating, Team of the week on the pitch, Group table |
+| Tournaments | SAFF Championship: Match card, Starting XI, XI on the pitch, Fixtures, Group table, Match stats, Head to head, Ke jitbe? poll, Photo frame, all in the SAFF look. Add the SAFF logo once and every SAFF card uses it. Add more tournaments in `js/tournaments.js`. |
+| General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Player vs player (stats with bars), Breaking news, Instant news, Record / achievement, Did you know?, MVP / player of the month, Photo frame, Ke jitbe? poll (comment 1 or 2), Head to head, Countdown, On this day (black and white photo), Player profile, Debut cap, Match story (5-slide carousel with a Download all slides button) |
 
 Features on every card:
 
@@ -40,7 +48,10 @@ Features on every card:
 | --- | --- | --- |
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
+| `js/catalog.js` | What the picker shows: each card's name, emoji, group and search words | **Often**: add one line here for every new card |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/stylish.js` | The Stylish cards: font library (`BPG.HEAD_FONTS`, `cat` = picker tab), the worn-print texture, the picker | To add a headline font: drop the woff2 in `fonts/`, add it to `css/fonts.css`, `BPG.HEAD_FONTS` and `sw.js` |
+| `css/fonts.css`, `fonts/` | Headline fonts saved with the site (free Google Fonts, OFL) so they work offline | To add a font |
 | `js/zip.js` | Reads and writes .zip files in the browser, and works out a player's name from a folder or file name | To change how names are read from a zip |
 | `js/library.js` | Photo library: player photos saved on the phone (IndexedDB) and found by name | To change how names are matched |
 | `js/smartfill.js` | Smart fill: sends the quick fill note to Google's free Gemini AI (your own free key) and gets back which field each piece goes in | To change the AI's instructions or the models it tries |

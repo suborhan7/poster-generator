@@ -88,7 +88,7 @@ window.BPG = window.BPG || {};
   function refresh() {
     datalists();
     const box = $("seriesBox"), st = BPG.app.state();
-    box.hidden = st.cat !== "series";
+    box.hidden = !BPG.TEMPLATES[st.tpl] || BPG.TEMPLATES[st.tpl].cat !== "series";
     if (box.hidden) return;
     const s = S.current();
     const pick = el("select", { id: "sr_pick", on: { change(e) { S.select(e.target.value); openMatch = null; refresh(); BPG.app.draw(); } } },

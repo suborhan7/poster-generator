@@ -6,12 +6,14 @@ window.BPG = window.BPG || {};
   const T = BPG.TEMPLATES, L = BPG.LAYOUTS, THEMES = BPG.THEMES, PLATFORMS = BPG.PLATFORMS;
   const cv = $("poster"), ctx = cv.getContext("2d");
 
-  const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
+  // state.cat is the picker group (BPG.SHELVES in catalog.js), not the sport.
+  const firstOf = (shelf) => BPG.firstOfShelf(shelf);
+  const SH = BPG.SHELVES;
   const state = {
-    cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
+    cat: Object.keys(SH)[0], tpl: firstOf(Object.keys(SH)[0]), platform: "instagram", recent: [],
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
-  const photos = { 1: null, 2: null };
+  const photos = { 1: null, 2: null, 3: null };
   let logoImg = null;
 
   try {
@@ -19,8 +21,9 @@ window.BPG = window.BPG || {};
     // Brand settings (theme, colours, handle, page name) go back to the defaults on every reload; only an uploaded logo is kept.
     if (saved) Object.assign(state, saved, { theme: "team", brand: { ...BPG.BRAND, logo: (saved.brand || {}).logo || null } });
   } catch (e) {}
-  if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
-  if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
+  if (!T[state.tpl]) { state.cat = Object.keys(SH)[0]; state.tpl = firstOf(state.cat); }
+  if (!SH[state.cat] && state.cat !== "recent") state.cat = BPG.shelfOf(state.tpl);
+  state.recent = (Array.isArray(state.recent) ? state.recent : []).filter((k) => T[k]);
   const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
 
   BPG.state = () => state;
@@ -41,18 +44,69 @@ window.BPG = window.BPG || {};
     b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(pressed)); b.onclick = onClick;
     parent.appendChild(b);
   }
+  // ---------- Card picker: search, group pills, emoji tiles ----------
+  let query = "";
+  function pickCard(key) {
+    state.tpl = key;
+    if (query) state.cat = BPG.shelfOf(key);
+    state.recent = [key, ...state.recent.filter((k) => k !== key)].slice(0, 8);
+    persist(); renderAll();
+  }
   function renderCats() {
-    $("cats").innerHTML = "";
-    Object.entries(BPG.CATS).forEach(([key, label]) => button($("cats"), label, state.cat === key, () => {
-      state.cat = key; state.tpl = firstOf(key); persist(); renderAll();
+    const row = $("cats"); row.innerHTML = "";
+    const pills = (state.recent.length ? [["recent", "🕘 Recent"]] : []).concat(Object.entries(SH));
+    pills.forEach(([key, label]) => button(row, label, !query && state.cat === key, () => {
+      query = ""; $("cardSearch").value = ""; $("searchClear").hidden = true;
+      state.cat = key;
+      if (key !== "recent" && BPG.shelfOf(state.tpl) !== key) state.tpl = firstOf(key);
+      persist(); renderAll();
     }));
+  }
+  function tile(parent, key, showShelf) {
+    const t = T[key], b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.setAttribute("aria-pressed", String(state.tpl === key));
+    const i = document.createElement("i"); i.textContent = t.emoji; i.setAttribute("aria-hidden", "true");
+    const n = document.createElement("span"); n.textContent = t.name;
+    b.append(i, n);
+    if (showShelf) { const g = document.createElement("small"); g.textContent = SH[t.shelf].replace(/^\S+\s/, "") + (t.tour && BPG.TOURNAMENTS[t.tour] ? " · " + BPG.TOURNAMENTS[t.tour].name : ""); b.appendChild(g); }
+    b.title = t.use || t.name;
+    b.onclick = () => pickCard(key);
+    parent.appendChild(b);
   }
   function renderTypes() {
-    $("types").innerHTML = "";
-    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
-      state.tpl = key; persist(); renderAll();
-    }));
+    const box = $("types"); box.innerHTML = "";
+    if (query) {
+      const found = BPG.searchCards(query);
+      found.forEach((k) => tile(box, k, true));
+      if (!found.length) { const p = document.createElement("p"); p.className = "hint none"; p.textContent = `No card called "${query}". Try a simpler word like 50, wicket, goal, table or news.`; box.appendChild(p); }
+    } else if (state.cat === "recent") {
+      state.recent.forEach((k) => tile(box, k, true));
+    } else {
+      // Tournaments: pick the tournament first, then its cards.
+      let tour = null;
+      if (state.cat === "tour" && BPG.TOURNAMENTS) {
+        tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+        const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+        Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+          state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+        }));
+        box.appendChild(row);
+      }
+      Object.keys(T).filter((k) => T[k].shelf === state.cat && (!tour || T[k].tour === tour)).sort((x, y) => T[x].order - T[y].order).forEach((k) => tile(box, k, false));
+    }
+    const t = T[state.tpl];
+    $("picked").innerHTML = "";
+    const e = document.createElement("i"); e.textContent = t.emoji;
+    const d = document.createElement("div");
+    const b = document.createElement("b"); b.textContent = t.name;
+    const u = document.createElement("small"); u.textContent = (t.use || "") + (t.use ? " · " : "") + SH[t.shelf].replace(/^\S+\s/, "");
+    d.append(b, u); $("picked").append(e, d);
   }
+  $("cardSearch").addEventListener("input", (e) => {
+    query = e.target.value.trim(); $("searchClear").hidden = !query;
+    renderCats(); renderTypes();
+  });
+  $("searchClear").addEventListener("click", () => { query = ""; $("cardSearch").value = ""; $("searchClear").hidden = true; renderCats(); renderTypes(); $("cardSearch").focus(); });
   function addField(parent, id, label, value, wide, type, onInput) {
     const d = document.createElement("div");
     d.className = "field" + (wide ? " wide" : "");
@@ -135,6 +189,15 @@ window.BPG = window.BPG || {};
     if (ex || BPG.aiKey()) quickBox(box, t, ex);
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
+    if (t.fontPick && BPG.fontPicker) BPG.fontPicker(box, state, persist, draw, t);
+    // Carousel cards: tap a slide to see it.
+    if (t.slides) {
+      const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Slide");
+      const cur = parseInt(val("slide"), 10) || 1;
+      (BPG.STORY_SLIDES || []).slice(0, t.slides).forEach((nm, i) => button(seg, `${i + 1} ${nm}`, cur === i + 1, () => { setVal("slide", String(i + 1)); renderFields(); }));
+      box.appendChild(seg);
+    }
+    $("allSlides").hidden = !t.slides;
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
@@ -142,7 +205,12 @@ window.BPG = window.BPG || {};
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
+    // Cards with no main photo but a crest or logo slot keep only those slots.
+    document.querySelectorAll("#photoBox > .fields > .field").forEach((el) => { if (el.id !== "photo2Wrap" && el.id !== "photo3Wrap") el.hidden = !!t.noMain; });
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
+    const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -159,18 +227,24 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
+  function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
     open(tpl, values, big) {
-      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign({}, state.values[tpl] || {}, values, big ? { __big: big } : {});
       persist(); renderAll();
     },
   };
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
+  // Where the logo sits: top right (default) or the small bottom-right corner.
+  function renderLogoPos() {
+    $("b_logopos").innerHTML = "";
+    [["bottom", "Bottom right"], ["top", "Top"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "bottom") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+  }
+  renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
@@ -247,14 +321,38 @@ window.BPG = window.BPG || {};
     img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
-    if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+  [1, 2, 3].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    await usePhoto(n, await loadImage(f), { blob: f });
+    const img = await loadImage(f);
+    if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
+    await usePhoto(n, img, { blob: f, tpl: T[state.tpl].layout }); // crests only show on the card they were added for
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // The tournament logo stays on this phone (shrunk to 600 px), so it is added once per tournament.
+  function keepTourLogo(img) {
+    try {
+      const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem(logoKey(), c.toDataURL("image/png"));
+    } catch (e) {}
+  }
+  // Each tournament in the Tournaments section keeps its own logo; the other cards share one.
+  const logoKey = () => (T[state.tpl] && T[state.tpl].tour ? "bpg_tourlogo_" + T[state.tpl].tour : "bpg_tourlogo");
+  let logoLoaded = null;
+  function loadTourLogo() {
+    const key = logoKey(); if (key === logoLoaded) return; logoLoaded = key; photos[3] = null;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) { const i = new Image(); i.onload = () => { if (logoKey() !== key) return; photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+    } catch (e) {}
+  }
+  BPG.loadTourLogo = loadTourLogo;
+  loadTourLogo();
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.
@@ -377,7 +475,7 @@ window.BPG = window.BPG || {};
     try {
       aiStatus("Picking the card…");
       const key = await BPG.pickCard(text);
-      state.tpl = key; state.cat = T[key].cat; persist(); renderAll();
+      state.tpl = key; state.cat = BPG.shelfOf(key); persist(); renderAll();
       aiStatus(`${T[key].name} card. Filling it in…`);
       const { values, labels } = await BPG.smartFill(T[key], text);
       fillCard(values);
@@ -438,6 +536,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
+      logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
@@ -540,6 +639,22 @@ window.BPG = window.BPG || {};
     status("Saved both sizes.");
   });
 
+  // Carousel: every slide in one tap, in order, ready to post as one swipe post.
+  $("allSlides").addEventListener("click", async () => {
+    const t = T[state.tpl]; if (!t.slides) return;
+    const was = val("slide"), files = [], vals = (state.values[state.tpl] = state.values[state.tpl] || {});
+    for (let i = 1; i <= t.slides; i++) {
+      vals.slide = String(i); const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename().replace(".png", `-slide${i}.png`), { type: "image/png" }));
+    }
+    vals.slide = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared all slides."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status(`Saved ${files.length} slides.`);
+  });
+
   // ---------- Install as an app ----------
   let installEvent = null;
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; $("install").hidden = false; });
@@ -563,7 +678,7 @@ window.BPG = window.BPG || {};
       }
       const values = {};
       T[tpl].fields.forEach(([id]) => { values[id] = d[id] != null ? String(d[id]) : ""; });
-      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign(values, q.get("big") ? { __big: q.get("big") } : {});
       if (q.get("size") && PLATFORMS[q.get("size")]) state.platform = q.get("size");
       persist();

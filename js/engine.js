@@ -110,7 +110,9 @@ BPG.createKit = function (ctx, env) {
     const img = g.photo.img, a = env.adjust();
     // Size the photo to the part of the card that stays visible, so it is zoomed in as little as possible.
     const bh = Math.min(g.H, textTop + 80);
-    const pl = k.place(img, g.W, bh, a, g.st + 60, textTop - 60);
+    // With the logo on top, the head sits a little lower so the logo never covers it.
+    const pl = k.place(img, g.W, bh, a, g.st + (g.logoTop ? 130 : 60), textTop - 60), f = img.bpgFocus;
+    if (f && isFinite(f.l)) g.subj = { l: pl.x + f.l * pl.dw, r: pl.x + f.r * pl.dw, t: pl.y + f.t * pl.dh };
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
     ctx.drawImage(img, pl.x, pl.y, pl.dw, pl.dh);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
@@ -172,12 +174,43 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
-  // Logo + name, small, in the bottom-right corner. y is the baseline of the bottom row.
+  // Logo + name in the bottom-right corner (default): round badge, a thin line, the page name.
+  // "Logo place: Top" in Brand settings moves it to the top instead (not on tournament-look cards).
+  // y is the baseline of the bottom row.
   k.brandCorner = (g, y) => {
-    const size = 40;
-    k.logoMark(g, g.W - 56 - size, y - size + 4, size);
-    if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+    if (g.logoTop) { k.brandTop(g); return; }
+    k.brandLockup(g, "right", y - 14, 52);
   };
+  // The lockup itself. cy is its vertical centre; side "left"/"right" is the edge it hugs.
+  k.brandLockup = (g, side, cy, s) => {
+    const logo = env.logo(), edge = 50;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 16;
+    if (logo) { // your own logo already has the name in it
+      const h = s * 1.15, sc = Math.min(h / logo.height, 260 / logo.width), w = logo.width * sc;
+      ctx.drawImage(logo, side === "left" ? edge : g.W - edge - w, cy - (logo.height * sc) / 2, w, logo.height * sc); ctx.restore(); return;
+    }
+    const words = (String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants").toUpperCase().split(/\s+/);
+    const fs = Math.round(s * 0.6); ctx.font = k.font(fs, C, 700); k.spaced(Math.round(fs * 0.12));
+    const a = words[0] + (words[1] ? " " : ""), b = words.slice(1).join(" "), wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+    const total = s + 34 + wa + wb, left = side === "left" ? edge : g.W - edge - total, bx = left + s / 2, tx = left + s + 34;
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(a, tx, cy + fs * 0.36);
+    ctx.fillStyle = g.accent; ctx.fillText(b, tx + wa, cy + fs * 0.36); k.spaced(0);
+    ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillRect(tx - 18, cy - s * 0.34, 2.5, s * 0.68); // thin line between badge and name
+    ctx.beginPath(); ctx.arc(bx, cy, s / 2, 0, Math.PI * 2);
+    const gr = ctx.createLinearGradient(bx, cy - s / 2, bx, cy + s / 2); gr.addColorStop(0, "#1B2A4A"); gr.addColorStop(1, "#0B1326");
+    ctx.fillStyle = gr; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 3; ctx.strokeStyle = g.accent; ctx.stroke();
+    ctx.restore();
+    k.logoMark(g, bx - s * 0.34, cy - s * 0.3, s * 0.68);
+  };
+  // Which top corner the logo goes in: the one the player's head is furthest from.
+  k.logoSide = (g) => {
+    if (g.logoSideFixed) return g.logoSideFixed;
+    const s = g.subj; if (!s) return "right";
+    const zone = 400, over = (a, b) => Math.max(0, Math.min(b, s.r) - Math.max(a, s.l));
+    return over(0, zone) < over(g.W - zone, g.W) ? "left" : "right";
+  };
+  k.brandTop = (g) => { k.brandLockup(g, k.logoSide(g), g.st + (g.H / g.W > 1.5 ? 25 : 49), 50); };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.
   k.wordmark = (g, x, y, align, size = 22) => {

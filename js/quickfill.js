@@ -21,6 +21,8 @@ window.BPG = window.BPG || {};
     "Netherlands": ["ned", "nl", "holland"],
     "Scotland": ["sco"],
     "Nepal": ["nep"],
+    "Bhutan": ["bhu", "btn"],
+    "Maldives": ["mdv", "mald"],
     "UAE": ["uae"],
     "Oman": ["oma", "omn"],
     "USA": ["usa", "us"],
@@ -148,7 +150,7 @@ window.BPG = window.BPG || {};
   const SHORT = {
     "Bangladesh": "BAN", "Pakistan": "PAK", "Sri Lanka": "SL", "India": "IND", "Australia": "AUS", "England": "ENG",
     "South Africa": "SA", "New Zealand": "NZ", "Afghanistan": "AFG", "West Indies": "WI", "Zimbabwe": "ZIM", "Ireland": "IRE",
-    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
+    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "Bhutan": "BHU", "Maldives": "MDV", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
     "Canada": "CAN", "Hong Kong": "HK", "Argentina": "ARG", "Brazil": "BRA", "France": "FRA", "Germany": "GER", "Spain": "ESP",
     "Portugal": "POR", "Italy": "ITA", "Belgium": "BEL", "Croatia": "CRO", "Uruguay": "URU", "Morocco": "MAR", "Japan": "JPN", "Mexico": "MEX", "Colombia": "COL", "Ecuador": "ECU", "Chile": "CHI", "Paraguay": "PAR", "Peru": "PER", "Venezuela": "VEN", "Bolivia": "BOL", "Saudi Arabia": "KSA", "South Korea": "KOR", "Switzerland": "SUI", "Denmark": "DEN", "Senegal": "SEN", "Egypt": "EGY", "Nigeria": "NGA",
     "Uganda": "UGA", "Papua New Guinea": "PNG", "Qatar": "QAT", "Iran": "IRN", "Ghana": "GHA", "Cameroon": "CMR", "Ivory Coast": "CIV", "Algeria": "ALG", "Tunisia": "TUN", "Poland": "POL", "Austria": "AUT", "Turkey": "TUR", "Serbia": "SRB", "Wales": "WAL", "Norway": "NOR", "Sweden": "SWE", "Ukraine": "UKR", "Bayern Munich": "BAY", "Al Nassr": "NAS", "Al Hilal": "HIL", "Paris Saint-Germain": "PSG", "Juventus": "JUV", "AC Milan": "MIL", "Inter Milan": "INT", "Inter Miami": "MIA", "Atletico Madrid": "ATM", "Borussia Dortmund": "BVB", "Tottenham": "TOT", "Newcastle": "NEW", "Bayer Leverkusen": "B04",
@@ -251,14 +253,14 @@ window.BPG = window.BPG || {};
     put("team", ids.has("abbr") || tpl.layout !== "reaction" ? p.team : BPG.teamShort(p.team));
     put("abbr", p.team && BPG.teamShort(p.team));
     put("opp", p.opp);
-    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" ? p.given : p.runs);
+    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" || tpl.quick === "bowling" ? p.given : p.runs);
     put("balls", tpl.layout === "over" ? undefined : p.balls);
     put("fours", p.fours); put("sixes", p.sixes);
     put("wkts", p.wkts);
     put("score", p.score); put("overs", p.scoreOvers || p.overs);
     put("minute", p.minute); put("assist", p.assist);
     if (p.goals1 !== undefined) { put("t1", p.team); put("s1", p.goals1); put("t2", p.opp); put("s2", p.goals2); put("score", `${p.team} ${p.goals1}-${p.goals2} ${p.opp}`); }
-    else if (tpl.layout === "result" || tpl.layout === "fscore") { put("t1", p.team); put("t2", p.opp); }
+    else if (tpl.layout === "result" || tpl.layout === "fscore" || tpl.layout === "matchcard") { put("t1", p.team); put("t2", p.opp); }
     const labels = Object.keys(set).map((id) => tpl.fields.find((f) => f[0] === id)[1].replace(/\s*\(.*\)$/, ""));
     return { values: set, labels };
   };
@@ -278,7 +280,9 @@ window.BPG = window.BPG || {};
     testbowl: "Taijul 6/39 (24.4) BAN vs PAK",
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
+    matchcard: "BAN 1-0 BHU",
+    lineup: "BAN vs BHU",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
-  })[tpl.layout] || "";
+  })[tpl.quick || tpl.layout] || "";
 })();

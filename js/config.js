@@ -3,7 +3,7 @@
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "21 Oct 2026 · v42";
+BPG.VERSION = "9 Nov 2026 · v49";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -33,13 +33,14 @@ BPG.PLATFORMS = {
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 
-BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", test: "Test cricket", football: "Football", general: "General" };
+BPG.CATS = { rants: "Borhan Rants", stylish: "Stylish", series: "Series", cricket: "Cricket", test: "Test cricket", football: "Football", general: "General" };
 
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
 // Jersey colours, used by the "Team colours" theme. bg = dark base, accent = highlight, stroke = paint strokes.
 // Add a team: copy a line. The name must match the full name the quick fill uses (e.g. "Sri Lanka").
 // Flags for the squad card, by team name (ISO country codes; flag images come from the free flag-icons set).
 BPG.FLAG_CODES = {
+  "Bhutan": "bt", "Maldives": "mv",
   "Bangladesh": "bd", "India": "in", "Pakistan": "pk", "Sri Lanka": "lk", "Australia": "au", "England": "gb-eng", "South Africa": "za", "New Zealand": "nz", "Afghanistan": "af", "Zimbabwe": "zw", "Ireland": "ie", "Netherlands": "nl", "Nepal": "np", "Scotland": "gb-sct", "UAE": "ae", "Oman": "om", "USA": "us", "Namibia": "na", "Canada": "ca", "Hong Kong": "hk", "Uganda": "ug", "Papua New Guinea": "pg", "Argentina": "ar", "Brazil": "br", "France": "fr", "Portugal": "pt", "Spain": "es", "Germany": "de", "Italy": "it", "Belgium": "be", "Croatia": "hr", "Uruguay": "uy", "Morocco": "ma", "Japan": "jp", "Colombia": "co", "Ecuador": "ec", "Chile": "cl", "Paraguay": "py", "Peru": "pe", "Venezuela": "ve", "Bolivia": "bo", "Saudi Arabia": "sa", "South Korea": "kr", "Switzerland": "ch", "Denmark": "dk", "Senegal": "sn", "Egypt": "eg", "Nigeria": "ng", "Mexico": "mx", "Qatar": "qa", "Iran": "ir", "Ghana": "gh", "Cameroon": "cm", "Ivory Coast": "ci", "Algeria": "dz", "Tunisia": "tn", "Poland": "pl", "Austria": "at", "Turkey": "tr", "Serbia": "rs", "Wales": "gb-wls", "Norway": "no", "Sweden": "se", "Ukraine": "ua",
 };
 
@@ -57,6 +58,8 @@ BPG.TEAM_COLORS = {
   "Zimbabwe": { bg: "#2A0909", accent: "#FCE300", stroke: "#C80F0F", hot: "#2DB35A" },
   "Ireland": { bg: "#042C1C", accent: "#A9E36E", stroke: "#169B62", hot: "#FF883E" },
   "Netherlands": { bg: "#2A1200", accent: "#FF7A00", stroke: "#E85A00", hot: "#FFFFFF" },
+  "Bhutan": { bg: "#2A1402", accent: "#FFCC33", stroke: "#FF6A13", hot: "#E4002B" },
+  "Maldives": { bg: "#2A0508", accent: "#3DCB6E", stroke: "#D21034", hot: "#FFFFFF" },
   "Nepal": { bg: "#2A0610", accent: "#3D7CFF", stroke: "#DC143C", hot: "#FFFFFF" },
   "Argentina": { bg: "#0C2340", accent: "#75AADB", stroke: "#3E7CC0", hot: "#F6B40E" },
   "Brazil": { bg: "#063B22", accent: "#FFDF00", stroke: "#009C3B", hot: "#2A63C8" },
