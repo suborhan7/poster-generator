@@ -12,55 +12,10 @@ window.BPG = window.BPG || {};
   let bigCase = cap;
   const BN = '"Baloo Da 2", "Hind Siliguri"'; // Bangla letters fall back to these
 
-  // The font library: 36 free fonts (SIL Open Font License / Apache), saved in fonts/ so they work offline.
-  // Each group is a genuinely different kind of lettering. grp = group (BPG.FONT_GROUPS),
-  // style "italic" for slanted fonts, title: true for scripts and serifs that look wrong in ALL CAPS.
+  // The headline font. The user picked Anton out of 36 (9 Nov 2026), so it's the only one.
+  // To offer more again, add entries here (grp = a BPG.FONT_GROUPS key) and the picker comes back by itself.
   BPG.HEAD_FONTS = {
-    // Impact: tall condensed capitals
-    bebas: { label: "Bebas Neue", note: "tall, clean", fam: "Bebas Neue", weight: 400, grp: "impact" },
     anton: { label: "Anton", note: "heavy", fam: "Anton", weight: 400, grp: "impact" },
-    league: { label: "League Gothic", note: "extra tall", fam: "League Gothic", weight: 400, grp: "impact" },
-    oswald: { label: "Oswald", note: "bold", fam: "Oswald", weight: 700, grp: "impact" },
-    shoulders: { label: "Big Shoulders", note: "stadium", fam: "Big Shoulders Display", weight: 900, grp: "impact" },
-    teko: { label: "Teko", note: "sporty", fam: "Teko", weight: 700, grp: "impact" },
-    // Speed: heavy italics with motion
-    kanit: { label: "Kanit Italic", note: "fast, heavy", fam: "Kanit", weight: 900, style: "italic", grp: "speed" },
-    barlowi: { label: "Barlow Italic", note: "broadcast style", fam: "Barlow Condensed", weight: 900, style: "italic", grp: "speed" },
-    exo: { label: "Exo 2 Italic", note: "tech, racing", fam: "Exo 2", weight: 900, style: "italic", grp: "speed" },
-    // Wide & heavy: extended block letters
-    unbounded: { label: "Unbounded", note: "wide, modern", fam: "Unbounded", weight: 900, grp: "wide" },
-    climate: { label: "Climate Crisis", note: "ultra heavy", fam: "Climate Crisis", weight: 400, grp: "wide" },
-    montserrat: { label: "Montserrat Black", note: "clean, strong", fam: "Montserrat", weight: 900, grp: "wide" },
-    archblack: { label: "Archivo Black", note: "solid", fam: "Archivo Black", weight: 400, grp: "wide" },
-    // Classic serif: newspaper and legend look
-    playfair: { label: "Playfair Black", note: "elegant", fam: "Playfair Display", weight: 900, title: true, grp: "serif" },
-    dmserif: { label: "DM Serif", note: "magazine", fam: "DM Serif Display", weight: 400, title: true, grp: "serif" },
-    abril: { label: "Abril Fatface", note: "bold headline", fam: "Abril Fatface", weight: 400, grp: "serif" },
-    slab: { label: "Alfa Slab", note: "classic club", fam: "Alfa Slab One", weight: 400, grp: "serif" },
-    // Signature & script: handwritten names
-    dafoe: { label: "Mr Dafoe", note: "signature", fam: "Mr Dafoe", weight: 400, title: true, grp: "script" },
-    yellowtail: { label: "Yellowtail", note: "retro script", fam: "Yellowtail", weight: 400, title: true, grp: "script" },
-    kaushan: { label: "Kaushan Script", note: "brush script", fam: "Kaushan Script", weight: 400, title: true, grp: "script" },
-    vibes: { label: "Great Vibes", note: "fancy", fam: "Great Vibes", weight: 400, title: true, grp: "script" },
-    // Brush & street
-    marker: { label: "Permanent Marker", note: "hand-written", fam: "Permanent Marker", weight: 400, grp: "brush" },
-    knewave: { label: "Knewave", note: "thick brush", fam: "Knewave", weight: 400, grp: "brush" },
-    graffiti: { label: "Sedgwick Ave", note: "street graffiti", fam: "Sedgwick Ave Display", weight: 400, grp: "brush" },
-    bangers: { label: "Bangers", note: "comic BOOM", fam: "Bangers", weight: 400, grp: "brush" },
-    // Gritty: worn into the letters
-    dirt: { label: "Rubik Dirt", note: "dusty print", fam: "Rubik Dirt", weight: 400, grp: "grunge" },
-    distressed: { label: "Rubik Distressed", note: "cracked print", fam: "Rubik Distressed", weight: 400, grp: "grunge" },
-    spray: { label: "Rubik Spray Paint", note: "spray can", fam: "Rubik Spray Paint", weight: 400, grp: "grunge" },
-    // Jersey & stencil
-    graduate: { label: "Graduate", note: "college jersey", fam: "Graduate", weight: 400, wear: 0.5, grp: "jersey" },
-    sstencil: { label: "Saira Stencil", note: "kit number", fam: "Saira Stencil One", weight: 400, grp: "jersey" },
-    stencil: { label: "Black Ops", note: "army stencil", fam: "Black Ops One", weight: 400, grp: "jersey" },
-    bungee: { label: "Bungee", note: "signboard", fam: "Bungee", weight: 400, grp: "jersey" },
-    // Bangla headlines (these also draw English)
-    galada: { label: "Galada", note: "Bangla stylish", fam: "Galada", weight: 400, grp: "bangla" },
-    anek: { label: "Anek Bangla", note: "Bangla bold condensed", fam: "Anek Bangla", weight: 800, grp: "bangla" },
-    baloo: { label: "Baloo Da 2", note: "Bangla round bold", fam: "Baloo Da 2", weight: 800, grp: "bangla" },
-    tiro: { label: "Tiro Bangla", note: "Bangla newspaper", fam: "Tiro Bangla", weight: 400, wear: 0.5, grp: "bangla" },
   };
   // Groups, in the order the picker shows them, with what each is good for.
   BPG.FONT_GROUPS = {
@@ -81,7 +36,7 @@ window.BPG = window.BPG || {};
   const KIND_GROUP = { runs: "impact", wickets: "impact", goal: "brush", result: "wide", number: "impact" };
   const KIND_SAMPLE = { runs: "219* RUNS!", wickets: "6 WKTS!", goal: "GOAL!", result: "WIN!", number: "950!" };
   BPG.HEAD_TEXTURES = { clean: ["Clean", 0], worn: ["Worn", 0.7], rough: ["Rough", 1.25] };
-  const fontOf = (st) => BPG.HEAD_FONTS[st.hfont] || BPG.HEAD_FONTS.bebas;
+  const fontOf = (st) => BPG.HEAD_FONTS[st.hfont] || BPG.HEAD_FONTS.anton;
   const stack = (f) => `"${f.fam}", ${BN}, Impact, sans-serif`;
   const LABEL_FAM = `"Oswald", ${BN}, "Arial Narrow", sans-serif`;
 
@@ -238,7 +193,7 @@ window.BPG = window.BPG || {};
   // the headline in that font. Tap a tile to use it, tap ☆ to keep it in "My fonts". Remembered on this phone.
   BPG.fontPicker = (box, state, persist, draw, t) => {
     const kind = (t && t.kind) || "runs", favs = () => (Array.isArray(state.hfav) ? state.hfav : (state.hfav = []));
-    if (!BPG.HEAD_FONTS[state.hfont]) state.hfont = "bebas";
+    if (!BPG.HEAD_FONTS[state.hfont]) state.hfont = "anton";
     const d = document.createElement("div"); d.className = "field wide fontlib";
     const l = document.createElement("label"); const cur = document.createElement("span"); cur.className = "fontlib-cur";
     l.append("Headline font: ", cur);
@@ -282,6 +237,7 @@ window.BPG = window.BPG || {};
     });
     showCur(); render();
     d.append(l, tabs, hint, grid);
+    if (Object.keys(BPG.HEAD_FONTS).length < 2) d.hidden = true; // one font: nothing to pick
     const tx = document.createElement("div"); tx.className = "field wide";
     const tl = document.createElement("label"); tl.textContent = "Texture";
     const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Headline texture");
@@ -291,7 +247,7 @@ window.BPG = window.BPG || {};
       b.onclick = () => { state.htex = key; persist(); seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); };
       seg.appendChild(b);
     });
-    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Gritty, script and thin fonts get a lighter texture so the letters stay readable.";
+    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Worn and Rough give the headline an old-print look.";
     tx.append(tl, seg, th); box.append(d, tx);
   };
 })();
