@@ -2406,6 +2406,8 @@ window.BPG = window.BPG || {};
   const KIND_SAMPLE = { runs: "219* RUNS!", wickets: "6 WKTS!", goal: "GOAL!", result: "WIN!", number: "950!" };
   BPG.HEAD_TEXTURES = { clean: ["Clean", 0], worn: ["Worn", 0.7], rough: ["Rough", 1.25] };
   const fontOf = (st) => BPG.HEAD_FONTS[st.hfont] || BPG.HEAD_FONTS.anton;
+  // The texture is set per font and is off (Clean) until you turn it on for that font.
+  const texOf = (st) => { const t = (st.htexBy || {})[BPG.HEAD_FONTS[st.hfont] ? st.hfont : "anton"]; return BPG.HEAD_TEXTURES[t] ? t : "clean"; };
   const stack = (f) => `"${f.fam}", ${BN}, Impact, sans-serif`;
   const LABEL_FAM = `"Oswald", ${BN}, "Arial Narrow", sans-serif`;
 
@@ -2537,7 +2539,7 @@ window.BPG = window.BPG || {};
     draw(k, g) {
       const ctx = k.ctx, st = BPG.state(), f = fontOf(st);
       // Gritty fonts are already worn and thin fonts break up, so the texture goes on lighter for them.
-      const level = (BPG.HEAD_TEXTURES[st.htex] || BPG.HEAD_TEXTURES.worn)[1] * (f.wear != null ? f.wear : WEAR[f.grp] != null ? WEAR[f.grp] : 1);
+      const level = BPG.HEAD_TEXTURES[texOf(st)][1] * (f.wear != null ? f.wear : WEAR[f.grp] != null ? WEAR[f.grp] : 1);
       const v = (id) => String(g.val(id) == null ? "" : g.val(id)).trim(), parts = (KINDS[g.t.kind] || KINDS.runs)(v, g);
       const spec = (s) => `${f.style || "normal"} ${f.weight} ${s}px ${stack(f)}`;
       bigCase = f.title ? titleCase : cap;
@@ -2563,6 +2565,7 @@ window.BPG = window.BPG || {};
   BPG.fontPicker = (box, state, persist, draw, t) => {
     const kind = (t && t.kind) || "runs", favs = () => (Array.isArray(state.hfav) ? state.hfav : (state.hfav = []));
     if (!BPG.HEAD_FONTS[state.hfont]) state.hfont = "anton";
+    let onFont = () => {};
     const d = document.createElement("div"); d.className = "field wide fontlib";
     const l = document.createElement("label"); const cur = document.createElement("span"); cur.className = "fontlib-cur";
     l.append("Headline font: ", cur);
@@ -2586,7 +2589,7 @@ window.BPG = window.BPG || {};
         sample.textContent = f.grp === "bangla" ? "দারুণ জয়!" : f.title ? titleCase(smp) : smp;
         const name = document.createElement("span"); name.className = "fontlib-name"; name.innerHTML = ""; const ty = document.createElement("b"); ty.textContent = f.type; name.append(ty, ` · ${f.label}`, document.createElement("br"), f.use);
         pick.append(sample, name);
-        pick.onclick = () => { state.hfont = key; persist(); showCur(); grid.querySelectorAll(".fontlib-tile > button:first-child").forEach((x) => x.setAttribute("aria-pressed", String(x === pick))); draw(); };
+        pick.onclick = () => { state.hfont = key; persist(); showCur(); onFont(); grid.querySelectorAll(".fontlib-tile > button:first-child").forEach((x) => x.setAttribute("aria-pressed", String(x === pick))); draw(); };
         const star = document.createElement("button"); star.type = "button"; star.className = "fontlib-star";
         const on = favs().includes(key); star.textContent = on ? "★" : "☆"; star.setAttribute("aria-pressed", String(on));
         star.setAttribute("aria-label", (on ? "Remove from" : "Add to") + ` My fonts: ${f.label}`);
@@ -2608,13 +2611,14 @@ window.BPG = window.BPG || {};
     const tx = document.createElement("div"); tx.className = "field wide";
     const tl = document.createElement("label"); tl.textContent = "Texture";
     const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Headline texture");
-    const curT = BPG.HEAD_TEXTURES[state.htex] ? state.htex : "worn";
+    const showTex = () => seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.t === texOf(state))));
     Object.entries(BPG.HEAD_TEXTURES).forEach(([key, [lab]]) => {
-      const b = document.createElement("button"); b.type = "button"; b.textContent = lab; b.setAttribute("aria-pressed", String(curT === key));
-      b.onclick = () => { state.htex = key; persist(); seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); };
+      const b = document.createElement("button"); b.type = "button"; b.textContent = lab; b.dataset.t = key;
+      b.onclick = () => { state.htexBy = Object.assign({}, state.htexBy, { [state.hfont]: key }); persist(); showTex(); draw(); };
       seg.appendChild(b);
     });
-    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Worn and Rough give the headline an old-print look. Thin and script fonts get it lighter.";
+    showTex(); onFont = showTex;
+    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Off (Clean) by default. Worn or Rough is remembered for this font only.";
     tx.append(tl, seg, th); box.append(d, tx);
   };
 })();
