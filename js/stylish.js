@@ -12,28 +12,36 @@ window.BPG = window.BPG || {};
   let bigCase = cap;
   const BN = '"Baloo Da 2", "Hind Siliguri"'; // Bangla letters fall back to these
 
-  // The headline font. The user picked Anton out of 36 (9 Nov 2026), so it's the only one.
-  // To offer more again, add entries here (grp = a BPG.FONT_GROUPS key) and the picker comes back by itself.
+  // The font library: ONE font for each kind of lettering a sports page needs (the user asked for every type,
+  // but no look-alikes: Anton is the only tall-condensed one). All free (SIL OFL), saved in fonts/ for offline use.
+  // type = what kind of font it is, use = what posts it suits, grp = how strongly the texture wears it (WEAR),
+  // style "italic" for slanted fonts, title: true for scripts and serifs that look wrong in ALL CAPS.
   BPG.HEAD_FONTS = {
-    anton: { label: "Anton", note: "heavy", fam: "Anton", weight: 400, grp: "impact" },
+    anton: { label: "Anton", type: "Impact", use: "scores, milestones, big numbers", fam: "Anton", weight: 400, grp: "impact" },
+    kanit: { label: "Kanit Italic", type: "Speed", use: "live updates, breaking news", fam: "Kanit", weight: 900, style: "italic", grp: "speed" },
+    unbounded: { label: "Unbounded", type: "Wide", use: "results, finals, trophies", fam: "Unbounded", weight: 900, grp: "wide" },
+    montserrat: { label: "Montserrat Black", type: "Clean modern", use: "stats, announcements, fixtures", fam: "Montserrat", weight: 900, grp: "wide" },
+    playfair: { label: "Playfair", type: "Classic serif", use: "legends, tributes, retirements", fam: "Playfair Display", weight: 900, title: true, grp: "serif" },
+    slab: { label: "Alfa Slab", type: "Vintage slab", use: "throwbacks, on this day, records", fam: "Alfa Slab One", weight: 400, grp: "serif" },
+    dafoe: { label: "Mr Dafoe", type: "Signature", use: "player names, birthdays, emotion", fam: "Mr Dafoe", weight: 400, title: true, grp: "script" },
+    vibes: { label: "Great Vibes", type: "Elegant script", use: "farewells, thank-you posts", fam: "Great Vibes", weight: 400, title: true, grp: "script" },
+    marker: { label: "Permanent Marker", type: "Marker", use: "rants, hot takes, opinions", fam: "Permanent Marker", weight: 400, grp: "brush" },
+    bangers: { label: "Bangers", type: "Comic", use: "memes, funny moments, BOOM", fam: "Bangers", weight: 400, grp: "brush" },
+    spray: { label: "Rubik Spray Paint", type: "Spray paint", use: "fan reactions, street hype", fam: "Rubik Spray Paint", weight: 400, grp: "grunge" },
+    graduate: { label: "Graduate", type: "Varsity", use: "jersey numbers, player spotlights", fam: "Graduate", weight: 400, wear: 0.5, grp: "jersey" },
+    stencil: { label: "Black Ops", type: "Stencil", use: "squad drops, team news", fam: "Black Ops One", weight: 400, grp: "jersey" },
+    bungee: { label: "Bungee", type: "Signboard", use: "matchday, countdowns, fixtures", fam: "Bungee", weight: 400, grp: "jersey" },
+    galada: { label: "Galada", type: "Bangla stylish", use: "Bangla headlines with flair", fam: "Galada", weight: 400, grp: "bangla" },
+    anek: { label: "Anek Bangla", type: "Bangla bold", use: "Bangla news and scores", fam: "Anek Bangla", weight: 800, grp: "bangla" },
+    tiro: { label: "Tiro Bangla", type: "Bangla newspaper", use: "Bangla tributes, serious news", fam: "Tiro Bangla", weight: 400, wear: 0.5, grp: "bangla" },
   };
-  // Groups, in the order the picker shows them, with what each is good for.
   BPG.FONT_GROUPS = {
+    all: ["All fonts", "One font for each kind of post. Tap one to use it, ☆ to keep it in My fonts."],
     fav: ["★ My fonts", "Your starred fonts. Tap ☆ on any font to add it here."],
-    impact: ["Impact", "Tall capitals. Scores, milestones, big numbers."],
-    speed: ["Speed", "Slanted and fast. Live updates, wins, breaking news."],
-    wide: ["Wide", "Wide and heavy. Results, finals, trophies."],
-    serif: ["Classic", "Newspaper serif. Legends, records, tributes, retirements."],
-    script: ["Signature", "Handwritten. Player names, birthdays, emotional posts."],
-    brush: ["Brush", "Street energy. Hype, celebrations, rants, memes."],
-    grunge: ["Gritty", "Worn print. Heated matches, comebacks."],
-    jersey: ["Jersey", "Kit numbers, squads, club posts."],
-    bangla: ["Bangla", "Bangla headlines (they also write English)."],
   };
   // How strongly the texture wears each group (thin letters fall apart at full strength).
   const WEAR = { grunge: 0.35, script: 0.4, serif: 0.6, brush: 0.7 };
   // Which scenario fits each Stylish card best, so the picker opens there.
-  const KIND_GROUP = { runs: "impact", wickets: "impact", goal: "brush", result: "wide", number: "impact" };
   const KIND_SAMPLE = { runs: "219* RUNS!", wickets: "6 WKTS!", goal: "GOAL!", result: "WIN!", number: "950!" };
   BPG.HEAD_TEXTURES = { clean: ["Clean", 0], worn: ["Worn", 0.7], rough: ["Rough", 1.25] };
   const fontOf = (st) => BPG.HEAD_FONTS[st.hfont] || BPG.HEAD_FONTS.anton;
@@ -200,23 +208,22 @@ window.BPG = window.BPG || {};
     const tabs = document.createElement("div"); tabs.className = "seg fontlib-tabs"; tabs.setAttribute("role", "group"); tabs.setAttribute("aria-label", "Font scenario");
     const hint = document.createElement("p"); hint.className = "hint";
     const grid = document.createElement("div"); grid.className = "fontlib-grid";
-    const own = BPG.HEAD_FONTS[state.hfont].grp;
-    let grp = favs().length ? "fav" : (state.hfgrp && BPG.FONT_GROUPS[state.hfgrp] ? state.hfgrp : (KIND_GROUP[kind] || own));
-    const showCur = () => { const f = BPG.HEAD_FONTS[state.hfont]; cur.textContent = `${f.label} (${f.note})`; };
+    let grp = favs().length ? "fav" : "all";
+    const showCur = () => { const f = BPG.HEAD_FONTS[state.hfont]; cur.textContent = `${f.label} (${f.type})`; };
     function render() {
       tabs.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.g === grp)));
-      hint.textContent = BPG.FONT_GROUPS[grp][1] + (KIND_GROUP[kind] === grp ? " Suggested for this card." : "");
+      hint.textContent = BPG.FONT_GROUPS[grp][1];
       grid.innerHTML = "";
-      const keys = Object.keys(BPG.HEAD_FONTS).filter((k) => (grp === "fav" ? favs().includes(k) : BPG.HEAD_FONTS[k].grp === grp));
+      const keys = Object.keys(BPG.HEAD_FONTS).filter((k) => (grp === "fav" ? favs().includes(k) : true));
       if (!keys.length) { const e = document.createElement("p"); e.className = "hint"; e.textContent = "No starred fonts yet. Open any group and tap ☆ on the ones you like."; grid.appendChild(e); }
       keys.forEach((key) => {
         const f = BPG.HEAD_FONTS[key], tile = document.createElement("div"); tile.className = "fontlib-tile";
         const pick = document.createElement("button"); pick.type = "button"; pick.setAttribute("aria-pressed", String(state.hfont === key));
-        pick.setAttribute("aria-label", `${f.label}, ${f.note}`);
+        pick.setAttribute("aria-label", `${f.label}, ${f.type}`);
         const sample = document.createElement("span"); sample.className = "fontlib-sample"; sample.style.fontFamily = stack(f); sample.style.fontWeight = f.weight; sample.style.fontStyle = f.style || "normal";
         const smp = KIND_SAMPLE[kind] || "219* RUNS!";
         sample.textContent = f.grp === "bangla" ? "দারুণ জয়!" : f.title ? titleCase(smp) : smp;
-        const name = document.createElement("span"); name.className = "fontlib-name"; name.textContent = `${f.label} · ${f.note}`;
+        const name = document.createElement("span"); name.className = "fontlib-name"; name.innerHTML = ""; const ty = document.createElement("b"); ty.textContent = f.type; name.append(ty, ` · ${f.label}`, document.createElement("br"), f.use);
         pick.append(sample, name);
         pick.onclick = () => { state.hfont = key; persist(); showCur(); grid.querySelectorAll(".fontlib-tile > button:first-child").forEach((x) => x.setAttribute("aria-pressed", String(x === pick))); draw(); };
         const star = document.createElement("button"); star.type = "button"; star.className = "fontlib-star";
@@ -232,12 +239,11 @@ window.BPG = window.BPG || {};
     }
     Object.entries(BPG.FONT_GROUPS).forEach(([g, [lab]]) => {
       const b = document.createElement("button"); b.type = "button"; b.dataset.g = g; b.textContent = lab;
-      b.onclick = () => { grp = g; if (g !== "fav") { state.hfgrp = g; persist(); } render(); };
+      b.onclick = () => { grp = g; render(); };
       tabs.appendChild(b);
     });
     showCur(); render();
     d.append(l, tabs, hint, grid);
-    if (Object.keys(BPG.HEAD_FONTS).length < 2) d.hidden = true; // one font: nothing to pick
     const tx = document.createElement("div"); tx.className = "field wide";
     const tl = document.createElement("label"); tl.textContent = "Texture";
     const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Headline texture");
@@ -247,7 +253,7 @@ window.BPG = window.BPG || {};
       b.onclick = () => { state.htex = key; persist(); seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); };
       seg.appendChild(b);
     });
-    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Worn and Rough give the headline an old-print look.";
+    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Worn and Rough give the headline an old-print look. Thin and script fonts get it lighter.";
     tx.append(tl, seg, th); box.append(d, tx);
   };
 })();

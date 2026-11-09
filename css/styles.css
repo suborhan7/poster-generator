@@ -151,7 +151,7 @@ img { max-width: 100%; }
 .fontlib-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
 .fontlib-tabs button { flex: 0 0 auto; }
 .fontlib .hint { margin: 2px 0 4px; }
-.fontlib-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 340px; overflow-y: auto; }
+.fontlib-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 440px; overflow-y: auto; }
 .fontlib-tile { position: relative; }
 .fontlib-tile > button:first-child { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 10px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: inherit; cursor: pointer; text-align: left; min-height: 74px; }
 .fontlib-tile > button[aria-pressed="true"]:first-child { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
