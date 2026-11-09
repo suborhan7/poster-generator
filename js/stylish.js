@@ -12,31 +12,60 @@ window.BPG = window.BPG || {};
   let bigCase = cap;
   const BN = '"Baloo Da 2", "Hind Siliguri"'; // Bangla letters fall back to these
 
-  // The font library: ONE font for each kind of lettering a sports page needs (the user asked for every type,
-  // but no look-alikes: Anton is the only tall-condensed one). All free (SIL OFL), saved in fonts/ for offline use.
-  // type = what kind of font it is, use = what posts it suits, grp = how strongly the texture wears it (WEAR),
+  // The font library, in the user's categories (9 Nov 2026): Bold sports headlines, Modern & professional,
+  // Athletic & futuristic, Editorial, plus Creative (one font per other look) and Bangla (the Sports Timeline set).
+  // All free (SIL OFL / Apache), saved in fonts/ so they work offline.
+  // cat = picker tab, type = kind of font, use = what posts it suits, grp = texture strength (WEAR),
   // style "italic" for slanted fonts, title: true for scripts and serifs that look wrong in ALL CAPS.
   BPG.HEAD_FONTS = {
-    anton: { label: "Anton", type: "Impact", use: "scores, milestones, big numbers", fam: "Anton", weight: 400, grp: "impact" },
-    kanit: { label: "Kanit Italic", type: "Speed", use: "live updates, breaking news", fam: "Kanit", weight: 900, style: "italic", grp: "speed" },
-    unbounded: { label: "Unbounded", type: "Wide", use: "results, finals, trophies", fam: "Unbounded", weight: 900, grp: "wide" },
-    montserrat: { label: "Montserrat Black", type: "Clean modern", use: "stats, announcements, fixtures", fam: "Montserrat", weight: 900, grp: "wide" },
-    playfair: { label: "Playfair", type: "Classic serif", use: "legends, tributes, retirements", fam: "Playfair Display", weight: 900, title: true, grp: "serif" },
-    slab: { label: "Alfa Slab", type: "Vintage slab", use: "throwbacks, on this day, records", fam: "Alfa Slab One", weight: 400, grp: "serif" },
-    dafoe: { label: "Mr Dafoe", type: "Signature", use: "player names, birthdays, emotion", fam: "Mr Dafoe", weight: 400, title: true, grp: "script" },
-    vibes: { label: "Great Vibes", type: "Elegant script", use: "farewells, thank-you posts", fam: "Great Vibes", weight: 400, title: true, grp: "script" },
-    marker: { label: "Permanent Marker", type: "Marker", use: "rants, hot takes, opinions", fam: "Permanent Marker", weight: 400, grp: "brush" },
-    bangers: { label: "Bangers", type: "Comic", use: "memes, funny moments, BOOM", fam: "Bangers", weight: 400, grp: "brush" },
-    spray: { label: "Rubik Spray Paint", type: "Spray paint", use: "fan reactions, street hype", fam: "Rubik Spray Paint", weight: 400, grp: "grunge" },
-    graduate: { label: "Graduate", type: "Varsity", use: "jersey numbers, player spotlights", fam: "Graduate", weight: 400, wear: 0.5, grp: "jersey" },
-    stencil: { label: "Black Ops", type: "Stencil", use: "squad drops, team news", fam: "Black Ops One", weight: 400, grp: "jersey" },
-    bungee: { label: "Bungee", type: "Signboard", use: "matchday, countdowns, fixtures", fam: "Bungee", weight: 400, grp: "jersey" },
-    galada: { label: "Galada", type: "Bangla stylish", use: "Bangla headlines with flair", fam: "Galada", weight: 400, grp: "bangla" },
-    anek: { label: "Anek Bangla", type: "Bangla bold", use: "Bangla news and scores", fam: "Anek Bangla", weight: 800, grp: "bangla" },
-    tiro: { label: "Tiro Bangla", type: "Bangla newspaper", use: "Bangla tributes, serious news", fam: "Tiro Bangla", weight: 400, wear: 0.5, grp: "bangla" },
+    // A. Bold sports headlines
+    anton: { label: "Anton", cat: "bold", type: "Condensed heavy", use: "breaking news, results, big headlines", fam: "Anton", weight: 400, grp: "impact" },
+    bebas: { label: "Bebas Neue", cat: "bold", type: "Sports poster", use: "short headlines", fam: "Bebas Neue", weight: 400, grp: "impact" },
+    oswald: { label: "Oswald", cat: "bold", type: "Modern condensed", use: "headlines, player names", fam: "Oswald", weight: 700, grp: "impact" },
+    league: { label: "League Gothic", cat: "bold", type: "Editorial tall", use: "free look-alike of Tungsten (paid)", fam: "League Gothic", weight: 400, grp: "impact" },
+    // B. Modern & professional
+    montserrat: { label: "Montserrat", cat: "modern", type: "Clean, professional", use: "sports news, announcements", fam: "Montserrat", weight: 900, grp: "wide" },
+    poppins: { label: "Poppins", cat: "modern", type: "Modern, friendly", use: "social media graphics", fam: "Poppins", weight: 800, grp: "wide" },
+    inter: { label: "Inter", cat: "modern", type: "Very readable", use: "news and statistics", fam: "Inter", weight: 800, grp: "wide" },
+    robotoc: { label: "Roboto Condensed", cat: "modern", type: "Compact, clean", use: "sports information", fam: "Roboto Condensed", weight: 700, grp: "impact" },
+    // C. Athletic & futuristic
+    teko: { label: "Teko", cat: "athletic", type: "Sharp, tall", use: "football graphics, player cards", fam: "Teko", weight: 700, grp: "impact" },
+    russo: { label: "Russo One", cat: "athletic", type: "Futuristic, sporty", use: "matchday designs", fam: "Russo One", weight: 400, grp: "wide" },
+    exo: { label: "Exo 2", cat: "athletic", type: "Technical, modern", use: "gaming-style sports graphics", fam: "Exo 2", weight: 900, grp: "wide" },
+    quantico: { label: "Quantico", cat: "athletic", type: "Tactical", use: "stats, numbers, tactics", fam: "Quantico", weight: 700, grp: "wide" },
+    barlow: { label: "Barlow Condensed", cat: "athletic", type: "Info condensed", use: "line-ups, player stats, match info", fam: "Barlow Condensed", weight: 800, grp: "impact" },
+    // D. Editorial & newspaper
+    playfair: { label: "Playfair Display", cat: "editorial", type: "Premium newspaper", use: "transfer stories, exclusives, features", fam: "Playfair Display", weight: 900, title: true, grp: "serif" },
+    slab: { label: "Alfa Slab", cat: "editorial", type: "Vintage slab", use: "throwbacks, on this day, records", fam: "Alfa Slab One", weight: 400, grp: "serif" },
+    // E. Creative (one font per other look)
+    kanit: { label: "Kanit Italic", cat: "creative", type: "Speed italic", use: "live updates, fast news", fam: "Kanit", weight: 900, style: "italic", grp: "speed" },
+    unbounded: { label: "Unbounded", cat: "creative", type: "Wide", use: "results, finals, trophies", fam: "Unbounded", weight: 900, grp: "wide" },
+    dafoe: { label: "Mr Dafoe", cat: "creative", type: "Signature", use: "player names, birthdays, emotion", fam: "Mr Dafoe", weight: 400, title: true, grp: "script" },
+    vibes: { label: "Great Vibes", cat: "creative", type: "Elegant script", use: "farewells, thank-you posts", fam: "Great Vibes", weight: 400, title: true, grp: "script" },
+    marker: { label: "Permanent Marker", cat: "creative", type: "Marker", use: "rants, hot takes, opinions", fam: "Permanent Marker", weight: 400, grp: "brush" },
+    bangers: { label: "Bangers", cat: "creative", type: "Comic", use: "memes, funny moments", fam: "Bangers", weight: 400, grp: "brush" },
+    spray: { label: "Rubik Spray Paint", cat: "creative", type: "Spray paint", use: "fan reactions, street hype", fam: "Rubik Spray Paint", weight: 400, grp: "grunge" },
+    graduate: { label: "Graduate", cat: "creative", type: "Varsity", use: "jersey numbers, spotlights", fam: "Graduate", weight: 400, wear: 0.5, grp: "jersey" },
+    stencil: { label: "Black Ops", cat: "creative", type: "Stencil", use: "squad drops, team news", fam: "Black Ops One", weight: 400, grp: "jersey" },
+    bungee: { label: "Bungee", cat: "creative", type: "Signboard", use: "matchday, countdowns", fam: "Bungee", weight: 400, grp: "jersey" },
+    // F. Bangla (same set as the Sports Timeline studio)
+    anek: { label: "Anek Bangla", cat: "bangla", type: "Bangla bold", use: "Bangla news and scores", fam: "Anek Bangla", weight: 800, grp: "bangla" },
+    hind: { label: "Hind Siliguri", cat: "bangla", type: "Bangla clean", use: "Bangla info, captions", fam: "Hind Siliguri", weight: 700, grp: "bangla" },
+    baloo: { label: "Baloo Da 2", cat: "bangla", type: "Bangla round", use: "friendly Bangla headlines", fam: "Baloo Da 2", weight: 800, grp: "bangla" },
+    galada: { label: "Galada", cat: "bangla", type: "Bangla stylish", use: "Bangla headlines with flair", fam: "Galada", weight: 400, grp: "bangla" },
+    atma: { label: "Atma", cat: "bangla", type: "Bangla playful", use: "fun Bangla posts", fam: "Atma", weight: 700, grp: "bangla" },
+    mina: { label: "Mina", cat: "bangla", type: "Bangla modern", use: "modern Bangla titles", fam: "Mina", weight: 700, grp: "bangla" },
+    tiro: { label: "Tiro Bangla", cat: "bangla", type: "Bangla newspaper", use: "Bangla tributes, serious news", fam: "Tiro Bangla", weight: 400, wear: 0.5, grp: "bangla" },
+    notoserif: { label: "Noto Serif Bengali", cat: "bangla", type: "Bangla editorial", use: "Bangla features, exclusives", fam: "Noto Serif Bengali", weight: 900, grp: "bangla" },
   };
   BPG.FONT_GROUPS = {
-    all: ["All fonts", "One font for each kind of post. Tap one to use it, ☆ to keep it in My fonts."],
+    all: ["All", "Every font. Tap one to use it, ☆ to keep it in My fonts."],
+    bold: ["Bold headlines", "Breaking news, match results, transfer news, big headlines."],
+    modern: ["Modern", "Sports news, captions, subheadings, information."],
+    athletic: ["Athletic", "Football graphics, player cards, matchday, gaming-style designs."],
+    editorial: ["Editorial", "Transfer stories, exclusive news, player announcements, features."],
+    creative: ["Creative", "One of each other look: script, marker, comic, varsity and more."],
+    bangla: ["Bangla", "Bangla headlines (the Sports Timeline set). They also write English."],
     fav: ["★ My fonts", "Your starred fonts. Tap ☆ on any font to add it here."],
   };
   // How strongly the texture wears each group (thin letters fall apart at full strength).
@@ -217,7 +246,7 @@ window.BPG = window.BPG || {};
       tabs.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.g === grp)));
       hint.textContent = BPG.FONT_GROUPS[grp][1];
       grid.innerHTML = "";
-      const keys = Object.keys(BPG.HEAD_FONTS).filter((k) => (grp === "fav" ? favs().includes(k) : true));
+      const keys = Object.keys(BPG.HEAD_FONTS).filter((k) => (grp === "fav" ? favs().includes(k) : grp === "all" || BPG.HEAD_FONTS[k].cat === grp));
       if (!keys.length) { const e = document.createElement("p"); e.className = "hint"; e.textContent = "No starred fonts yet. Open any group and tap ☆ on the ones you like."; grid.appendChild(e); }
       keys.forEach((key) => {
         const f = BPG.HEAD_FONTS[key], tile = document.createElement("div"); tile.className = "fontlib-tile";
