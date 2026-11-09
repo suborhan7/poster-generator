@@ -24,6 +24,7 @@ window.BPG = window.BPG || {};
     const photoTop = y - 30;
     const gp = o.photo !== undefined ? Object.assign({}, g, { photo: o.photo }) : g;
     if (!k.bleedPhoto(gp, photoTop, o.grey)) k.photoHint(g, g.st + (photoTop - g.st) / 2);
+    g.subj = gp.subj;
     if (o.after) o.after(photoTop);
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
     list.forEach((b) => { ctx.save(); b.draw(y); ctx.restore(); y += b.h; });
@@ -307,10 +308,10 @@ window.BPG = window.BPG || {};
       const pager = () => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
         // With the logo at the top right, the dots move to the left with the match line under them.
-        const r = 9, gap = 30, x0 = g.logoTop ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
+        const r = 9, gap = 30, x0 = g.logoTop && k.logoSide(g) === "right" ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
         SLIDES.forEach((_, i) => { ctx.beginPath(); ctx.arc(x0 + i * gap, y, i + 1 === n ? r + 2 : r - 2, 0, Math.PI * 2); ctx.fillStyle = i + 1 === n ? g.accent : "rgba(255,255,255,0.6)"; ctx.fill(); });
         ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
-        if (g.val("tag")) { if (g.logoTop) ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
+        if (g.val("tag")) { if (g.logoTop && k.logoSide(g) === "right") ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else if (g.logoTop) { ctx.textAlign = "right"; ctx.fillText(cap(g.val("tag")), W - PAD, y + 52, W * 0.5); } else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
         k.spaced(0); ctx.restore();
       };
       // "Swipe" on slides 1-4, the info line on the last one.

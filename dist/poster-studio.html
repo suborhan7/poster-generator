@@ -282,7 +282,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v47";
+BPG.VERSION = "9 Nov 2026 · v48";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -831,7 +831,9 @@ BPG.createKit = function (ctx, env) {
     const img = g.photo.img, a = env.adjust();
     // Size the photo to the part of the card that stays visible, so it is zoomed in as little as possible.
     const bh = Math.min(g.H, textTop + 80);
-    const pl = k.place(img, g.W, bh, a, g.st + 60, textTop - 60);
+    // With the logo on top, the head sits a little lower so the logo never covers it.
+    const pl = k.place(img, g.W, bh, a, g.st + (g.logoTop ? 130 : 60), textTop - 60), f = img.bpgFocus;
+    if (f && isFinite(f.l)) g.subj = { l: pl.x + f.l * pl.dw, r: pl.x + f.r * pl.dw, t: pl.y + f.t * pl.dh };
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
     ctx.drawImage(img, pl.x, pl.y, pl.dw, pl.dh);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
@@ -893,36 +895,43 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
-  // Logo + name. By default at the top right, like a TV channel bug: round badge, a thin line, the page name.
-  // Tournament-look cards (and "Logo place: Bottom" in Brand settings) keep it small in the bottom-right corner.
+  // Logo + name in the bottom-right corner (default): round badge, a thin line, the page name.
+  // "Logo place: Top" in Brand settings moves it to the top instead (not on tournament-look cards).
   // y is the baseline of the bottom row.
   k.brandCorner = (g, y) => {
     if (g.logoTop) { k.brandTop(g); return; }
-    const size = 40;
-    k.logoMark(g, g.W - 56 - size, y - size + 4, size);
-    if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+    k.brandLockup(g, "right", y - 14, 52);
   };
-  k.brandTop = (g) => {
-    const logo = env.logo(), top = g.st + (g.H / g.W > 1.5 ? 10 : 34), right = g.W - 52;
-    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 14;
+  // The lockup itself. cy is its vertical centre; side "left"/"right" is the edge it hugs.
+  k.brandLockup = (g, side, cy, s) => {
+    const logo = env.logo(), edge = 50;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 16;
     if (logo) { // your own logo already has the name in it
-      const h = 76, sc = h / logo.height, w = Math.min(logo.width * sc, 300);
-      ctx.drawImage(logo, right - w, top, w, w === 300 ? logo.height * (300 / logo.width) : h); ctx.restore(); return;
+      const h = s * 1.15, sc = Math.min(h / logo.height, 260 / logo.width), w = logo.width * sc;
+      ctx.drawImage(logo, side === "left" ? edge : g.W - edge - w, cy - (logo.height * sc) / 2, w, logo.height * sc); ctx.restore(); return;
     }
-    const name = String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants";
-    ctx.font = k.font(38, k.B, 500); const tw = ctx.measureText(name).width;
-    const s = 62, cy = top + s / 2, tx = right - tw;
-    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(name, tx, cy + 13);
-    ctx.fillRect(tx - 18, cy - 22, 2.5, 44); // the thin line between badge and name
-    // round badge with the BR bubble inside
-    const bx = tx - 30 - s / 2;
+    const words = (String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants").toUpperCase().split(/\s+/);
+    const fs = Math.round(s * 0.6); ctx.font = k.font(fs, C, 700); k.spaced(Math.round(fs * 0.12));
+    const a = words[0] + (words[1] ? " " : ""), b = words.slice(1).join(" "), wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+    const total = s + 34 + wa + wb, left = side === "left" ? edge : g.W - edge - total, bx = left + s / 2, tx = left + s + 34;
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(a, tx, cy + fs * 0.36);
+    ctx.fillStyle = g.accent; ctx.fillText(b, tx + wa, cy + fs * 0.36); k.spaced(0);
+    ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillRect(tx - 18, cy - s * 0.34, 2.5, s * 0.68); // thin line between badge and name
     ctx.beginPath(); ctx.arc(bx, cy, s / 2, 0, Math.PI * 2);
     const gr = ctx.createLinearGradient(bx, cy - s / 2, bx, cy + s / 2); gr.addColorStop(0, "#1B2A4A"); gr.addColorStop(1, "#0B1326");
     ctx.fillStyle = gr; ctx.fill(); ctx.shadowBlur = 0;
     ctx.lineWidth = 3; ctx.strokeStyle = g.accent; ctx.stroke();
     ctx.restore();
-    k.logoMark(g, bx - 21, cy - 19, 42);
+    k.logoMark(g, bx - s * 0.34, cy - s * 0.3, s * 0.68);
   };
+  // Which top corner the logo goes in: the one the player's head is furthest from.
+  k.logoSide = (g) => {
+    if (g.logoSideFixed) return g.logoSideFixed;
+    const s = g.subj; if (!s) return "right";
+    const zone = 400, over = (a, b) => Math.max(0, Math.min(b, s.r) - Math.max(a, s.l));
+    return over(0, zone) < over(g.W - zone, g.W) ? "left" : "right";
+  };
+  k.brandTop = (g) => { k.brandLockup(g, k.logoSide(g), g.st + (g.H / g.W > 1.5 ? 25 : 49), 50); };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.
   k.wordmark = (g, x, y, align, size = 22) => {
@@ -3257,6 +3266,7 @@ window.BPG = window.BPG || {};
     const photoTop = y - 30;
     const gp = o.photo !== undefined ? Object.assign({}, g, { photo: o.photo }) : g;
     if (!k.bleedPhoto(gp, photoTop, o.grey)) k.photoHint(g, g.st + (photoTop - g.st) / 2);
+    g.subj = gp.subj;
     if (o.after) o.after(photoTop);
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
     list.forEach((b) => { ctx.save(); b.draw(y); ctx.restore(); y += b.h; });
@@ -3540,10 +3550,10 @@ window.BPG = window.BPG || {};
       const pager = () => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
         // With the logo at the top right, the dots move to the left with the match line under them.
-        const r = 9, gap = 30, x0 = g.logoTop ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
+        const r = 9, gap = 30, x0 = g.logoTop && k.logoSide(g) === "right" ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
         SLIDES.forEach((_, i) => { ctx.beginPath(); ctx.arc(x0 + i * gap, y, i + 1 === n ? r + 2 : r - 2, 0, Math.PI * 2); ctx.fillStyle = i + 1 === n ? g.accent : "rgba(255,255,255,0.6)"; ctx.fill(); });
         ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
-        if (g.val("tag")) { if (g.logoTop) ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
+        if (g.val("tag")) { if (g.logoTop && k.logoSide(g) === "right") ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else if (g.logoTop) { ctx.textAlign = "right"; ctx.fillText(cap(g.val("tag")), W - PAD, y + 52, W * 0.5); } else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
         k.spaced(0); ctx.restore();
       };
       // "Swipe" on slides 1-4, the info line on the last one.
@@ -5276,7 +5286,7 @@ window.BPG = window.BPG || {};
   // Where the logo sits: top right (default) or the small bottom-right corner.
   function renderLogoPos() {
     $("b_logopos").innerHTML = "";
-    [["top", "Top right"], ["bottom", "Bottom right"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "top") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+    [["bottom", "Bottom right"], ["top", "Top"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "bottom") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
   }
   renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
@@ -5570,7 +5580,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
-      logoTop: state.logoPos !== "bottom" && !layout.tourLook && !layout.logoBottom,
+      logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 

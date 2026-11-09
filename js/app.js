@@ -197,7 +197,7 @@ window.BPG = window.BPG || {};
   // Where the logo sits: top right (default) or the small bottom-right corner.
   function renderLogoPos() {
     $("b_logopos").innerHTML = "";
-    [["top", "Top right"], ["bottom", "Bottom right"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "top") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+    [["bottom", "Bottom right"], ["top", "Top"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "bottom") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
   }
   renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
@@ -491,7 +491,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
-      logoTop: state.logoPos !== "bottom" && !layout.tourLook && !layout.logoBottom,
+      logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
