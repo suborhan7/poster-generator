@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <rect width="1080" height="1350" fill="#0B1426"/>
+  <rect x="56" y="56" width="968" height="1238" rx="8" fill="none" stroke="#26364D" stroke-width="2"/>
+  <rect x="56" y="56" width="8" height="1238" fill="#75AADB"/>
+  <text x="104" y="132" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="27" font-weight="700" letter-spacing="5">BORHAN RANTS</text>
+  <text x="976" y="132" text-anchor="end" fill="#9BAABD" font-family="Arial,sans-serif" font-size="22" letter-spacing="3">INTERNATIONAL FRIENDLY</text>
+  <line x1="104" y1="168" x2="976" y2="168" stroke="#33445C" stroke-width="2"/>
+  <text x="104" y="250" fill="#75AADB" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="5">FULL-TIME</text>
+  <text x="104" y="306" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="48" font-weight="800" letter-spacing="1">ARGENTINA TAKE THE WIN</text>
+  <text x="104" y="352" fill="#9BAABD" font-family="Arial,sans-serif" font-size="23" letter-spacing="2">FINAL SCORE</text>
+  <line x1="104" y1="394" x2="976" y2="394" stroke="#33445C" stroke-width="2"/>
+  <g font-family="Arial,sans-serif">
+    <text x="300" y="520" text-anchor="middle" fill="#FFFFFF" font-size="35" font-weight="700" letter-spacing="2">ARGENTINA</text>
+    <text x="780" y="520" text-anchor="middle" fill="#AAB6C6" font-size="35" font-weight="700" letter-spacing="2">BRAZIL</text>
+    <text x="300" y="760" text-anchor="middle" fill="#FFFFFF" font-size="224" font-weight="800">2</text>
+    <text x="780" y="760" text-anchor="middle" fill="#AAB6C6" font-size="224" font-weight="800">1</text>
+    <rect x="490" y="630" width="100" height="58" rx="29" fill="#75AADB"/>
+    <text x="540" y="668" text-anchor="middle" fill="#0B1426" font-size="26" font-weight="800" letter-spacing="2">FT</text>
+  </g>
+  <line x1="540" y1="440" x2="540" y2="820" stroke="#26364D" stroke-width="2"/>
+  <line x1="104" y1="860" x2="976" y2="860" stroke="#33445C" stroke-width="2"/>
+  <text x="104" y="930" fill="#75AADB" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4">GOAL SCORERS</text>
+  <text x="104" y="1000" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="31" font-weight="700">ARGENTINA</text>
+  <text x="976" y="1000" text-anchor="end" fill="#D7E0EB" font-family="Arial,sans-serif" font-size="28">Messi 67'  ·  Álvarez 81'</text>
+  <line x1="104" y1="1034" x2="976" y2="1034" stroke="#26364D" stroke-width="2"/>
+  <text x="104" y="1094" fill="#AAB6C6" font-family="Arial,sans-serif" font-size="31" font-weight="700">BRAZIL</text>
+  <text x="976" y="1094" text-anchor="end" fill="#AAB6C6" font-family="Arial,sans-serif" font-size="28">Vinícius Jr. 74'</text>
+  <rect x="104" y="1160" width="872" height="1" fill="#33445C"/>
+  <text x="104" y="1225" fill="#8797AC" font-family="Arial,sans-serif" font-size="21" letter-spacing="2">A CLEAN, SCORE-FIRST MATCH REPORT</text>
+  <text x="976" y="1225" text-anchor="end" fill="#75AADB" font-family="Arial,sans-serif" font-size="21" font-weight="700" letter-spacing="2">@BORHANRANTS</text>
+</svg>
