@@ -21,7 +21,7 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | Group | Cards |
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
-| Stylish | Runs milestone, Wicket haul, Goal moment, Result, Big number / record: one huge worn headline (`219* RUNS!`). Font library: 36 free fonts in 7 scenarios (Milestone, Gritty, Hype, Breaking, Jersey, Premium, Bangla) with live previews, plus ★ My fonts |
+| Stylish | Runs milestone, Wicket haul, Goal moment, Result, Big number / record: one huge worn headline (`219* RUNS!`). Font library: 36 free fonts in 9 kinds (Impact, Speed italic, Wide, Classic serif, Signature script, Brush, Gritty, Jersey, Bangla) with live previews, plus ★ My fonts |
 | Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss |
 | Football | Goal, Full-time score, Red card, Player rating |
 | General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Breaking news, Photo frame |

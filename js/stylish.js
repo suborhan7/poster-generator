@@ -7,68 +7,78 @@ window.BPG = window.BPG || {};
 (function () {
   const L = BPG.LAYOUTS, PAD = 56;
   const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  // Scripts and some serifs look wrong in ALL CAPS, so their headline goes in Title Case.
+  const titleCase = (s) => String(s == null ? "" : s).toLowerCase().replace(/(^|[\s*(])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+  let bigCase = cap;
   const BN = '"Baloo Da 2", "Hind Siliguri"'; // Bangla letters fall back to these
 
-  // The font library. Every font is free (SIL Open Font License) and saved in fonts/, so it works offline.
-  // grp = the scenario it suits (BPG.FONT_GROUPS). scale: some fonts draw smaller at the same size, so they get a nudge.
+  // The font library: 36 free fonts (SIL Open Font License / Apache), saved in fonts/ so they work offline.
+  // Each group is a genuinely different kind of lettering. grp = group (BPG.FONT_GROUPS),
+  // style "italic" for slanted fonts, title: true for scripts and serifs that look wrong in ALL CAPS.
   BPG.HEAD_FONTS = {
-    // Milestones & records: tall condensed, the classic big-number look
-    bebas: { label: "Bebas Neue", note: "tall, clean", fam: "Bebas Neue", weight: 400, grp: "milestone" },
-    league: { label: "League Gothic", note: "extra tall", fam: "League Gothic", weight: 400, grp: "milestone" },
-    sixcaps: { label: "Six Caps", note: "super tall, thin", fam: "Six Caps", weight: 400, grp: "milestone" },
-    anton: { label: "Anton", note: "heavy", fam: "Anton", weight: 400, grp: "milestone" },
-    shoulders: { label: "Big Shoulders", note: "stadium", fam: "Big Shoulders Display", weight: 900, grp: "milestone" },
-    oswald: { label: "Oswald", note: "bold", fam: "Oswald", weight: 700, grp: "milestone" },
-    saira: { label: "Saira Condensed", note: "racing", fam: "Saira Extra Condensed", weight: 800, grp: "milestone" },
-    teko: { label: "Teko", note: "sporty", fam: "Teko", weight: 700, grp: "milestone" },
-    staat: { label: "Staatliches", note: "poster block", fam: "Staatliches", weight: 400, grp: "milestone" },
-    // Worn / gritty: the texture is built into the letters
+    // Impact: tall condensed capitals
+    bebas: { label: "Bebas Neue", note: "tall, clean", fam: "Bebas Neue", weight: 400, grp: "impact" },
+    anton: { label: "Anton", note: "heavy", fam: "Anton", weight: 400, grp: "impact" },
+    league: { label: "League Gothic", note: "extra tall", fam: "League Gothic", weight: 400, grp: "impact" },
+    oswald: { label: "Oswald", note: "bold", fam: "Oswald", weight: 700, grp: "impact" },
+    shoulders: { label: "Big Shoulders", note: "stadium", fam: "Big Shoulders Display", weight: 900, grp: "impact" },
+    teko: { label: "Teko", note: "sporty", fam: "Teko", weight: 700, grp: "impact" },
+    // Speed: heavy italics with motion
+    kanit: { label: "Kanit Italic", note: "fast, heavy", fam: "Kanit", weight: 900, style: "italic", grp: "speed" },
+    barlowi: { label: "Barlow Italic", note: "broadcast style", fam: "Barlow Condensed", weight: 900, style: "italic", grp: "speed" },
+    exo: { label: "Exo 2 Italic", note: "tech, racing", fam: "Exo 2", weight: 900, style: "italic", grp: "speed" },
+    // Wide & heavy: extended block letters
+    unbounded: { label: "Unbounded", note: "wide, modern", fam: "Unbounded", weight: 900, grp: "wide" },
+    climate: { label: "Climate Crisis", note: "ultra heavy", fam: "Climate Crisis", weight: 400, grp: "wide" },
+    montserrat: { label: "Montserrat Black", note: "clean, strong", fam: "Montserrat", weight: 900, grp: "wide" },
+    archblack: { label: "Archivo Black", note: "solid", fam: "Archivo Black", weight: 400, grp: "wide" },
+    // Classic serif: newspaper and legend look
+    playfair: { label: "Playfair Black", note: "elegant", fam: "Playfair Display", weight: 900, title: true, grp: "serif" },
+    dmserif: { label: "DM Serif", note: "magazine", fam: "DM Serif Display", weight: 400, title: true, grp: "serif" },
+    abril: { label: "Abril Fatface", note: "bold headline", fam: "Abril Fatface", weight: 400, grp: "serif" },
+    slab: { label: "Alfa Slab", note: "classic club", fam: "Alfa Slab One", weight: 400, grp: "serif" },
+    // Signature & script: handwritten names
+    dafoe: { label: "Mr Dafoe", note: "signature", fam: "Mr Dafoe", weight: 400, title: true, grp: "script" },
+    yellowtail: { label: "Yellowtail", note: "retro script", fam: "Yellowtail", weight: 400, title: true, grp: "script" },
+    kaushan: { label: "Kaushan Script", note: "brush script", fam: "Kaushan Script", weight: 400, title: true, grp: "script" },
+    vibes: { label: "Great Vibes", note: "fancy", fam: "Great Vibes", weight: 400, title: true, grp: "script" },
+    // Brush & street
+    marker: { label: "Permanent Marker", note: "hand-written", fam: "Permanent Marker", weight: 400, grp: "brush" },
+    knewave: { label: "Knewave", note: "thick brush", fam: "Knewave", weight: 400, grp: "brush" },
+    graffiti: { label: "Sedgwick Ave", note: "street graffiti", fam: "Sedgwick Ave Display", weight: 400, grp: "brush" },
+    bangers: { label: "Bangers", note: "comic BOOM", fam: "Bangers", weight: 400, grp: "brush" },
+    // Gritty: worn into the letters
     dirt: { label: "Rubik Dirt", note: "dusty print", fam: "Rubik Dirt", weight: 400, grp: "grunge" },
     distressed: { label: "Rubik Distressed", note: "cracked print", fam: "Rubik Distressed", weight: 400, grp: "grunge" },
-    burned: { label: "Rubik Burned", note: "burnt edges", fam: "Rubik Burned", weight: 400, grp: "grunge" },
     spray: { label: "Rubik Spray Paint", note: "spray can", fam: "Rubik Spray Paint", weight: 400, grp: "grunge" },
-    wetpaint: { label: "Rubik Wet Paint", note: "dripping paint", fam: "Rubik Wet Paint", weight: 400, grp: "grunge" },
-    // Celebration & hype: brush and hand-made energy
-    marker: { label: "Permanent Marker", note: "hand-written", fam: "Permanent Marker", weight: 400, grp: "hype" },
-    knewave: { label: "Knewave", note: "thick brush", fam: "Knewave", weight: 400, grp: "hype" },
-    graffiti: { label: "Sedgwick Ave", note: "street graffiti", fam: "Sedgwick Ave Display", weight: 400, grp: "hype" },
-    bangers: { label: "Bangers", note: "comic BOOM", fam: "Bangers", weight: 400, grp: "hype" },
-    titan: { label: "Titan One", note: "round, fun", fam: "Titan One", weight: 400, grp: "hype" },
-    // Breaking news: loud, sharp, urgent
-    bungee: { label: "Bungee", note: "signboard", fam: "Bungee", weight: 400, grp: "breaking" },
-    russo: { label: "Russo One", note: "sharp, techy", fam: "Russo One", weight: 400, grp: "breaking" },
-    stencil: { label: "Black Ops", note: "army stencil", fam: "Black Ops One", weight: 400, grp: "breaking" },
-    racing: { label: "Racing Sans", note: "fast italic", fam: "Racing Sans One", weight: 400, grp: "breaking" },
-    // Jersey & varsity: shirt numbers and club crests
-    graduate: { label: "Graduate", note: "college jersey", fam: "Graduate", weight: 400, grp: "jersey" },
+    // Jersey & stencil
+    graduate: { label: "Graduate", note: "college jersey", fam: "Graduate", weight: 400, wear: 0.5, grp: "jersey" },
     sstencil: { label: "Saira Stencil", note: "kit number", fam: "Saira Stencil One", weight: 400, grp: "jersey" },
-    bsstencil: { label: "Shoulders Stencil", note: "tall stencil", fam: "Big Shoulders Stencil Display", weight: 900, grp: "jersey" },
-    slab: { label: "Alfa Slab", note: "classic club", fam: "Alfa Slab One", weight: 400, grp: "jersey" },
-    // Premium / big result: wide and heavy, for wins, titles and finals
-    climate: { label: "Climate Crisis", note: "ultra heavy", fam: "Climate Crisis", weight: 400, grp: "premium" },
-    bowlby: { label: "Bowlby One", note: "wide, punchy", fam: "Bowlby One SC", weight: 400, grp: "premium" },
-    archblack: { label: "Archivo Black", note: "clean heavy", fam: "Archivo Black", weight: 400, grp: "premium" },
+    stencil: { label: "Black Ops", note: "army stencil", fam: "Black Ops One", weight: 400, grp: "jersey" },
+    bungee: { label: "Bungee", note: "signboard", fam: "Bungee", weight: 400, grp: "jersey" },
     // Bangla headlines (these also draw English)
     galada: { label: "Galada", note: "Bangla stylish", fam: "Galada", weight: 400, grp: "bangla" },
     anek: { label: "Anek Bangla", note: "Bangla bold condensed", fam: "Anek Bangla", weight: 800, grp: "bangla" },
     baloo: { label: "Baloo Da 2", note: "Bangla round bold", fam: "Baloo Da 2", weight: 800, grp: "bangla" },
-    atma: { label: "Atma", note: "Bangla playful", fam: "Atma", weight: 700, grp: "bangla" },
-    mina: { label: "Mina", note: "Bangla modern", fam: "Mina", weight: 700, grp: "bangla" },
-    tiro: { label: "Tiro Bangla", note: "Bangla newspaper", fam: "Tiro Bangla", weight: 400, grp: "bangla" },
+    tiro: { label: "Tiro Bangla", note: "Bangla newspaper", fam: "Tiro Bangla", weight: 400, wear: 0.5, grp: "bangla" },
   };
-  // Scenarios, in the order the picker shows them, with what each is good for.
+  // Groups, in the order the picker shows them, with what each is good for.
   BPG.FONT_GROUPS = {
     fav: ["★ My fonts", "Your starred fonts. Tap ☆ on any font to add it here."],
-    milestone: ["Milestone", "Centuries, fifers, records, big numbers."],
-    grunge: ["Gritty", "Old-print look: comebacks, heated matches, rants."],
-    hype: ["Hype", "Goals, wins, celebrations, fan reactions."],
-    breaking: ["Breaking", "Breaking news, transfers, injuries, squad drops."],
-    jersey: ["Jersey", "Player spotlights, kit numbers, club posts."],
-    premium: ["Premium", "Finals, trophies, series wins, big results."],
+    impact: ["Impact", "Tall capitals. Scores, milestones, big numbers."],
+    speed: ["Speed", "Slanted and fast. Live updates, wins, breaking news."],
+    wide: ["Wide", "Wide and heavy. Results, finals, trophies."],
+    serif: ["Classic", "Newspaper serif. Legends, records, tributes, retirements."],
+    script: ["Signature", "Handwritten. Player names, birthdays, emotional posts."],
+    brush: ["Brush", "Street energy. Hype, celebrations, rants, memes."],
+    grunge: ["Gritty", "Worn print. Heated matches, comebacks."],
+    jersey: ["Jersey", "Kit numbers, squads, club posts."],
     bangla: ["Bangla", "Bangla headlines (they also write English)."],
   };
+  // How strongly the texture wears each group (thin letters fall apart at full strength).
+  const WEAR = { grunge: 0.35, script: 0.4, serif: 0.6, brush: 0.7 };
   // Which scenario fits each Stylish card best, so the picker opens there.
-  const KIND_GROUP = { runs: "milestone", wickets: "milestone", goal: "hype", result: "premium", number: "milestone" };
+  const KIND_GROUP = { runs: "impact", wickets: "impact", goal: "brush", result: "wide", number: "impact" };
   const KIND_SAMPLE = { runs: "219* RUNS!", wickets: "6 WKTS!", goal: "GOAL!", result: "WIN!", number: "950!" };
   BPG.HEAD_TEXTURES = { clean: ["Clean", 0], worn: ["Worn", 0.7], rough: ["Rough", 1.25] };
   const fontOf = (st) => BPG.HEAD_FONTS[st.hfont] || BPG.HEAD_FONTS.bebas;
@@ -126,8 +136,8 @@ window.BPG = window.BPG || {};
   // or two when one line would make the text too small. Returns { size, lines, capH }.
   function layoutBig(k, text, maxW, capMax, spec) {
     // text is a list of [words, inColour] pieces, or a string with *stars* typed by you.
-    const ctx = k.ctx, words = typeof text === "string" ? k.richWords(cap(text))
-      : text.flatMap(([t, hl]) => cap(t).split(/\s+/).filter(Boolean).map((w) => ({ w, hl })));
+    const ctx = k.ctx, words = typeof text === "string" ? k.richWords(bigCase(text))
+      : text.flatMap(([t, hl]) => bigCase(t).split(/\s+/).filter(Boolean).map((w) => ({ w, hl })));
     ctx.font = spec(100); const capAt100 = ctx.measureText("H").actualBoundingBoxAscent || 72, sp = () => ctx.measureText(" ").width;
     const width = (ln, s) => { ctx.font = spec(s); return ln.reduce((a, wd, i) => a + ctx.measureText(wd.w).width + (i ? sp() : 0), 0); };
     const sizeFor = (lines, capT) => { let s = Math.round(capT / capAt100 * 100); const wMax = Math.max(...lines.map((ln) => width(ln, s))); if (wMax > maxW) s = Math.floor(s * maxW / wMax); return s; };
@@ -202,10 +212,11 @@ window.BPG = window.BPG || {};
     standard: false, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, st = BPG.state(), f = fontOf(st);
-      // Gritty fonts are already worn, so the texture goes on lighter or it eats the letters.
-      const level = (BPG.HEAD_TEXTURES[st.htex] || BPG.HEAD_TEXTURES.worn)[1] * (f.grp === "grunge" ? 0.35 : 1);
+      // Gritty fonts are already worn and thin fonts break up, so the texture goes on lighter for them.
+      const level = (BPG.HEAD_TEXTURES[st.htex] || BPG.HEAD_TEXTURES.worn)[1] * (f.wear != null ? f.wear : WEAR[f.grp] != null ? WEAR[f.grp] : 1);
       const v = (id) => String(g.val(id) == null ? "" : g.val(id)).trim(), parts = (KINDS[g.t.kind] || KINDS.runs)(v, g);
-      const spec = (s) => `${f.weight} ${s}px ${stack(f)}`;
+      const spec = (s) => `${f.style || "normal"} ${f.weight} ${s}px ${stack(f)}`;
+      bigCase = f.title ? titleCase : cap;
       ensure(spec(100)); ensure(`700 40px ${LABEL_FAM}`); ensure(`500 40px ${LABEL_FAM}`);
       const cx = g.W / 2, hasInfo = parts.info.some(Boolean);
       // Bottom up: logo row, info line, the big headline, the name label. The photo fills the rest.
@@ -247,8 +258,9 @@ window.BPG = window.BPG || {};
         const f = BPG.HEAD_FONTS[key], tile = document.createElement("div"); tile.className = "fontlib-tile";
         const pick = document.createElement("button"); pick.type = "button"; pick.setAttribute("aria-pressed", String(state.hfont === key));
         pick.setAttribute("aria-label", `${f.label}, ${f.note}`);
-        const sample = document.createElement("span"); sample.className = "fontlib-sample"; sample.style.fontFamily = stack(f); sample.style.fontWeight = f.weight;
-        sample.textContent = f.grp === "bangla" ? "দারুণ জয়!" : KIND_SAMPLE[kind] || "219* RUNS!";
+        const sample = document.createElement("span"); sample.className = "fontlib-sample"; sample.style.fontFamily = stack(f); sample.style.fontWeight = f.weight; sample.style.fontStyle = f.style || "normal";
+        const smp = KIND_SAMPLE[kind] || "219* RUNS!";
+        sample.textContent = f.grp === "bangla" ? "দারুণ জয়!" : f.title ? titleCase(smp) : smp;
         const name = document.createElement("span"); name.className = "fontlib-name"; name.textContent = `${f.label} · ${f.note}`;
         pick.append(sample, name);
         pick.onclick = () => { state.hfont = key; persist(); showCur(); grid.querySelectorAll(".fontlib-tile > button:first-child").forEach((x) => x.setAttribute("aria-pressed", String(x === pick))); draw(); };
@@ -260,7 +272,7 @@ window.BPG = window.BPG || {};
         // Shrink the sample until it fits its tile, once the font has loaded.
         const fit = () => { let px = 26; sample.style.fontSize = px + "px"; while (sample.scrollWidth > sample.clientWidth + 1 && px > 13) sample.style.fontSize = --px + "px"; };
         requestAnimationFrame(fit);
-        if (document.fonts && document.fonts.load) document.fonts.load(`${f.weight} 26px "${f.fam}"`, sample.textContent).then(fit, () => {});
+        if (document.fonts && document.fonts.load) document.fonts.load(`${f.style || "normal"} ${f.weight} 26px "${f.fam}"`, sample.textContent).then(fit, () => {});
       });
     }
     Object.entries(BPG.FONT_GROUPS).forEach(([g, [lab]]) => {
@@ -279,7 +291,7 @@ window.BPG = window.BPG || {};
       b.onclick = () => { state.htex = key; persist(); seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); };
       seg.appendChild(b);
     });
-    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Gritty fonts are already worn, so they get a lighter texture.";
+    const th = document.createElement("p"); th.className = "hint"; th.textContent = "Gritty, script and thin fonts get a lighter texture so the letters stay readable.";
     tx.append(tl, seg, th); box.append(d, tx);
   };
 })();
