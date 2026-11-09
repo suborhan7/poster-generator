@@ -16,7 +16,13 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 2. Under **Build and deployment**, set Source to **Deploy from a branch**, Branch to **main**, and Folder to **/ (root)**. Then click **Save**.
 3. After a minute the site is live at `https://suborhan7.github.io/poster-generator/`. Every push to `main` updates it automatically.
 
-## Cards included (25)
+## Find a card fast
+
+The picker works like an app shelf: type in the **search box** (English, Banglish or Bangla: `fifty`, `pachas`, `uikat`, `গোল`, `table`), or tap a group pill (🏏 Cricket, 🔴 Test, ⚽ Football, 📰 News & talk, 🆚 Compare, 👥 Line-ups, 📊 Tables & series, 🏆 Tournaments, 🔥 Borhan Rants, ✨ Big text) and pick an emoji tile. **🕘 Recent** keeps your last 8 cards. The bar under the tiles says what the picked card is for.
+
+Card names, emojis, groups and search words all live in `js/catalog.js`. Renaming a card there never breaks saved work, because the card's key stays the same.
+
+## Cards included (81)
 
 | Group | Cards |
 | --- | --- |
@@ -42,6 +48,7 @@ Features on every card:
 | --- | --- | --- |
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
+| `js/catalog.js` | What the picker shows: each card's name, emoji, group and search words | **Often**: add one line here for every new card |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
 | `js/stylish.js` | The Stylish cards: font library (`BPG.HEAD_FONTS`, `cat` = picker tab), the worn-print texture, the picker | To add a headline font: drop the woff2 in `fonts/`, add it to `css/fonts.css`, `BPG.HEAD_FONTS` and `sw.js` |
 | `css/fonts.css`, `fonts/` | Headline fonts saved with the site (free Google Fonts, OFL) so they work offline | To add a font |

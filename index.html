@@ -18,36 +18,41 @@
 </head>
 <body>
 <header class="top">
-  <h1>Borhan Poster Studio</h1>
-  <p>Pick a card, type the details, add a photo, download or share.</p>
+  <span class="badge" aria-hidden="true">BR</span>
+  <div class="ttl"><h1>Borhan Studio</h1><p>Pick a card, type, add a photo, download.</p></div>
   <span class="ver" id="ver"></span>
 </header>
 
 <div class="wrap">
   <div class="rail">
     <section class="box" id="aiBox">
-      <span class="label">Make a poster with AI</span>
+      <span class="label">✨ Or let AI make it</span>
       <div class="quick-row"><input id="aiNote" type="text" autocomplete="off" aria-label="Tell the AI what poster you want" placeholder="e.g. Shakib 52*(38) vs India, 4 ta char 2 ta chokka"><button type="button" id="aiGo">Make</button></div>
       <p class="hint" id="aiStatus">Type the update any way you like. The AI picks the card, fills it, and your saved photo of the player goes on it.</p>
     </section>
 
-    <section class="box">
-      <span class="label">Sport</span>
-      <div class="seg" id="cats"></div>
-      <span class="label">Card type</span>
-      <div class="types" id="types"></div>
+    <section class="box picker">
+      <span class="label">1 · Pick a card</span>
+      <div class="search">
+        <span aria-hidden="true">🔍</span>
+        <input id="cardSearch" type="search" autocomplete="off" enterkeyhint="search" aria-label="Search cards" placeholder="Search: fifty, wicket, goal, table, news…">
+        <button type="button" id="searchClear" aria-label="Clear search" hidden>✕</button>
+      </div>
+      <div class="pills" id="cats" role="group" aria-label="Card groups"></div>
+      <div class="tiles" id="types"></div>
+      <div class="picked" id="picked" aria-live="polite"></div>
     </section>
 
     <section class="box" id="seriesBox" hidden></section>
 
     <section class="box">
-      <span class="label">Details</span>
+      <span class="label">2 · Type the details</span>
       <div class="fields" id="fields"></div>
       <p class="hint" id="tplHint"></p>
     </section>
 
     <section class="box" id="photoBox">
-      <span class="label">Photo</span>
+      <span class="label">3 · Add a photo</span>
       <div class="fields">
         <div class="field wide"><label for="photo1">Player photo</label><input id="photo1" type="file" accept="image/*"></div>
         <div class="field wide lib" id="libWrap">
@@ -90,12 +95,14 @@
   </div>
 
   <div class="stage">
-    <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
     <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
-    <div class="actions">
-      <button class="primary" id="download" type="button">Download</button>
-      <button class="ghost" id="share" type="button">Share</button>
-      <button class="ghost" id="showImg" type="button">Show image</button>
+    <div class="stage-side">
+      <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
+      <div class="actions">
+        <button class="primary" id="download" type="button">⬇ Download</button>
+        <button class="ghost" id="share" type="button">Share</button>
+        <button class="ghost" id="showImg" type="button">Show image</button>
+      </div>
     </div>
     <div class="status" id="status" role="status"></div>
   </div>
@@ -165,6 +172,7 @@
 <script src="js/morecards.js"></script>
 <script src="js/newcards.js"></script>
 <script src="js/tournaments.js"></script>
+<script src="js/catalog.js"></script>
 <script src="js/quickfill.js"></script>
 <script src="js/smartfill.js"></script>
 <script src="js/caption.js"></script>

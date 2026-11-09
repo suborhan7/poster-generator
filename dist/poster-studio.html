@@ -58,28 +58,24 @@
 <style>
 /* Layout: a control rail on the left, the live poster on the right; stacks to one column on phones. */
 :root {
-  --bg: #f3f4f7;
-  --panel: #ffffff;
-  --ink: #12151c;
-  --muted: #5b6272;
-  --line: #dfe2ea;
-  --accent: #1d4ed8;
-  --accent-ink: #ffffff;
-  --chip: #eef0f5;
+  /* Night-match look: deep navy with the Borhan gold, always dark so the posters pop. */
+  --bg: #081120;
+  --panel: #0f1b31;
+  --panel2: #13223d;
+  --ink: #edf1f8;
+  --muted: #93a0b8;
+  --line: #22324f;
+  --accent: #ffd23f;
+  --accent-ink: #1a1404;
+  --chip: #172742;
+  --field: #0a1528;
+  --ok: #7fe3a8;
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --font-body: "Barlow", "Hind Siliguri", system-ui, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1015; --panel: #171a22; --ink: #eceef3; --muted: #9aa1b2; --line: #2a2f3b;
-    --accent: #7aa2ff; --accent-ink: #0e1015; --chip: #222633; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1015; --panel: #171a22; --ink: #eceef3; --muted: #9aa1b2; --line: #2a2f3b;
-  --accent: #7aa2ff; --accent-ink: #0e1015; --chip: #222633; color-scheme: dark;
+  color-scheme: dark;
 }
 html, body { background: var(--bg); color: var(--ink); }
+body { background: radial-gradient(900px 500px at 50% -120px, #15305a 0%, var(--bg) 70%) no-repeat, var(--bg); }
 body { font-family: var(--font-body); font-size: 15px; padding-inline: 16px; padding-block: 16px 32px; }
 * { box-sizing: border-box; }
 .wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
@@ -94,20 +90,22 @@ body { font-family: var(--font-body); font-size: 15px; padding-inline: 16px; pad
 }
 @media (min-width: 861px) and (max-width: 1179px) { .wrap > .side { grid-column: 1; grid-row: 3; } }
 @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } .wrap > .rail, .wrap > .stage, .wrap > .side { grid-column: 1; grid-row: auto; } }
-header.top { max-width: 1240px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
-header.top h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: .01em; margin: 0; text-transform: uppercase; text-wrap: balance; }
-header.top p { margin: 0; color: var(--muted); }
+header.top { max-width: 1240px; margin: 0 auto 16px; display: flex; align-items: center; gap: 10px; }
+header.top .badge { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font: 800 17px var(--font-display); box-shadow: 0 0 0 3px #ffd23f40; }
+header.top .ttl { min-width: 0; }
+header.top h1 { font-family: var(--font-display); font-weight: 800; font-size: 28px; letter-spacing: .02em; margin: 0; line-height: 1; text-transform: uppercase; }
+header.top p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 .rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.label { font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.label { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg button, .types button {
-  font: 600 14px var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid transparent;
+  font: 600 14px var(--font-body); color: var(--ink); background: var(--chip); border: 1px solid var(--line);
   border-radius: 999px; padding: 7px 14px; cursor: pointer;
 }
 .types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .types button { border-radius: 8px; text-align: left; padding: 9px 11px; }
-.seg button[aria-pressed="true"], .types button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button[aria-pressed="true"], .types button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -133,7 +131,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .lib-tools { display: flex; flex-wrap: wrap; gap: 8px; }
 .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
 #aiBox input, .field input, .field textarea, .field select {
-  font: 500 15px var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  font: 500 15px var(--font-body); color: var(--ink); background: var(--field); border: 1px solid var(--line);
   border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
 }
 .field textarea { resize: vertical; min-height: 64px; }
@@ -143,12 +141,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .stage { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; flex-direction: column; gap: 12px; align-items: center; min-width: 0; }
 canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.25); background: #000; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-.primary { font: 700 16px var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 12px 22px; cursor: pointer; }
-.ghost { font: 600 14px var(--font-body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+.primary { font: 800 16px var(--font-display); letter-spacing: .08em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 12px 22px; cursor: pointer; }
+.ghost { font: 600 14px var(--font-body); background: var(--chip); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; cursor: pointer; }
 .status { font-size: 13px; color: var(--muted); min-height: 1.2em; text-align: center; }
 /* Keep the preview in view while editing, so slider changes show as you drag. */
 @media (max-width: 860px) {
-  .stage { order: -1; top: 0; z-index: 5; background: var(--bg); padding-block: 8px; gap: 8px; }
+  .stage { order: -1; top: 0; z-index: 5; background: var(--bg); margin-inline: -16px; padding-inline: 16px; border-bottom: 1px solid var(--line); padding-block: 8px; gap: 8px; }
   canvas#poster { max-height: 31vh; }
   #platforms button { padding: 4px 10px; font-size: 13px; }
   .actions { flex-wrap: nowrap; width: 100%; gap: 6px; }
@@ -164,7 +162,7 @@ canvas#poster { width: auto; max-width: 100%; max-height: calc(100vh - 180px); b
 .save-sheet img { max-width: 100%; max-height: calc(100vh - 120px); border-radius: 8px; }
 .save-sheet p { color: #fff; margin: 0; font-size: 14px; text-align: center; }
 .save-sheet button { background: #fff; color: #111; border: 0; }
-details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; color: var(--muted); }
+details summary { cursor: pointer; font-family: var(--font-display); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 14px; color: var(--ink); }
 details[open] summary { margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 body { margin: 0; }
@@ -221,40 +219,90 @@ img { max-width: 100%; }
 .ideas .label { margin-top: 12px; }
 .tour-pick { grid-column: 1 / -1; margin-bottom: 4px; }
 .tour-pick button { font-weight: 700; }
+
+/* Card picker: search, group pills, emoji tiles (phone first) */
+.picker { gap: 10px; }
+.search { display: flex; align-items: center; gap: 8px; background: var(--field); border: 1px solid var(--line); border-radius: 999px; padding: 0 6px 0 14px; }
+.search:focus-within { border-color: var(--accent); }
+.search input { flex: 1; min-width: 0; border: 0; background: none; color: var(--ink); font: 500 16px var(--font-body); padding: 11px 0; outline: none; }
+.search input::-webkit-search-cancel-button { display: none; }
+.search button { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--chip); color: var(--ink); cursor: pointer; font-size: 14px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pills button { font: 600 14px var(--font-body); color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer; white-space: nowrap; }
+.pills button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-height: 82px; padding: 10px 6px 8px; border-radius: 14px; border: 1px solid var(--line); background: var(--field); color: var(--ink); font: 600 13px/1.2 var(--font-body); text-align: center; cursor: pointer; overflow-wrap: anywhere; }
+.tile i { font-style: normal; font-size: 28px; line-height: 1.1; }
+.tile small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.tile:hover { border-color: #3a5486; }
+.tile[aria-pressed="true"] { border-color: var(--accent); background: #ffd23f1f; box-shadow: 0 0 0 1px var(--accent) inset; }
+.tiles .hint.none, .tiles .tour-pick { grid-column: 1 / -1; }
+.picked { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--panel2); border-left: 3px solid var(--accent); }
+.picked i { font-style: normal; font-size: 24px; }
+.picked b { display: block; font-size: 15px; }
+.picked small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+@media (max-width: 860px) {
+  body { padding-inline: 12px; }
+  .stage { margin-inline: -12px; padding-inline: 12px; }
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .tile { min-height: 84px; padding: 10px 3px 8px; font-size: 12px; border-radius: 12px; }
+  .tile i { font-size: 26px; }
+  .pills button { padding: 6px 11px; font-size: 13.5px; }
+  .box { padding: 12px; border-radius: 14px; }
+}
+
+/* Phone: a slim pinned preview, poster on the left and the buttons on the right, so the form has room. */
+@media (max-width: 860px) {
+  .stage { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "cv side" "st st"; align-items: center; gap: 6px 12px; padding-block: 8px; }
+  canvas#poster { grid-area: cv; max-height: 27vh; max-width: 46vw; border-radius: 6px; }
+  .stage > .status { grid-area: st; }
+  .stage-side { grid-area: side; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  #platforms { flex-wrap: wrap; gap: 4px; }
+  #platforms button { padding: 4px 9px; font-size: 12px; }
+  .stage .actions { flex-direction: column; flex-wrap: nowrap; gap: 6px; }
+  .stage .actions button { width: 100%; padding: 9px 8px; font-size: 13px; }
+  .stage .actions .primary { font-size: 15px; padding: 11px 8px; }
+}
+@media (min-width: 861px) { .stage-side { display: contents; } #platforms { order: -1; } }
 </style>
 </head>
 <body>
 <header class="top">
-  <h1>Borhan Poster Studio</h1>
-  <p>Pick a card, type the details, add a photo, download or share.</p>
+  <span class="badge" aria-hidden="true">BR</span>
+  <div class="ttl"><h1>Borhan Studio</h1><p>Pick a card, type, add a photo, download.</p></div>
   <span class="ver" id="ver"></span>
 </header>
 
 <div class="wrap">
   <div class="rail">
     <section class="box" id="aiBox">
-      <span class="label">Make a poster with AI</span>
+      <span class="label">✨ Or let AI make it</span>
       <div class="quick-row"><input id="aiNote" type="text" autocomplete="off" aria-label="Tell the AI what poster you want" placeholder="e.g. Shakib 52*(38) vs India, 4 ta char 2 ta chokka"><button type="button" id="aiGo">Make</button></div>
       <p class="hint" id="aiStatus">Type the update any way you like. The AI picks the card, fills it, and your saved photo of the player goes on it.</p>
     </section>
 
-    <section class="box">
-      <span class="label">Sport</span>
-      <div class="seg" id="cats"></div>
-      <span class="label">Card type</span>
-      <div class="types" id="types"></div>
+    <section class="box picker">
+      <span class="label">1 · Pick a card</span>
+      <div class="search">
+        <span aria-hidden="true">🔍</span>
+        <input id="cardSearch" type="search" autocomplete="off" enterkeyhint="search" aria-label="Search cards" placeholder="Search: fifty, wicket, goal, table, news…">
+        <button type="button" id="searchClear" aria-label="Clear search" hidden>✕</button>
+      </div>
+      <div class="pills" id="cats" role="group" aria-label="Card groups"></div>
+      <div class="tiles" id="types"></div>
+      <div class="picked" id="picked" aria-live="polite"></div>
     </section>
 
     <section class="box" id="seriesBox" hidden></section>
 
     <section class="box">
-      <span class="label">Details</span>
+      <span class="label">2 · Type the details</span>
       <div class="fields" id="fields"></div>
       <p class="hint" id="tplHint"></p>
     </section>
 
     <section class="box" id="photoBox">
-      <span class="label">Photo</span>
+      <span class="label">3 · Add a photo</span>
       <div class="fields">
         <div class="field wide"><label for="photo1">Player photo</label><input id="photo1" type="file" accept="image/*"></div>
         <div class="field wide lib" id="libWrap">
@@ -297,12 +345,14 @@ img { max-width: 100%; }
   </div>
 
   <div class="stage">
-    <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
     <canvas id="poster" width="1080" height="1350" aria-label="Poster preview"></canvas>
-    <div class="actions">
-      <button class="primary" id="download" type="button">Download</button>
-      <button class="ghost" id="share" type="button">Share</button>
-      <button class="ghost" id="showImg" type="button">Show image</button>
+    <div class="stage-side">
+      <div class="seg" id="platforms" role="group" aria-label="Platform"></div>
+      <div class="actions">
+        <button class="primary" id="download" type="button">⬇ Download</button>
+        <button class="ghost" id="share" type="button">Share</button>
+        <button class="ghost" id="showImg" type="button">Show image</button>
+      </div>
     </div>
     <div class="status" id="status" role="status"></div>
   </div>
@@ -366,7 +416,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v48";
+BPG.VERSION = "9 Nov 2026 · v49";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -4090,6 +4140,158 @@ BPG.TOURNAMENTS = {
 
 </script>
 <script>
+// The card picker's catalogue: the plain name, emoji, group (shelf) and search words of every card.
+// Only what you SEE changes here. Card keys, fields and designs stay in templates.js and the layout files.
+// To add a card to the picker: add one line to CARDS below with its key.
+window.BPG = window.BPG || {};
+
+(() => {
+  const T = BPG.TEMPLATES;
+
+  // Groups shown as pills, in this order. ("tour" must stay "tour": the app shows the tournament picker there.)
+  BPG.SHELVES = {
+    cricket: "🏏 Cricket",
+    test: "🔴 Test",
+    football: "⚽ Football",
+    news: "📰 News & talk",
+    compare: "🆚 Compare",
+    teams: "👥 Line-ups",
+    tables: "📊 Tables & series",
+    tour: "🏆 Tournaments",
+    rants: "🔥 Borhan Rants",
+    stylish: "✨ Big text",
+  };
+
+  // key: [emoji, name, group, "use it when…", "extra search words (Banglish / Bangla)"]
+  const CARDS = {
+    // Cricket, in match order: during the innings, milestones, bowling, end of match.
+    scoreupd:    ["📺", "Live score", "cricket", "Score during an innings, like the TV score bar", "score update live run rate rr scorebar স্কোর"],
+    innings:     ["☕", "Innings break", "cricket", "First innings is over: total and target", "target innings break half time lokkho লক্ষ্য"],
+    chase:       ["🎯", "Runs needed", "cricket", "Chase is on: need 42 off 30 balls", "chase tracker need required rate rrr lagbe dorkar"],
+    partnership: ["🤝", "Partnership", "cricket", "Two batters' stand together", "partnership stand juti জুটি"],
+    fifty:       ["5️⃣", "Fifty (50)", "cricket", "A batter reaches 50", "50 half century fifty pachas ফিফটি অর্ধশতক"],
+    century:     ["💯", "Century (100)", "cricket", "A batter reaches 100", "100 hundred ton century shotok sentury সেঞ্চুরি শতক"],
+    knock:       ["🏏", "Knock (52 off 38)", "cricket", "Any batting score, X runs off Y balls. 0 gets a DUCK stamp", "knock innings runs balls batting duck"],
+    bigknock:    ["💥", "Knock, bold style", "cricket", "Big batting score with big bold text", "big knock bold innings runs"],
+    wicket:      ["☝️", "Wicket", "cricket", "A batter is out", "wicket out uikat bowled caught উইকেট আউট"],
+    fifer:       ["🖐️", "Five wickets", "cricket", "A bowler takes 5 wickets", "five wicket haul fifer 5wi 5 wickets পাঁচ উইকেট"],
+    goodover:    ["🔥", "Great over", "cricket", "Over with few runs or wickets: six balls shown", "brilliant over maiden good over"],
+    badover:     ["💸", "Expensive over", "cricket", "Over that went for lots of runs", "bad over expensive costly sixes"],
+    cresult:     ["🏆", "Match result", "cricket", "Who won, both scores and player of the match", "result won win potm jitlo joy ফলাফল"],
+    bigresult:   ["🏅", "Result, bold style", "cricket", "Who won, in big bold text", "big result bold win"],
+    toss:        ["🪙", "Toss", "cricket", "Who won the toss and chose what", "toss coin bat bowl first"],
+    form:        ["📈", "Recent form", "cricket", "A player's last few scores as a bar chart", "form last innings average chart"],
+
+    // Test cricket
+    testfifty:   ["5️⃣", "Test fifty", "test", "50 in a Test match", "test 50 fifty red ball"],
+    testton:     ["💯", "Test hundred", "test", "100 in a Test match", "test 100 century ton red ball"],
+    testfifer:   ["🖐️", "Test five wickets", "test", "5 wickets in a Test innings", "test fifer five wicket red ball"],
+    stumps:      ["⏸️", "Day end / Lunch / Tea", "test", "Score at stumps, lunch or tea", "stumps lunch tea day end session"],
+    testresult:  ["🏆", "Test result", "test", "Who won the Test (or a draw)", "test result draw won"],
+
+    // Football
+    goal:        ["⚽", "Goal", "football", "Someone scores", "goal gol scored গোল"],
+    fresult:     ["🏁", "Full-time score", "football", "Final score of a match", "full time ft result score"],
+    fbigresult:  ["🏅", "Result, bold style", "football", "Who won, in big bold text", "big result bold win"],
+    matchcard:   ["🆚", "Match card (live / full time)", "football", "Two crests and the score, for kick-off, live or full time", "match card kick off live ft vs"],
+    redcard:     ["🟥", "Red card", "football", "A player is sent off", "red card sent off lal card"],
+    rating:      ["⭐", "Player rating", "football", "Rate a player out of 10", "rating rate 10 player"],
+    transfer:    ["🔁", "Transfer", "football", "A player moves club: old club, new club, fee", "transfer sign signing deal here we go"],
+    tframe:      ["🖼️", "Tournament photo frame", "football", "Any photo with the tournament ribbons around it", "frame tournament ribbons photo"],
+
+    // News & talk
+    breaking:    ["🚨", "Breaking news", "news", "Big news, one strong headline", "breaking news alert"],
+    news:        ["📰", "News with details", "news", "Headline plus up to 4 lines of text", "instant news update details khobor খবর"],
+    statuscard:  ["✅", "Player in / out", "news", "In the XI, ruled out, injured, rested", "status ruled out injury injured xi in out dropped"],
+    quote:       ["💬", "Quote", "news", "What a player or coach said", "quote said bolse উক্তি"],
+    hottake:     ["🌶️", "Hot take (my opinion)", "news", "Your bold opinion on a player or match", "hot take opinion rant take mot"],
+    trivia:      ["💡", "Did you know?", "news", "A fun fact or stat", "trivia fact did you know jano ki"],
+    poll:        ["🗳️", "Who will win? (poll)", "news", "Fans comment 1 or 2", "poll ke jitbe who will win vote predict"],
+    countdown:   ["⏳", "Countdown", "news", "Days left to a big match", "countdown days left baki"],
+    onthisday:   ["📅", "On this day", "news", "Something that happened on this date years ago", "on this day history ajker dine"],
+    record:      ["🏅", "Record broken", "news", "A record or big achievement, with a big number", "record achievement milestone"],
+    mvp:         ["👑", "Player of the month", "news", "MVP or player of the month / series", "mvp potm player of month series award"],
+    profile:     ["🪪", "Player profile", "news", "A player's career stats", "profile career stats bio"],
+    debut:       ["🧢", "Debut", "news", "A player's first match", "debut cap first match ovishek অভিষেক"],
+    top:         ["🔢", "Top 5 list", "news", "Any ranked list", "top list ranking top 5 top 10"],
+    frame:       ["🖼️", "Photo with logo", "news", "Just the photo, a short line and your logo", "photo frame picture simple"],
+    story:       ["📚", "5-slide story (carousel)", "news", "One match told in 5 swipeable slides", "story carousel slides swipe"],
+
+    // Compare
+    versus:      ["⚖️", "Who's better?", "compare", "Two players, fans pick one", "versus who better vs ke bhalo"],
+    compare:     ["📊", "Player vs player stats", "compare", "Two players' stats side by side with bars", "compare player vs player stats bars"],
+    h2h:         ["🆚", "Head to head (teams)", "compare", "Two teams' record against each other", "head to head h2h teams record"],
+
+    // Line-ups and squads
+    playingxi:   ["📋", "Playing XI (cricket)", "teams", "Cricket team's eleven for the match", "playing xi 11 eleven lineup cricket team"],
+    squad:       ["🏏", "Squad (cricket)", "teams", "Cricket squad announced, with the flag", "squad announcement dol দল cricket"],
+    lineup:      ["📋", "Starting XI (football)", "teams", "Football eleven as a list", "starting xi lineup 11 football"],
+    pitch:       ["🏟️", "XI on the pitch", "teams", "Football eleven drawn on a pitch with a formation", "pitch formation 4-3-3 lineup xi"],
+    fsquad:      ["⚽", "Squad (football)", "teams", "Football squad announced, with the flag", "squad announcement football dol"],
+    totwc:       ["🌟", "Team of the week (cricket)", "teams", "Best cricket XI of the week", "team of the week totw best xi cricket"],
+    totw:        ["🌟", "Team of the week (football)", "teams", "Best football XI of the week, on a pitch", "team of the week totw best xi football"],
+
+    // Tables and series (series cards fill from the Series box)
+    seriesscore: ["🧮", "Series score", "tables", "Series result so far (fill the Series box)", "series score results 2-1"],
+    preview:     ["🔜", "Match preview", "tables", "Next match in a series", "preview next match upcoming"],
+    mostruns:    ["🏏", "Most runs", "tables", "Top run scorers of a series", "most runs top scorers batting leaders"],
+    mostwkts:    ["🎯", "Most wickets", "tables", "Top wicket takers of a series", "most wickets bowling leaders"],
+    points:      ["📊", "Points table", "tables", "Series or league points table", "points table standings"],
+    topscorers:  ["⚽", "Top goal scorers", "tables", "Most goals in a tournament", "top scorers goals golden boot"],
+    assists:     ["🅰️", "Most assists", "tables", "Most assists in a tournament", "assists playmaker"],
+    fixtures:    ["🗓️", "Fixtures", "tables", "Upcoming matches with day and time", "fixtures schedule upcoming matches khela kobe"],
+    tgroup:      ["🧾", "Group table", "tables", "Group standings, top teams highlighted", "group table standings points"],
+    tstats:      ["📉", "Match stats", "tables", "Possession, shots and more with split bars", "match stats possession shots"],
+
+    // Borhan Rants (your own style)
+    reaction:     ["🔥", "Match reaction", "rants", "Your rant on a match, with the Rant Meter", "reaction rant take meter"],
+    reactionTest: ["📝", "Day report", "rants", "Your take on a Test day, with the Rant Meter", "day report test rant"],
+
+    // Big text (the Stylish cards with the font library)
+    gruns:   ["🔠", "Runs, big text", "stylish", "Huge \"219* RUNS!\" headline, pick any font", "stylish runs big text font headline"],
+    gwkts:   ["🔠", "Wickets, big text", "stylish", "Huge \"5 WICKETS\" headline", "stylish wickets big text font"],
+    ggoal:   ["🔠", "Goal, big text", "stylish", "Huge \"GOAL!\" headline", "stylish goal big text font"],
+    gresult: ["🔠", "Result, big text", "stylish", "Huge \"WON BY 7 WICKETS\" headline", "stylish result big text font"],
+    gnumber: ["🔠", "Big number / record", "stylish", "One huge number for a record", "stylish number record big text font"],
+  };
+
+  // Tournament copies (saff_matchcard…) take the base card's emoji and a short name.
+  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame" };
+
+  Object.entries(T).forEach(([key, t]) => {
+    let c = CARDS[key];
+    if (t.tour) {
+      const base = key.slice(t.tour.length + 1), b = CARDS[base];
+      c = [b ? b[0] : "🏆", TOUR_NAMES[base] || t.name, "tour", b ? b[3] : "", (b ? b[4] : "") + " " + t.tour];
+    }
+    if (!c) c = ["🃏", t.name, BPG.SHELVES[t.cat] ? t.cat : "news", "", ""];  // a new card nobody listed yet still shows up
+    t.oldName = t.name;
+    [t.emoji, t.name, t.shelf, t.use, t.kw] = c;
+    const i = t.tour ? Object.keys(TOUR_NAMES).indexOf(key.slice(t.tour.length + 1)) : Object.keys(CARDS).indexOf(key);
+    t.order = i < 0 ? 999 : i;
+  });
+
+  BPG.shelfOf = (key) => (T[key] && T[key].shelf) || "cricket";
+  BPG.firstOfShelf = (shelf) => Object.keys(T).filter((k) => T[k].shelf === shelf).sort((a, b) => T[a].order - T[b].order)[0];
+
+  // Search: every word typed must appear in the name, group, use line, search words or old name.
+  const norm = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+  BPG.searchCards = (q) => {
+    const words = norm(q).split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    return Object.keys(T).map((k) => {
+      const t = T[k], name = norm(t.name);
+      const hay = [name, norm(BPG.SHELVES[t.shelf]), norm(t.use), norm(t.kw), norm(t.oldName), k.toLowerCase()].join(" ");
+      if (!words.every((w) => hay.includes(w))) return null;
+      // Name matches first, then name starts, then everything else.
+      const score = words.reduce((s, w) => s + (name.startsWith(w) ? 3 : name.includes(w) ? 2 : 0), 0) - (t.tour ? 1 : 0) + (name.replace(/\s*\(.*\)$/, "") === words.join(" ") ? 5 : 0);
+      return [k, score, name.length];
+    }).filter(Boolean).sort((a, b) => b[1] - a[1] || a[2] - b[2]).map((x) => x[0]);
+  };
+})();
+
+</script>
+<script>
 // Quick fill: type one line like "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL" and the form fills itself.
 // BPG.quickParse(text) returns what it understood; BPG.quickApply(template, text) maps that onto a card's fields.
 window.BPG = window.BPG || {};
@@ -5498,9 +5700,11 @@ window.BPG = window.BPG || {};
   const T = BPG.TEMPLATES, L = BPG.LAYOUTS, THEMES = BPG.THEMES, PLATFORMS = BPG.PLATFORMS;
   const cv = $("poster"), ctx = cv.getContext("2d");
 
-  const firstOf = (cat) => Object.keys(T).find((k) => T[k].cat === cat);
+  // state.cat is the picker group (BPG.SHELVES in catalog.js), not the sport.
+  const firstOf = (shelf) => BPG.firstOfShelf(shelf);
+  const SH = BPG.SHELVES;
   const state = {
-    cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
+    cat: Object.keys(SH)[0], tpl: firstOf(Object.keys(SH)[0]), platform: "instagram", recent: [],
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null, 3: null };
@@ -5511,8 +5715,9 @@ window.BPG = window.BPG || {};
     // Brand settings (theme, colours, handle, page name) go back to the defaults on every reload; only an uploaded logo is kept.
     if (saved) Object.assign(state, saved, { theme: "team", brand: { ...BPG.BRAND, logo: (saved.brand || {}).logo || null } });
   } catch (e) {}
-  if (!T[state.tpl]) { state.cat = Object.keys(BPG.CATS)[0]; state.tpl = firstOf(state.cat); }
-  if (!BPG.CATS[state.cat]) state.cat = T[state.tpl].cat;
+  if (!T[state.tpl]) { state.cat = Object.keys(SH)[0]; state.tpl = firstOf(state.cat); }
+  if (!SH[state.cat] && state.cat !== "recent") state.cat = BPG.shelfOf(state.tpl);
+  state.recent = (Array.isArray(state.recent) ? state.recent : []).filter((k) => T[k]);
   const persist = () => { try { localStorage.setItem("bpg_state", JSON.stringify(state)); } catch (e) {} };
 
   BPG.state = () => state;
@@ -5533,28 +5738,69 @@ window.BPG = window.BPG || {};
     b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", String(pressed)); b.onclick = onClick;
     parent.appendChild(b);
   }
+  // ---------- Card picker: search, group pills, emoji tiles ----------
+  let query = "";
+  function pickCard(key) {
+    state.tpl = key;
+    if (query) state.cat = BPG.shelfOf(key);
+    state.recent = [key, ...state.recent.filter((k) => k !== key)].slice(0, 8);
+    persist(); renderAll();
+  }
   function renderCats() {
-    $("cats").innerHTML = "";
-    Object.entries(BPG.CATS).forEach(([key, label]) => button($("cats"), label, state.cat === key, () => {
-      state.cat = key; state.tpl = firstOf(key); persist(); renderAll();
+    const row = $("cats"); row.innerHTML = "";
+    const pills = (state.recent.length ? [["recent", "🕘 Recent"]] : []).concat(Object.entries(SH));
+    pills.forEach(([key, label]) => button(row, label, !query && state.cat === key, () => {
+      query = ""; $("cardSearch").value = ""; $("searchClear").hidden = true;
+      state.cat = key;
+      if (key !== "recent" && BPG.shelfOf(state.tpl) !== key) state.tpl = firstOf(key);
+      persist(); renderAll();
     }));
+  }
+  function tile(parent, key, showShelf) {
+    const t = T[key], b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.setAttribute("aria-pressed", String(state.tpl === key));
+    const i = document.createElement("i"); i.textContent = t.emoji; i.setAttribute("aria-hidden", "true");
+    const n = document.createElement("span"); n.textContent = t.name;
+    b.append(i, n);
+    if (showShelf) { const g = document.createElement("small"); g.textContent = SH[t.shelf].replace(/^\S+\s/, "") + (t.tour && BPG.TOURNAMENTS[t.tour] ? " · " + BPG.TOURNAMENTS[t.tour].name : ""); b.appendChild(g); }
+    b.title = t.use || t.name;
+    b.onclick = () => pickCard(key);
+    parent.appendChild(b);
   }
   function renderTypes() {
-    $("types").innerHTML = "";
-    // Tournaments: pick the tournament first, then its cards.
-    let tour = null;
-    if (state.cat === "tour" && BPG.TOURNAMENTS) {
-      tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
-      const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
-      Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
-        state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
-      }));
-      $("types").appendChild(row);
+    const box = $("types"); box.innerHTML = "";
+    if (query) {
+      const found = BPG.searchCards(query);
+      found.forEach((k) => tile(box, k, true));
+      if (!found.length) { const p = document.createElement("p"); p.className = "hint none"; p.textContent = `No card called "${query}". Try a simpler word like 50, wicket, goal, table or news.`; box.appendChild(p); }
+    } else if (state.cat === "recent") {
+      state.recent.forEach((k) => tile(box, k, true));
+    } else {
+      // Tournaments: pick the tournament first, then its cards.
+      let tour = null;
+      if (state.cat === "tour" && BPG.TOURNAMENTS) {
+        tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+        const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+        Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+          state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+        }));
+        box.appendChild(row);
+      }
+      Object.keys(T).filter((k) => T[k].shelf === state.cat && (!tour || T[k].tour === tour)).sort((x, y) => T[x].order - T[y].order).forEach((k) => tile(box, k, false));
     }
-    Object.entries(T).filter(([, t]) => t.cat === state.cat && (!tour || t.tour === tour)).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
-      state.tpl = key; persist(); renderAll();
-    }));
+    const t = T[state.tpl];
+    $("picked").innerHTML = "";
+    const e = document.createElement("i"); e.textContent = t.emoji;
+    const d = document.createElement("div");
+    const b = document.createElement("b"); b.textContent = t.name;
+    const u = document.createElement("small"); u.textContent = (t.use || "") + (t.use ? " · " : "") + SH[t.shelf].replace(/^\S+\s/, "");
+    d.append(b, u); $("picked").append(e, d);
   }
+  $("cardSearch").addEventListener("input", (e) => {
+    query = e.target.value.trim(); $("searchClear").hidden = !query;
+    renderCats(); renderTypes();
+  });
+  $("searchClear").addEventListener("click", () => { query = ""; $("cardSearch").value = ""; $("searchClear").hidden = true; renderCats(); renderTypes(); $("cardSearch").focus(); });
   function addField(parent, id, label, value, wide, type, onInput) {
     const d = document.createElement("div");
     d.className = "field" + (wide ? " wide" : "");
@@ -5680,7 +5926,7 @@ window.BPG = window.BPG || {};
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
     open(tpl, values, big) {
-      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign({}, state.values[tpl] || {}, values, big ? { __big: big } : {});
       persist(); renderAll();
     },
@@ -5923,7 +6169,7 @@ window.BPG = window.BPG || {};
     try {
       aiStatus("Picking the card…");
       const key = await BPG.pickCard(text);
-      state.tpl = key; state.cat = T[key].cat; persist(); renderAll();
+      state.tpl = key; state.cat = BPG.shelfOf(key); persist(); renderAll();
       aiStatus(`${T[key].name} card. Filling it in…`);
       const { values, labels } = await BPG.smartFill(T[key], text);
       fillCard(values);
@@ -6126,7 +6372,7 @@ window.BPG = window.BPG || {};
       }
       const values = {};
       T[tpl].fields.forEach(([id]) => { values[id] = d[id] != null ? String(d[id]) : ""; });
-      state.tpl = tpl; state.cat = T[tpl].cat;
+      state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign(values, q.get("big") ? { __big: q.get("big") } : {});
       if (q.get("size") && PLATFORMS[q.get("size")]) state.platform = q.get("size");
       persist();
@@ -6235,7 +6481,7 @@ window.BPG = window.BPG || {};
   function refresh() {
     datalists();
     const box = $("seriesBox"), st = BPG.app.state();
-    box.hidden = st.cat !== "series";
+    box.hidden = !BPG.TEMPLATES[st.tpl] || BPG.TEMPLATES[st.tpl].cat !== "series";
     if (box.hidden) return;
     const s = S.current();
     const pick = el("select", { id: "sr_pick", on: { change(e) { S.select(e.target.value); openMatch = null; refresh(); BPG.app.draw(); } } },
