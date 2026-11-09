@@ -63,6 +63,7 @@
         <div class="field wide"><label>Use the photo as</label><div class="seg" id="cutMode" role="group" aria-label="Photo style"><button type="button" data-v="full" aria-pressed="true">Full photo</button><button type="button" data-v="cut" aria-pressed="false">Cutout</button></div><p class="hint" id="cutStatus"></p><button class="ghost" id="cutFix" type="button" hidden>Fix the cutout (bring back a bat, erase background)</button></div>
         <div class="field wide"><label>Photo finish</label><div class="seg" id="proMode" role="group" aria-label="Photo finish"><button type="button" data-v="pro" aria-pressed="true">Pro (punchy colour, crisp, fine grain)</button><button type="button" data-v="natural" aria-pressed="false">Natural</button></div></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
+        <div class="field wide" id="photo3Wrap" hidden><label for="photo3" id="photo3Label">Tournament logo</label><input id="photo3" type="file" accept="image/*"><button class="ghost" id="photo3Clear" type="button" hidden>Remove the logo</button></div>
         <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
         <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0"></div>
         <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
@@ -76,6 +77,7 @@
         <summary>Brand settings</summary>
         <div class="fields">
           <div class="field wide"><label for="b_theme">Colour theme</label><select id="b_theme"></select></div>
+          <div class="field wide"><span class="label">Logo place</span><div class="seg" id="b_logopos" role="group" aria-label="Logo place"></div></div>
           <div class="field"><label for="b_handle">Handle</label><input id="b_handle" type="text"></div>
           <div class="field"><label for="b_name">Page name</label><input id="b_name" type="text"></div>
           <div class="field"><label for="b_accent">Accent colour</label><input id="b_accent" type="color"></div>
@@ -135,6 +137,7 @@
     <section class="box">
       <span class="label">Post everywhere</span>
       <button class="ghost wide-btn" id="allSizes" type="button">Download both sizes (4:5 and 9:16)</button>
+      <button class="ghost wide-btn" id="allSlides" type="button" hidden>Download all 5 slides (carousel)</button>
       <p class="hint">4:5 works for Instagram and Facebook posts. 9:16 is for TikTok, Reels and Stories.</p>
       <button class="ghost wide-btn" id="install" type="button" hidden>Install as an app</button>
       <p class="hint" id="installHint"></p>
@@ -157,6 +160,11 @@
 <script src="js/cricket.js"></script>
 <script src="js/testcards.js"></script>
 <script src="js/stylish.js"></script>
+<script src="js/tournament.js"></script>
+<script src="js/tournament2.js"></script>
+<script src="js/morecards.js"></script>
+<script src="js/newcards.js"></script>
+<script src="js/tournaments.js"></script>
 <script src="js/quickfill.js"></script>
 <script src="js/smartfill.js"></script>
 <script src="js/caption.js"></script>

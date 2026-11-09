@@ -11,7 +11,7 @@ window.BPG = window.BPG || {};
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
-  const photos = { 1: null, 2: null };
+  const photos = { 1: null, 2: null, 3: null };
   let logoImg = null;
 
   try {
@@ -49,7 +49,17 @@ window.BPG = window.BPG || {};
   }
   function renderTypes() {
     $("types").innerHTML = "";
-    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
+    // Tournaments: pick the tournament first, then its cards.
+    let tour = null;
+    if (state.cat === "tour" && BPG.TOURNAMENTS) {
+      tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+      const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+      Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+        state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+      }));
+      $("types").appendChild(row);
+    }
+    Object.entries(T).filter(([, t]) => t.cat === state.cat && (!tour || t.tour === tour)).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
       state.tpl = key; persist(); renderAll();
     }));
   }
@@ -136,6 +146,14 @@ window.BPG = window.BPG || {};
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.fontPick && BPG.fontPicker) BPG.fontPicker(box, state, persist, draw, t);
+    // Carousel cards: tap a slide to see it.
+    if (t.slides) {
+      const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Slide");
+      const cur = parseInt(val("slide"), 10) || 1;
+      (BPG.STORY_SLIDES || []).slice(0, t.slides).forEach((nm, i) => button(seg, `${i + 1} ${nm}`, cur === i + 1, () => { setVal("slide", String(i + 1)); renderFields(); }));
+      box.appendChild(seg);
+    }
+    $("allSlides").hidden = !t.slides;
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
@@ -143,7 +161,12 @@ window.BPG = window.BPG || {};
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
+    // Cards with no main photo but a crest or logo slot keep only those slots.
+    document.querySelectorAll("#photoBox > .fields > .field").forEach((el) => { if (el.id !== "photo2Wrap" && el.id !== "photo3Wrap") el.hidden = !!t.noMain; });
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
+    const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -160,7 +183,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
+  function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -172,6 +195,12 @@ window.BPG = window.BPG || {};
   };
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
+  // Where the logo sits: top right (default) or the small bottom-right corner.
+  function renderLogoPos() {
+    $("b_logopos").innerHTML = "";
+    [["bottom", "Bottom right"], ["top", "Top"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "bottom") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+  }
+  renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
@@ -248,14 +277,38 @@ window.BPG = window.BPG || {};
     img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
-    if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+  [1, 2, 3].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    await usePhoto(n, await loadImage(f), { blob: f });
+    const img = await loadImage(f);
+    if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
+    await usePhoto(n, img, { blob: f, tpl: T[state.tpl].layout }); // crests only show on the card they were added for
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // The tournament logo stays on this phone (shrunk to 600 px), so it is added once per tournament.
+  function keepTourLogo(img) {
+    try {
+      const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem(logoKey(), c.toDataURL("image/png"));
+    } catch (e) {}
+  }
+  // Each tournament in the Tournaments section keeps its own logo; the other cards share one.
+  const logoKey = () => (T[state.tpl] && T[state.tpl].tour ? "bpg_tourlogo_" + T[state.tpl].tour : "bpg_tourlogo");
+  let logoLoaded = null;
+  function loadTourLogo() {
+    const key = logoKey(); if (key === logoLoaded) return; logoLoaded = key; photos[3] = null;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) { const i = new Image(); i.onload = () => { if (logoKey() !== key) return; photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+    } catch (e) {}
+  }
+  BPG.loadTourLogo = loadTourLogo;
+  loadTourLogo();
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.
@@ -439,6 +492,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
+      logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
@@ -539,6 +593,22 @@ window.BPG = window.BPG || {};
     }
     for (const f of files) await saveBlob(f, f.name);
     status("Saved both sizes.");
+  });
+
+  // Carousel: every slide in one tap, in order, ready to post as one swipe post.
+  $("allSlides").addEventListener("click", async () => {
+    const t = T[state.tpl]; if (!t.slides) return;
+    const was = val("slide"), files = [], vals = (state.values[state.tpl] = state.values[state.tpl] || {});
+    for (let i = 1; i <= t.slides; i++) {
+      vals.slide = String(i); const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename().replace(".png", `-slide${i}.png`), { type: "image/png" }));
+    }
+    vals.slide = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared all slides."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status(`Saved ${files.length} slides.`);
   });
 
   // ---------- Install as an app ----------

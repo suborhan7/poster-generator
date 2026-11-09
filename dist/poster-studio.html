@@ -219,6 +219,8 @@ img { max-width: 100%; }
 .ideas a { display: block; padding: 7px 0; color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); font-size: 14px; }
 .ideas a small { display: block; color: var(--muted); font-size: 12px; }
 .ideas .label { margin-top: 12px; }
+.tour-pick { grid-column: 1 / -1; margin-bottom: 4px; }
+.tour-pick button { font-weight: 700; }
 </style>
 </head>
 <body>
@@ -268,6 +270,7 @@ img { max-width: 100%; }
         <div class="field wide"><label>Use the photo as</label><div class="seg" id="cutMode" role="group" aria-label="Photo style"><button type="button" data-v="full" aria-pressed="true">Full photo</button><button type="button" data-v="cut" aria-pressed="false">Cutout</button></div><p class="hint" id="cutStatus"></p><button class="ghost" id="cutFix" type="button" hidden>Fix the cutout (bring back a bat, erase background)</button></div>
         <div class="field wide"><label>Photo finish</label><div class="seg" id="proMode" role="group" aria-label="Photo finish"><button type="button" data-v="pro" aria-pressed="true">Pro (punchy colour, crisp, fine grain)</button><button type="button" data-v="natural" aria-pressed="false">Natural</button></div></div>
         <div class="field wide" id="photo2Wrap" hidden><label for="photo2" id="photo2Label">Second player photo</label><input id="photo2" type="file" accept="image/*"></div>
+        <div class="field wide" id="photo3Wrap" hidden><label for="photo3" id="photo3Label">Tournament logo</label><input id="photo3" type="file" accept="image/*"><button class="ghost" id="photo3Clear" type="button" hidden>Remove the logo</button></div>
         <div class="field"><label for="zoom">Zoom</label><input id="zoom" type="range" min="0.6" max="2.5" step="0.01" value="1"></div>
         <div class="field"><label for="shade">Darken photo</label><input id="shade" type="range" min="0" max="0.8" step="0.01" value="0"></div>
         <div class="field"><label for="offx">Move left / right</label><input id="offx" type="range" min="-50" max="50" step="1" value="0"></div>
@@ -281,6 +284,7 @@ img { max-width: 100%; }
         <summary>Brand settings</summary>
         <div class="fields">
           <div class="field wide"><label for="b_theme">Colour theme</label><select id="b_theme"></select></div>
+          <div class="field wide"><span class="label">Logo place</span><div class="seg" id="b_logopos" role="group" aria-label="Logo place"></div></div>
           <div class="field"><label for="b_handle">Handle</label><input id="b_handle" type="text"></div>
           <div class="field"><label for="b_name">Page name</label><input id="b_name" type="text"></div>
           <div class="field"><label for="b_accent">Accent colour</label><input id="b_accent" type="color"></div>
@@ -340,6 +344,7 @@ img { max-width: 100%; }
     <section class="box">
       <span class="label">Post everywhere</span>
       <button class="ghost wide-btn" id="allSizes" type="button">Download both sizes (4:5 and 9:16)</button>
+      <button class="ghost wide-btn" id="allSlides" type="button" hidden>Download all 5 slides (carousel)</button>
       <p class="hint">4:5 works for Instagram and Facebook posts. 9:16 is for TikTok, Reels and Stories.</p>
       <button class="ghost wide-btn" id="install" type="button" hidden>Install as an app</button>
       <p class="hint" id="installHint"></p>
@@ -361,7 +366,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v45";
+BPG.VERSION = "9 Nov 2026 · v48";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -398,6 +403,7 @@ BPG.CATS = { rants: "Borhan Rants", stylish: "Stylish", series: "Series", cricke
 // Add a team: copy a line. The name must match the full name the quick fill uses (e.g. "Sri Lanka").
 // Flags for the squad card, by team name (ISO country codes; flag images come from the free flag-icons set).
 BPG.FLAG_CODES = {
+  "Bhutan": "bt", "Maldives": "mv",
   "Bangladesh": "bd", "India": "in", "Pakistan": "pk", "Sri Lanka": "lk", "Australia": "au", "England": "gb-eng", "South Africa": "za", "New Zealand": "nz", "Afghanistan": "af", "Zimbabwe": "zw", "Ireland": "ie", "Netherlands": "nl", "Nepal": "np", "Scotland": "gb-sct", "UAE": "ae", "Oman": "om", "USA": "us", "Namibia": "na", "Canada": "ca", "Hong Kong": "hk", "Uganda": "ug", "Papua New Guinea": "pg", "Argentina": "ar", "Brazil": "br", "France": "fr", "Portugal": "pt", "Spain": "es", "Germany": "de", "Italy": "it", "Belgium": "be", "Croatia": "hr", "Uruguay": "uy", "Morocco": "ma", "Japan": "jp", "Colombia": "co", "Ecuador": "ec", "Chile": "cl", "Paraguay": "py", "Peru": "pe", "Venezuela": "ve", "Bolivia": "bo", "Saudi Arabia": "sa", "South Korea": "kr", "Switzerland": "ch", "Denmark": "dk", "Senegal": "sn", "Egypt": "eg", "Nigeria": "ng", "Mexico": "mx", "Qatar": "qa", "Iran": "ir", "Ghana": "gh", "Cameroon": "cm", "Ivory Coast": "ci", "Algeria": "dz", "Tunisia": "tn", "Poland": "pl", "Austria": "at", "Turkey": "tr", "Serbia": "rs", "Wales": "gb-wls", "Norway": "no", "Sweden": "se", "Ukraine": "ua",
 };
 
@@ -415,6 +421,8 @@ BPG.TEAM_COLORS = {
   "Zimbabwe": { bg: "#2A0909", accent: "#FCE300", stroke: "#C80F0F", hot: "#2DB35A" },
   "Ireland": { bg: "#042C1C", accent: "#A9E36E", stroke: "#169B62", hot: "#FF883E" },
   "Netherlands": { bg: "#2A1200", accent: "#FF7A00", stroke: "#E85A00", hot: "#FFFFFF" },
+  "Bhutan": { bg: "#2A1402", accent: "#FFCC33", stroke: "#FF6A13", hot: "#E4002B" },
+  "Maldives": { bg: "#2A0508", accent: "#3DCB6E", stroke: "#D21034", hot: "#FFFFFF" },
   "Nepal": { bg: "#2A0610", accent: "#3D7CFF", stroke: "#DC143C", hot: "#FFFFFF" },
   "Argentina": { bg: "#0C2340", accent: "#75AADB", stroke: "#3E7CC0", hot: "#F6B40E" },
   "Brazil": { bg: "#063B22", accent: "#FFDF00", stroke: "#009C3B", hot: "#2A63C8" },
@@ -672,6 +680,12 @@ BPG.TEMPLATES = {
     fields: [["winner","Winning team","Bangladesh"],["loser","Losing team","Pakistan"],["margin","Margin","by 10 wickets",true],["series","Series line (optional)","Bangladesh lead the series 1-0",true],["potm","Player of the match","Mushfiqur Rahim"],["info","Match line","1st Test | Rawalpindi",true]] },
 
   // ---------------- Football ----------------
+  playingxi: { cat: "cricket", name: "Playing XI (tournament look)", layout: "lineup", noCut: true,
+    photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament / series logo (optional, kept on this phone)",
+    hint: "Batting order, one per line: 1 Tanzid Hasan. (C) and (WK) after a name. Bench players go under Substitutes.",
+    fields: [["tournament","Series","Bangladesh vs Pakistan 2026",true],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["title","Top word","Playing"],
+      ["players","Playing XI","1 Batter One\n2 Batter Two\n3 Batter Three\n4 Batter Four (C)\n5 Keeper Five (WK)\n6 All-rounder Six\n7 All-rounder Seven\n8 Bowler Eight\n9 Bowler Nine\n10 Bowler Ten\n11 Bowler Eleven",true,"area"],
+      ["subs","Bench (optional)","",true,"area"],["info","Info line","1st ODI | Dhaka",true],["bgc","Card colour (optional)",""]] },
   squad: { cat: "cricket", name: "Squad announcement", layout: "squad",
     noPhoto: true,
     hint: "The team's flag is added for you. One player per line. Leave an empty line between groups, or start a line with # for a small heading (# Bowlers). (C), (VC) and (WK) after a name show in colour.",
@@ -681,6 +695,39 @@ BPG.TEMPLATES = {
   fresult: { cat: "football", name: "Full-time score", layout: "fscore",
     hint: "Put *stars* around words in the headline to colour them.",
     fields: [["headline","Headline (optional)","*MESSI* DOES IT AGAIN",true],["t1","Home team","Argentina"],["s1","Home goals","2"],["t2","Away team","Brazil"],["s2","Away goals","1"],["potm","Scorers","Messi 67', Álvarez 81' · Vinícius 74'",true]] },
+  matchcard: { cat: "football", name: "Match card (full time / live / kick-off)", layout: "matchcard", noCut: true,
+    photo1: "Home crest (optional, the flag is used for countries)", photo2: "Away crest (optional)", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Clean tournament look. Leave the goals empty for a kick-off card. Status Live 67' shows a red dot. Full time works out the winner line for you unless you type your own. Card colour is any hex like #1640C8.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["stage","Heading","Match day 1"],["status","Status (Full time, Half time, Live 67', Kick off)","Full time"],
+      ["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
+      ["g1","Home scorers","Ibrahim 68'",true],["g2","Away scorers","",true],
+      ["headline","Bottom line (empty = WINNER: team)","",true],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
+  tframe: { cat: "football", name: "Tournament photo frame", layout: "tframe", noCut: true,
+    photo1: "Photo from the tournament", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Pick any photo from the tournament: it fills the card with the tournament ribbons around the edges. Text is optional; leave it empty for a clean photo.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["tag","Small line (optional)","Match day 1"],["headline","Headline (optional, *stars* colour words)","*Ibrahim* wins it for Bangladesh",true],["info","Info line (optional)","",true]] },
+  lineup: { cat: "football", name: "Starting XI (tournament look)", layout: "lineup", noCut: true,
+    photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One player per line: shirt number, then the name, e.g. 20 Gyeltshen Zangpo (GK). Substitutes one per line or with commas.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["team","Team","Bhutan"],["opp","Opponent","Bangladesh"],["title","Top word","Starting"],
+      ["players","Starting XI","20 Gyeltshen Zangpo (GK)\n7 Chencho Gyeltshen (C)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n16 Tshelthrim Namgyel\n18 Kinzang Tashi Tobden",true,"area"],
+      ["subs","Substitutes","1 Locho Nima, 2 Tandin Tshewang, 5 Deychog Drakar Dorji, 9 Kinzang Tenzin, 11 Kinga Wangchuk, 12 Kinley Penjor, 13 Jigdrel Wangchuk, 17 Jetsuen Dorji, 19 Sonam Dorji, 21 Dhendup Namgyel, 22 Jigme Tshelthrium, 23 Bikash Pradhan",true,"area"],
+      ["info","Info line","Kick-off 7:00 PM | Dhaka",true],["bgc","Card colour (optional)",""]] },
+  transfer: { cat: "football", name: "Transfer", layout: "transfer", photo2: "New club crest (optional)",
+    hint: "Old club and new club show as discs in their colours (a crest you add goes on the new club). The stamp sits small on the top right; leave it empty for none.",
+    fields: [["player","Player","Player Name",true],["from","From","Abahani"],["to","To","Mohammedan"],["fee","Fee (optional)","Tk 50 lakh"],["feeLabel","Under the fee (optional)","Two-year deal"],["tag","Small line","Transfer"],["stamp","Stamp (optional)","DONE DEAL"],["info","Info line (optional)","",true]] },
+  fixtures: { cat: "football", name: "Fixtures (tournament look)", layout: "fixtures", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One match per line: day | time | Team vs Team. Up to 7 matches. Flags come by themselves for countries.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Fixtures"],["matches","Matches","Sat 8 Nov | 4:00 PM | Nepal vs Maldives\nSat 8 Nov | 7:00 PM | Bangladesh vs India\nSun 9 Nov | 4:00 PM | Bhutan vs Sri Lanka\nSun 9 Nov | 7:00 PM | Pakistan vs Nepal",true,"area"],["info","Info line","BD time | Dhaka",true],["bgc","Card colour (optional)",""]] },
+  tstats: { cat: "football", name: "Match stats (tournament look)", layout: "tstats", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One stat per line: name | home | away. The bars use each team's colours.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Match stats"],["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
+      ["stats","Stats","Possession % | 58 | 42\nShots | 14 | 6\nShots on target | 5 | 2\nCorners | 7 | 3\nFouls | 11 | 14",true,"area"],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
+  pitch: { cat: "football", name: "XI on the pitch (formation)", layout: "pitch", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)", noCut: true, noMain: true,
+    hint: "Formation like 4-3-3, 4-2-3-1, 4-4-2, 3-5-2. Players: keeper first, then each line from left to right as you look at the card (left back first), forwards last. A number before the name goes on the shirt.",
+    fields: [["title","Heading","Starting XI"],["team","Team","Bhutan"],["opp","Opponent (optional)","Bangladesh"],["formation","Formation","4-3-3"],
+      ["players","Players","20 Gyeltshen Zangpo (GK)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n16 Tshelthrim Namgyel\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n7 Chencho Gyeltshen (C)\n18 Kinzang Tashi Tobden",true,"area"],
+      ["coach","Coach (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
@@ -708,11 +755,66 @@ BPG.TEMPLATES = {
   versus: { cat: "general", name: "Who's better?", layout: "versus", photo2: "Second player photo",
     hint: "Photo 1 goes on the left, photo 2 on the right.",
     fields: [["p1","Player 1","Messi"],["p2","Player 2","Ronaldo"],["question","Question","WHO'S THE GOAT?",true]] },
+  news: { cat: "general", name: "Instant news", layout: "news",
+    hint: "For news with details. Headline up to 3 lines, body up to 4 lines. *Stars* colour words.",
+    fields: [["tag","Small line","News"],["headline","Headline","*Bangladesh* name squad for the SAFF Championship",true],["body","Body (optional)","Jamal Bhuyan leads a 23-man squad. Two new faces get a call-up.",true,"area"],["info","Info line (optional)","",true]] },
+  record: { cat: "general", name: "Record / achievement", layout: "record",
+    hint: "The big number goes in colour behind the bottom of the photo. *Stars* colour words in the record line.",
+    fields: [["tag","Small line","New record"],["number","Big number","100"],["unit","After the number (optional)","caps"],["player","Player","Player Name",true],["line","Record line","First *Bangladeshi* footballer to reach 100 caps",true,"area"],["info","Info line (optional)","",true]] },
+  trivia: { cat: "general", name: "Did you know?", layout: "hottake", big: "DID YOU KNOW?",
+    hint: "One fact in normal sentence case. *Stars* colour words.",
+    fields: [["quote","The fact","Bangladesh won their *first ever* SAFF Championship title in 2003, at home in Dhaka.",true,"area"],["by","Signed (optional)",""]] },
+  mvp: { cat: "general", name: "MVP / player of the month", layout: "mvp",
+    hint: "Stats are Label: value, comma between (up to 4). The stamp sits small at the top right.",
+    fields: [["title","Title","Player of the month"],["period","Month / series","October 2026"],["player","Player","Player Name",true],["stats","Stats","Matches: 5, Goals: 4, Assists: 2, Rating: 8.1",true],["stamp","Stamp (optional)","BORHAN'S PICK"],["info","Info line (optional)","",true]] },
+  compare: { cat: "general", name: "Player vs player (stats)", layout: "compare", photo2: "Player 2 photo",
+    hint: "Photo 1 on the left, photo 2 on the right. One stat per line: name | player 1 | player 2. Add ↓ to a stat name when lower is better (e.g. Economy ↓).",
+    fields: [["title","Small line on top (optional)","Last 10 ODIs"],["p1","Player 1","Player One"],["p2","Player 2","Player Two"],["stats","Stats","Runs | 412 | 389\nAverage | 45.8 | 43.2\nStrike rate | 92.1 | 88.4\n50s | 4 | 3\n100s | 1 | 1",true,"area"],["info","Info line (optional)","",true]] },
   breaking: { cat: "general", name: "Breaking news", layout: "breaking", big: "BREAKING", accent: "#FF3B3B",
     hint: "Put *stars* around words to colour them.",
     fields: [["headline","Headline","Mushfiqur Rahim *announces ODI retirement*",true,"area"],["detail","Detail line","Ends a 19-year career with the Tigers",true]] },
   frame: { cat: "general", name: "Photo frame", layout: "frame",
     fields: [["headline","Headline (optional)","SCENES IN MIRPUR",true]] },
+  // ---- Cards Sports Timeline doesn't have (js/newcards.js) ----
+  chase: { cat: "cricket", name: "Chase tracker", layout: "chase",
+    hint: "Required rate is worked out from runs and balls. Win chance is optional (the batting team's %).",
+    fields: [["t1","Batting team","Bangladesh"],["t2","Bowling team","India"],["need","Runs needed","42"],["balls","Balls left","30"],["wkts","Wickets left","4"],["target","Target (optional)","265"],["win","Win chance % (optional)","38"],["tag","Small line","Chase on"],["info","Info line (optional)","2nd ODI | Mirpur",true]] },
+  partnership: { cat: "cricket", name: "Partnership", layout: "partnership",
+    fields: [["runs","Partnership runs","118"],["balls","Balls","96"],["wkt","For which wicket","4th"],["b1","Batter 1","Batter One"],["r1","Batter 1 score","64 (51)"],["b2","Batter 2","Batter Two"],["r2","Batter 2 score","48 (45)"],["tag","Small line","Partnership"],["info","Info line (optional)","BAN vs IND | 2nd ODI",true]] },
+  totwc: { cat: "cricket", name: "Team of the week", layout: "lineup", noCut: true,
+    photo1: "Player photo (optional, shows on the right)", photo3: "Logo (optional, kept on this phone)",
+    hint: "Your best XI of the week. Put the team in brackets after each name.",
+    fields: [["tournament","Series / week","Week 45 · 2026",true],["title","Top word","Team of the"],["xi","Big word","Week"],
+      ["players","XI","1 Batter One (BAN)\n2 Batter Two (IND)\n3 Batter Three (PAK)\n4 Batter Four (AUS) (C)\n5 Keeper Five (ENG) (WK)\n6 All-rounder Six (SA)\n7 All-rounder Seven (NZ)\n8 Bowler Eight (AFG)\n9 Bowler Nine (BAN)\n10 Bowler Ten (IND)\n11 Bowler Eleven (SL)",true,"area"],
+      ["subs","12th man (optional)","",true,"area"],["info","Info line","Borhan's pick",true],["bgc","Card colour (optional)",""]] },
+  totw: { cat: "football", name: "Team of the week (pitch)", layout: "pitch", photo3: "Logo (optional, kept on this phone)", noCut: true, noMain: true, coachLabel: "",
+    hint: "Players: keeper first, then each line from left to right (left back first), forwards last. Put the club in brackets.",
+    fields: [["title","Heading","Team of the week"],["formation","Formation","4-3-3"],
+      ["players","Players","1 Keeper (Abahani)\n2 Left Back (Kings)\n4 Centre Back (Mohammedan)\n5 Centre Back (Abahani)\n3 Right Back (Rahmatganj)\n8 Midfielder (Kings)\n6 Midfielder (Abahani)\n10 Midfielder (Mohammedan)\n11 Winger (Kings)\n9 Striker (Abahani)\n7 Winger (Fortis)",true,"area"],
+      ["coach","Line at the bottom (optional)","Borhan's pick"],["tournament","League / week","BPL Week 6",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+  poll: { cat: "general", name: "Ke jitbe? (poll)", layout: "poll", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Fans comment 1 or 2. Works on Instagram and Facebook. Flags come by themselves for countries.",
+    fields: [["question","Question","Ke jitbe?"],["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["match","Match line","SAFF Final · Sat 7:00 PM",true],["cta","Bottom line","Comment 1 or 2"],["tournament","Tournament (optional)","",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+  h2h: { cat: "general", name: "Head to head", layout: "h2h", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "Last results from team 1's side: W L D, e.g. W L W W D. Leave draws empty for cricket or call it No result.",
+    fields: [["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["w1","Team 1 wins","4"],["w2","Team 2 wins","9"],["played","Played","16"],["draws","Draws","3"],["dlabel","Draws label","Draws"],["last5","Last results (team 1)","L D W L W"],["title","Heading","Head to head"],["tournament","Tournament (optional)","",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+  countdown: { cat: "general", name: "Countdown", layout: "countdown",
+    fields: [["number","Number","10"],["unit","Next to it","Days to go"],["event","Event","*T20 World Cup* 2026",true],["line","Line (optional)","Starts 7 February in India and Sri Lanka",true],["tag","Small line","Countdown"],["info","Info line (optional)","",true]] },
+  onthisday: { cat: "general", name: "On this day", layout: "onthisday",
+    hint: "The photo turns black and white. Years ago is worked out from the year. Type yes in Colour photo to keep colour.",
+    fields: [["date","Date","9 November"],["year","Year","2003"],["headline","Headline","Bangladesh win their *first ever* SAFF title",true],["line","Line (optional)","A packed Bangabandhu Stadium saw the hosts beat the Maldives on penalties.",true,"area"],["colour","Colour photo? (yes / no)",""],["info","Info line (optional)","",true]] },
+  profile: { cat: "general", name: "Player profile", layout: "profile",
+    hint: "Stats are Label: value, comma between, up to 8 (two rows).",
+    fields: [["role","Small line","Batter · Bangladesh"],["player","Player","Player Name",true],["line","Line (optional)","Born 1990 · Right-handed",true],["stats","Stats","Matches: 247, Runs: 7570, Average: 37.3, SR: 82.8, 100s: 9, 50s: 56",true],["info","Info line (optional)","ODI career",true]] },
+  debut: { cat: "general", name: "Debut cap", layout: "debut",
+    fields: [["tag","Small line","Welcome to the team"],["format","Format","ODI"],["cap","Cap number","145"],["player","Player","Player Name",true],["line","Line","Makes his ODI debut against *India* in Mirpur",true],["info","Info line (optional)","",true]] },
+  story: { cat: "general", name: "Match story (5-slide carousel)", layout: "story", slides: 5, photo2: "Second photo (slides 2 and 4, optional)",
+    hint: "One match in 5 slides for a swipe post. Pick a slide below to see it, or use Download all 5 slides. Photo 1 goes on slides 1, 3 and 5.",
+    fields: [["slide","Slide (1-5)","1"],["tag","Match","BAN vs IND · 2nd ODI"],["headline","1 Cover headline","*Mehidy* steals it at the death",true],["result","1 Result line","Bangladesh won by 2 wickets with 3 balls left",true],
+      ["turnHead","2 Heading","Turning point"],["turn","2 What happened","38 needed off 24, then *Mehidy hit three sixes* in the 47th over and the chase was back on.",true,"area"],
+      ["star","3 Star","Player Name",true],["starStats","3 Star stats","Runs: 63, Balls: 48, 6s: 4, SR: 131",true],
+      ["numbers","4 Numbers (value | what)","3 | sixes in the 47th over\n265 | highest chase vs India\n7 | wins in a row at home",true,"area"],
+      ["verdict","5 Your verdict","This is the calm finisher we have been waiting for. *Give him the No. 6 spot* for good.",true,"area"],["question","5 Question","Tomar man of the match ke? Comment koro",true],["info","Info line (slide 5)","",true]] },
 };
 
 
@@ -830,7 +932,9 @@ BPG.createKit = function (ctx, env) {
     const img = g.photo.img, a = env.adjust();
     // Size the photo to the part of the card that stays visible, so it is zoomed in as little as possible.
     const bh = Math.min(g.H, textTop + 80);
-    const pl = k.place(img, g.W, bh, a, g.st + 60, textTop - 60);
+    // With the logo on top, the head sits a little lower so the logo never covers it.
+    const pl = k.place(img, g.W, bh, a, g.st + (g.logoTop ? 130 : 60), textTop - 60), f = img.bpgFocus;
+    if (f && isFinite(f.l)) g.subj = { l: pl.x + f.l * pl.dw, r: pl.x + f.r * pl.dw, t: pl.y + f.t * pl.dh };
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, g.W, bh); ctx.clip();
     ctx.drawImage(img, pl.x, pl.y, pl.dw, pl.dh);
     if (grey) { ctx.globalCompositeOperation = "saturation"; ctx.globalAlpha = grey; ctx.fillStyle = "#808080"; ctx.fillRect(0, 0, g.W, bh); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; }
@@ -892,12 +996,43 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
-  // Logo + name, small, in the bottom-right corner. y is the baseline of the bottom row.
+  // Logo + name in the bottom-right corner (default): round badge, a thin line, the page name.
+  // "Logo place: Top" in Brand settings moves it to the top instead (not on tournament-look cards).
+  // y is the baseline of the bottom row.
   k.brandCorner = (g, y) => {
-    const size = 40;
-    k.logoMark(g, g.W - 56 - size, y - size + 4, size);
-    if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+    if (g.logoTop) { k.brandTop(g); return; }
+    k.brandLockup(g, "right", y - 14, 52);
   };
+  // The lockup itself. cy is its vertical centre; side "left"/"right" is the edge it hugs.
+  k.brandLockup = (g, side, cy, s) => {
+    const logo = env.logo(), edge = 50;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 16;
+    if (logo) { // your own logo already has the name in it
+      const h = s * 1.15, sc = Math.min(h / logo.height, 260 / logo.width), w = logo.width * sc;
+      ctx.drawImage(logo, side === "left" ? edge : g.W - edge - w, cy - (logo.height * sc) / 2, w, logo.height * sc); ctx.restore(); return;
+    }
+    const words = (String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants").toUpperCase().split(/\s+/);
+    const fs = Math.round(s * 0.6); ctx.font = k.font(fs, C, 700); k.spaced(Math.round(fs * 0.12));
+    const a = words[0] + (words[1] ? " " : ""), b = words.slice(1).join(" "), wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+    const total = s + 34 + wa + wb, left = side === "left" ? edge : g.W - edge - total, bx = left + s / 2, tx = left + s + 34;
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(a, tx, cy + fs * 0.36);
+    ctx.fillStyle = g.accent; ctx.fillText(b, tx + wa, cy + fs * 0.36); k.spaced(0);
+    ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.fillRect(tx - 18, cy - s * 0.34, 2.5, s * 0.68); // thin line between badge and name
+    ctx.beginPath(); ctx.arc(bx, cy, s / 2, 0, Math.PI * 2);
+    const gr = ctx.createLinearGradient(bx, cy - s / 2, bx, cy + s / 2); gr.addColorStop(0, "#1B2A4A"); gr.addColorStop(1, "#0B1326");
+    ctx.fillStyle = gr; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 3; ctx.strokeStyle = g.accent; ctx.stroke();
+    ctx.restore();
+    k.logoMark(g, bx - s * 0.34, cy - s * 0.3, s * 0.68);
+  };
+  // Which top corner the logo goes in: the one the player's head is furthest from.
+  k.logoSide = (g) => {
+    if (g.logoSideFixed) return g.logoSideFixed;
+    const s = g.subj; if (!s) return "right";
+    const zone = 400, over = (a, b) => Math.max(0, Math.min(b, s.r) - Math.max(a, s.l));
+    return over(0, zone) < over(g.W - zone, g.W) ? "left" : "right";
+  };
+  k.brandTop = (g) => { k.brandLockup(g, k.logoSide(g), g.st + (g.H / g.W > 1.5 ? 25 : 49), 50); };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.
   k.wordmark = (g, x, y, align, size = 22) => {
@@ -2061,7 +2196,7 @@ window.BPG = window.BPG || {};
   // One name per line. A blank line starts a new group; a line starting with # is a small group heading.
   // (C), (VC) and (WK) after a name are shown small in the accent colour.
   L.squad = {
-    standard: false, ownSweep: true,
+    standard: false, ownSweep: true, logoBottom: true, // the team name owns the top
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, colW = W * 0.55;
       // No player photo here: the team's flag, waving on the right, fading into the team colour.
@@ -2138,6 +2273,7 @@ window.BPG = window.BPG || {};
       k.brandCorner(g, g.footerY);
     },
   };
+  BPG.flagImg = flagImg; // the tournament cards (tournament.js) use the same flags
 })();
 
 </script>
@@ -2672,6 +2808,1288 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Tournament cards: the clean "official broadcast" look (match card, starting XI).
+// Rich royal-blue background with our own stadium-dial ring and ribbons, the tournament logo on top,
+// a frosted panel with both teams, and big clear numbers. No brush strokes on these cards.
+//
+// Photos: 1 = home crest (match card) or a player photo (starting XI), 2 = away crest, 3 = tournament logo
+// (kept on this phone, so it only has to be added once per tournament).
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseInt(String(s).replace(/[^\d-]/g, ""), 10) || 0;
+  const C = { cream: "#FFE6BF", gold: "#FFD23F", cyan: "#4FB3FF", live: "#FF3B3B" };
+
+  // Card colour: typed hex, else royal blue.
+  function baseColour(g) {
+    const v = String(g.val("bgc") || "").trim().replace("#", "");
+    const tr = g.t.tour && BPG.TOURNAMENTS && BPG.TOURNAMENTS[g.t.tour];
+    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : (tr && tr.bg) || "#1640C8";
+  }
+  function mix(hex, to, f) {
+    const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
+    const ch = (s) => Math.round(((a >> s) & 255) * (1 - f) + ((b >> s) & 255) * f);
+    return "#" + [16, 8, 0].map((s) => ch(s).toString(16).padStart(2, "0")).join("");
+  }
+
+  // Background: gradient, floodlight glow, faint wave lines, a dial ring top-right and two ribbons bottom-left.
+  function tourBg(k, g, noRibbon) {
+    const ctx = k.ctx, { W, H } = g, base = baseColour(g);
+    const gr = ctx.createLinearGradient(0, 0, 0, H);
+    gr.addColorStop(0, mix(base, "#FFFFFF", 0.06)); gr.addColorStop(0.55, base); gr.addColorStop(1, mix(base, "#000000", 0.45));
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W / 2, -H * 0.05, 0, W / 2, -H * 0.05, H * 0.7);
+    glow.addColorStop(0, "rgba(255,255,255,0.22)"); glow.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    // Faint wave lines across the whole card.
+    ctx.save(); ctx.strokeStyle = "rgba(255,255,255,0.045)"; ctx.lineWidth = 2;
+    for (let y = -40; y < H + 40; y += 26) {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 20) ctx.lineTo(x, y + Math.sin(x / 90 + y / 70) * 14);
+      ctx.stroke();
+    }
+    ctx.restore();
+    saffEdges(k, g, { ribbons: !noRibbon });
+  }
+
+  // The tournament's edge graphics, drawn by us: a toothed dial ring top-right and broad twisting ribbons.
+  // frame: true puts ribbons on all four sides (for the photo frame), with a gold ribbon beside each.
+  function saffEdges(k, g, o) {
+    const ctx = k.ctx, { W, H } = g;
+    const rx = W * 1.0, ry = g.st + H * 0.14, rr = W * 0.3;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2); ctx.lineWidth = 120; ctx.strokeStyle = o.frame ? "rgba(70,120,240,0.85)" : "rgba(130,180,255,0.30)"; ctx.stroke();
+    ctx.fillStyle = o.frame ? "rgba(160,200,255,0.9)" : "rgba(190,220,255,0.30)";
+    for (let i = 0; i < 40; i++) {
+      const a = (i / 40) * Math.PI * 2, r1 = rr - 50, r2 = rr + 44, w = 0.045;
+      ctx.beginPath();
+      ctx.moveTo(rx + Math.cos(a - w) * r1, ry + Math.sin(a - w) * r1);
+      ctx.lineTo(rx + Math.cos(a) * r2, ry + Math.sin(a) * r2);
+      ctx.lineTo(rx + Math.cos(a + w) * r1, ry + Math.sin(a + w) * r1);
+      ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(rx, ry, rr - 90, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(190,220,255,0.35)"; ctx.setLineDash([4, 14]); ctx.stroke();
+    ctx.restore();
+    if (!o.ribbons) return;
+    const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return u * u * u * p0 + 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t * p3; };
+    // A ribbon along a curve: the bright face and the darker back show as it twists, zig-zags on the face.
+    const band = (P, width, twist, front, back, tex) => {
+      const N = 160, pts = [];
+      for (let i = 0; i <= N; i++) {
+        const t = i / N, x = bez(P[0], P[2], P[4], P[6], t), y = bez(P[1], P[3], P[5], P[7], t);
+        const t2 = Math.min(1, t + 0.004), dx = bez(P[0], P[2], P[4], P[6], t2) - x, dy = bez(P[1], P[3], P[5], P[7], t2) - y, l = Math.hypot(dx, dy) || 1;
+        const c = Math.cos(t * Math.PI * twist + 0.35), hw = (width / 2) * (0.35 + 0.65 * Math.abs(c));
+        pts.push({ x, y, nx: -dy / l, ny: dx / l, tx: dx / l, ty: dy / l, hw, face: Math.abs(c) > 0.32, t }); // the darker back shows only at the folds
+      }
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 24;
+      for (let i = 0; i < N; i++) {
+        const a = pts[i], b = pts[i + 1];
+        ctx.beginPath();
+        ctx.moveTo(a.x + a.nx * a.hw, a.y + a.ny * a.hw); ctx.lineTo(b.x + b.nx * b.hw, b.y + b.ny * b.hw);
+        ctx.lineTo(b.x - b.nx * b.hw, b.y - b.ny * b.hw); ctx.lineTo(a.x - a.nx * a.hw, a.y - a.ny * a.hw); ctx.closePath();
+        ctx.fillStyle = a.face ? front(a.t) : back; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = ctx.fillStyle; ctx.stroke();
+        if (i === 0) ctx.shadowBlur = 0;
+      }
+      if (tex) {
+        // zig-zag rows across the face
+        ctx.strokeStyle = "rgba(255,255,255,0.32)"; ctx.lineWidth = 3;
+        for (let i = 2; i < N; i += 4) {
+          const a = pts[i]; if (!a.face || a.hw < width * 0.15) continue;
+          ctx.beginPath();
+          for (let j = 0; j <= 8; j++) { const sgn = j / 8 * 2 - 1, z = j % 2 ? 9 : -9; const px = a.x + a.nx * a.hw * sgn * 0.9 + a.tx * z, py = a.y + a.ny * a.hw * sgn * 0.9 + a.ty * z; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+          ctx.stroke();
+        }
+      }
+      // light edge on the outer side
+      ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, q.x + q.nx * q.hw, q.y + q.ny * q.hw));
+      ctx.strokeStyle = "rgba(220,255,220,0.45)"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
+    };
+    const green = (t) => `rgb(${Math.round(24 + 40 * (1 - t))},${Math.round(196 + 50 * (1 - t))},${Math.round(84 + 20 * t)})`;
+    const gold = () => "#F4C430", deep = "#11924A";
+    const sw = o.frame ? 0.75 : 1; // thinner on a photo, so the photo stays the star
+    // Left side, from the middle down to the bottom corner.
+    band([-170, H * 0.42, W * 0.16 * sw, H * 0.5, -W * 0.08, H * 0.8, W * 0.22 * sw, H + 140], W * 0.24 * sw, 1.6, green, deep, true);
+    band([-W * 0.08, H + 40, W * 0.06, H * 0.95, W * 0.22, H * 0.97, W * 0.34, H + 100], W * 0.07, 1.0, gold, "#C99A1A", false);
+    if (!o.frame) return;
+    // Bottom-right corner, rising up the right edge.
+    band([W + 170, H * 0.62, W * 0.88, H * 0.72, W * 1.06, H * 0.9, W * 0.76, H + 140], W * 0.17, 1.5, green, deep, true);
+    band([W + 60, H * 0.84, W * 0.93, H * 0.9, W * 0.9, H * 1.0, W * 0.82, H + 60], W * 0.06, 1.0, gold, "#C99A1A", false);
+    // Top-left corner.
+    band([-160, H * 0.16, W * 0.06, H * 0.1, W * 0.08, H * 0.02, W * 0.26, -120], W * 0.12, 1.3, green, deep, true);
+  }
+
+  // Tournament logo (photo 3), or the tournament name in heavy letters. Returns the bottom y.
+  function tourTop(k, g, cx, top, maxW, maxH, align) {
+    const ctx = k.ctx, logo = g.photos[3] && (g.photos[3].plain || g.photos[3].img), name = cap(g.val("tournament"));
+    if (logo) {
+      const sc = Math.min(maxW / logo.width, maxH / logo.height), w = logo.width * sc, h = logo.height * sc;
+      ctx.drawImage(logo, align === "right" ? cx - w : cx - w / 2, top, w, h);
+      return top + h;
+    }
+    if (!name) return top;
+    ctx.save(); ctx.textAlign = align === "right" ? "right" : "center";
+    const words = name.split(/\s+/), mid = Math.ceil(words.length / 2), lines = words.length > 2 ? [words.slice(0, mid).join(" "), words.slice(mid).join(" ")] : [name];
+    let y = top;
+    lines.forEach((l, i) => {
+      const s = k.fit(l, maxW, i ? 40 : 56, k.H, 900, 22); y += s * (i ? 1.1 : 0.95);
+      ctx.font = k.font(s, k.H, 900); ctx.fillStyle = i ? "rgba(255,255,255,0.85)" : "#FFFFFF"; ctx.fillText(l, cx, y);
+    });
+    ctx.restore();
+    return y + 10;
+  }
+
+  // A team: the uploaded crest as it is, else the flag on a rounded tile, else the short name on a tile.
+  // (cx, cy) is the centre; returns the half height used.
+  function teamBadge(k, g, cx, cy, size, team, pic) {
+    const ctx = k.ctx, full = (BPG.teamName && BPG.teamName(team)) || team;
+    const crest = pic && (!pic.tpl || pic.tpl === g.t.layout) && (pic.plain || pic.orig || pic.img);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
+    if (crest) {
+      const sc = Math.min(size / crest.width, size / crest.height);
+      ctx.drawImage(crest, cx - (crest.width * sc) / 2, cy - (crest.height * sc) / 2, crest.width * sc, crest.height * sc);
+      ctx.restore(); return size / 2;
+    }
+    ctx.restore();
+    const flag = BPG.flagImg && BPG.flagImg(full), shape = BPG.flagShape || "wave";
+    // No flag (a club with no crest uploaded): the short name.
+    const fallback = (x, y, w, h) => {
+      ctx.fillStyle = "#0B1A4A"; ctx.fillRect(x, y, w, h);
+      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, w * 0.7, Math.round(h * 0.5), k.D), k.D); ctx.fillStyle = C.cream; ctx.fillText(sh, cx, cy + h * 0.17); ctx.textAlign = "left";
+    };
+    const paintIn = (path, x, y, w, h) => {
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
+      path(); ctx.fillStyle = "#FFFFFF"; ctx.fill(); ctx.restore();
+      ctx.save(); path(); ctx.clip();
+      if (flag) { const sc = Math.max(w / flag.width, h / flag.height); ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc); }
+      else fallback(x, y, w, h);
+      const gl = ctx.createLinearGradient(x, y, x + w * 0.6, y + h);
+      gl.addColorStop(0, "rgba(255,255,255,0.3)"); gl.addColorStop(0.5, "rgba(255,255,255,0)"); gl.addColorStop(1, "rgba(0,0,0,0.25)");
+      ctx.fillStyle = gl; ctx.fillRect(x, y, w, h); ctx.restore();
+      ctx.save(); path(); ctx.lineWidth = 6; ctx.strokeStyle = "#FFFFFF"; ctx.stroke(); ctx.restore();
+    };
+    if (shape === "circle") {
+      const r = size * 0.4;
+      paintIn(() => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); }, cx - r, cy - r, 2 * r, 2 * r);
+      return r + 4;
+    }
+    if (shape === "shield") {
+      const w = size * 0.74, h = size * 0.86, x = cx - w / 2, y = cy - h / 2, rc = 18;
+      paintIn(() => {
+        ctx.beginPath(); ctx.moveTo(x + rc, y); ctx.lineTo(x + w - rc, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rc);
+        ctx.lineTo(x + w, y + h * 0.5); ctx.bezierCurveTo(x + w, y + h * 0.78, cx + w * 0.18, y + h * 0.9, cx, y + h);
+        ctx.bezierCurveTo(cx - w * 0.18, y + h * 0.9, x, y + h * 0.78, x, y + h * 0.5);
+        ctx.lineTo(x, y + rc); ctx.quadraticCurveTo(x, y, x + rc, y); ctx.closePath();
+      }, x, y, w, h);
+      return h / 2 + 4;
+    }
+    // "wave": the flag as cloth in the wind (thin strips nudged up and down and shaded), no frame.
+    const w = Math.round(size * 1.02), h = Math.round(size * 0.68), amp = size * 0.05;
+    const off = document.createElement("canvas"); off.width = w; off.height = h + 2 * amp + 4;
+    const o = off.getContext("2d"), strip = 3;
+    const src = document.createElement("canvas"); src.width = w; src.height = h;
+    const sctx = src.getContext("2d");
+    if (flag) sctx.drawImage(flag, 0, 0, w, h);
+    else { sctx.fillStyle = "#0B1A4A"; sctx.fillRect(0, 0, w, h); const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3); sctx.textAlign = "center"; sctx.font = k.font(Math.round(h * 0.5), k.D); sctx.fillStyle = C.cream; sctx.fillText(sh, w / 2, h * 0.68); }
+    for (let x = 0; x < w; x += strip) {
+      const t = x / w, ph = t * Math.PI * 2.1 + 0.4, dy = Math.sin(ph) * amp * (0.3 + t * 0.7);
+      o.drawImage(src, x, 0, strip, h, x, amp + 2 + dy, strip + 0.6, h);
+      const shd = Math.cos(ph);
+      o.fillStyle = shd > 0 ? `rgba(255,255,255,${0.16 * shd})` : `rgba(0,0,0,${-0.3 * shd})`;
+      o.fillRect(x, amp + 2 + dy, strip + 0.6, h);
+    }
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 34; ctx.shadowOffsetY = 14;
+    ctx.translate(cx, cy); ctx.rotate(-0.04); ctx.drawImage(off, -w / 2, -off.height / 2); ctx.restore();
+    return h / 2 + amp;
+  }
+
+  function infoLine(k, g, text, x, base) {
+    const ctx = k.ctx, bits = String(text || "").split("|").map((b) => b.trim()).filter(Boolean);
+    if (!bits.length) return;
+    ctx.save(); ctx.textAlign = "left"; ctx.font = k.font(28, k.C, 700); k.spaced(2);
+    let cx = x;
+    bits.forEach((b, i) => {
+      if (i) { ctx.fillStyle = C.gold; ctx.fillText("  |  ", cx, base); cx += ctx.measureText("  |  ").width; }
+      ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.fillText(cap(b), cx, base, g.W * 0.6); cx += Math.min(ctx.measureText(cap(b)).width, g.W * 0.6);
+    });
+    k.spaced(0); ctx.restore();
+  }
+
+  // ---------- Match card: full time, live, half time, or kick-off ----------
+  L.matchcard = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, cx = W / 2, tall = g.H / W > 1.5;
+      tourBg(k, g);
+      const s1 = String(g.val("s1") || "").trim(), s2 = String(g.val("s2") || "").trim(), played = s1 !== "" || s2 !== "";
+      const status = cap(g.val("status")) || (played ? "FULL TIME" : "KICK OFF"), live = /LIVE/.test(status);
+      const finished = played && /FULL|FT|AET|PEN/.test(status);
+
+      // Top: tournament logo or name, then the stage in cream.
+      let y = tourTop(k, g, cx, g.st + (tall ? 30 : 10), W * 0.5, tall ? 250 : 190, "center");
+      const stage = cap(g.val("stage"));
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 16;
+      if (stage) { const s = k.fit(stage, W - 2 * PAD, tall ? 104 : 92, k.D, "", 40); y += s + (tall ? 40 : 26); ctx.font = k.font(s, k.D); ctx.fillStyle = C.cream; ctx.fillText(stage, cx, y); }
+      ctx.restore();
+
+      // Bottom line (your line, or the winner worked out for you) sits under the panel.
+      const typed = String(g.val("headline") || "").trim();
+      const t1 = cap(g.val("t1")), t2 = cap(g.val("t2"));
+      const auto = finished ? (num(s1) === num(s2) ? "*DRAW*" : `WINNER: *${num(s1) > num(s2) ? t1 : t2}*`) : "";
+      const bottomText = typed ? cap(typed) : auto;
+
+      // Work out the panel's content height first, so the panel hugs it and sits centred in the space.
+      const split = (v) => String(v || "").split(/\n|·|,\s*(?=[^\d\s])/).map((x) => x.trim()).filter(Boolean).slice(0, 4);
+      const lists = [split(g.val("g1")), split(g.val("g2"))], nSc = Math.max(lists[0].length, lists[1].length);
+      const size = tall ? 270 : 240, xs = [W * 0.22, W * 0.78], px = 60, pw = W - 120;
+      const ss = k.fit(status, pw - 80, tall ? 88 : 80, k.D, "", 36);
+      let padTop = tall ? 44 : 34, gap = tall ? 70 : 56;
+      const half = g.photos[1] || g.photos[2] ? size / 2 : size * 0.34 + 6;
+      const nameOff = tall ? 96 : 84, scH = nSc ? (tall ? 52 : 46) + (nSc - 1) * (tall ? 42 : 38) : 0;
+      const content = padTop + ss + gap + 2 * half + nameOff + scH + (tall ? 60 : 50);
+      const avTop = y + (tall ? 60 : 44), avBot = g.footerY - (bottomText ? (tall ? 170 : 140) : 70);
+      // Spare room: half of it opens up the panel (more air around the status and teams), the rest goes around it.
+      const extra = Math.max(0, avBot - avTop - content), grow = extra * 0.55;
+      padTop += grow * 0.25; gap += grow * 0.35;
+      const ph = Math.min(content + grow, avBot - avTop), pt = Math.round(avTop + (avBot - avTop - ph) * 0.4), pb = pt + ph;
+      ctx.save();
+      const pg = ctx.createLinearGradient(0, pt, 0, pb);
+      pg.addColorStop(0, "rgba(255,255,255,0.20)"); pg.addColorStop(1, "rgba(255,255,255,0.07)");
+      ctx.fillStyle = pg; k.roundRect(px, pt, pw, ph, 46); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.55)"; k.roundRect(px, pt, pw, ph, 46); ctx.stroke();
+      ctx.restore();
+
+      // Status at the top of the panel.
+      ctx.save(); ctx.textAlign = "center";
+      const sy = pt + padTop + ss * 0.9;
+      ctx.font = k.font(ss, k.D);
+      if (live) {
+        const tw = ctx.measureText(status).width;
+        ctx.fillStyle = C.live; ctx.beginPath(); ctx.arc(cx - tw / 2 - 30, sy - ss * 0.36, ss * 0.16, 0, Math.PI * 2); ctx.fill();
+        ctx.fillText(status, cx + 14, sy);
+      } else { ctx.fillStyle = C.gold; ctx.fillText(status, cx, sy); }
+
+      // Teams, score in the middle.
+      const by = Math.round(sy + ss * 0.1 + gap + half);
+      const halves = [teamBadge(k, g, xs[0], by, size, g.val("t1"), g.photos[1]), teamBadge(k, g, xs[1], by, size, g.val("t2"), g.photos[2])];
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 18; ctx.textAlign = "center";
+      if (played) {
+        const txt = `${s1 || "0"} - ${s2 || "0"}`, fs = k.fit(txt, W * 0.24, tall ? 200 : 180, k.D, "", 60);
+        ctx.font = k.font(fs, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(txt, cx, by + fs * 0.36);
+      } else {
+        ctx.font = k.font(tall ? 120 : 108, k.D); ctx.fillStyle = C.cream; ctx.fillText("VS", cx, by + 40);
+      }
+      // Names and scorers under each team.
+      const nameY = by + Math.max(...halves) + nameOff - 6, colW = W * 0.4;
+      [[t1, lists[0]], [t2, lists[1]]].forEach(([nm, list], i) => {
+        if (nm) { ctx.font = k.font(k.fit(nm, colW, tall ? 72 : 64, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, xs[i], nameY); }
+        list.forEach((line, j) => {
+          ctx.font = k.font(tall ? 34 : 30, k.C, 700); k.spaced(1); ctx.fillStyle = C.cream;
+          ctx.fillText("⚽ " + cap(line), xs[i], nameY + (tall ? 52 : 46) + j * (tall ? 42 : 38), colW); k.spaced(0);
+        });
+      });
+      ctx.restore(); ctx.restore();
+
+      // Under the panel: the winner or your line, *stars* in gold.
+      if (bottomText) {
+        const lay = k.layoutRich(bottomText, W - 2 * PAD, tall ? 76 : 64, k.H, 1, 30, 900);
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+        k.drawRich(lay, cx, Math.min(pb + (tall ? 110 : 92), g.footerY - 64), lay.size, k.H, "#FFFFFF", C.gold, "center", 900);
+        ctx.restore();
+      }
+      infoLine(k, g, g.val("info"), PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
+  // ---------- Starting XI ----------
+  // "20 Gyeltshen Zangpo (GK)" one per line. Subs: one per line or comma between.
+  L.lineup = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, tall = H / W > 1.5;
+      tourBg(k, g, true);
+      // Optional player photo on the right, fading into the card colour.
+      const base = baseColour(g), photo = g.photos[1] && g.photos[1].tpl !== "matchcard" && (g.photos[1].plain || g.photos[1].img);
+      const photoTop = g.st + (tall ? 420 : 330);
+      if (photo) {
+        const bw = W * 0.6, bh = g.footerY - photoTop + 60, bx = W - bw;
+        const sc = Math.max(bw / photo.width, bh / photo.height), dw = photo.width * sc, dh = photo.height * sc;
+        const f = photo.bpgFocus, fx = f && isFinite(f.cx) ? f.cx : 0.5, fy = f && isFinite(f.t) ? f.t : 0.12; // focus is in 0..1 of the photo
+        // Draw on its own layer and fade the left, top and bottom edges to see-through, so no edge shows.
+        const lay = document.createElement("canvas"); lay.width = Math.round(bw); lay.height = Math.round(bh);
+        const lc = lay.getContext("2d");
+        lc.drawImage(photo, Math.min(0, Math.max(bw - dw, bw / 2 - dw * fx)), Math.min(0, Math.max(bh - dh, 40 - dh * fy)), dw, dh);
+        lc.globalCompositeOperation = "destination-in";
+        const mx = lc.createLinearGradient(0, 0, bw * 0.6, 0); mx.addColorStop(0, "rgba(0,0,0,0)"); mx.addColorStop(1, "rgba(0,0,0,1)");
+        lc.fillStyle = mx; lc.fillRect(0, 0, bw, bh);
+        const my = lc.createLinearGradient(0, 0, 0, bh); my.addColorStop(0, "rgba(0,0,0,0)"); my.addColorStop(0.22, "rgba(0,0,0,1)"); my.addColorStop(0.7, "rgba(0,0,0,1)"); my.addColorStop(1, "rgba(0,0,0,0)");
+        lc.fillStyle = my; lc.fillRect(0, 0, bw, bh);
+        ctx.drawImage(lay, bx, photoTop);
+      }
+
+      // Top-left: team vs opponent as small tiles.
+      const tile = tall ? 150 : 132, ty = g.st + 40 + tile * 0.34;
+      const hasTeam = String(g.val("team") || "").trim() || g.photos[2];
+      if (hasTeam) {
+        teamBadge(k, g, PAD + tile / 2, ty, tile, g.val("team"), g.photos[2]);
+        ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(tall ? 50 : 44, k.H, 900); ctx.fillStyle = "#FFFFFF";
+        ctx.fillText("VS", PAD + tile + 62, ty + 16);
+        ctx.restore();
+      }
+      if (hasTeam && g.val("opp")) teamBadge(k, g, PAD + tile * 1.5 + 124, ty, tile, g.val("opp"), null);
+      // Top-right: tournament logo or name.
+      tourTop(k, g, W - PAD, g.st + 20, W * 0.36, tall ? 300 : 250, "right");
+
+      // STARTING / XI
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 14;
+      const head = cap(g.val("title") || "Starting"), hs = k.fit(head, W * 0.5, tall ? 104 : 92, k.H, 900, 40);
+      let y = ty + tile * 0.34 + 30 + hs * 0.9;
+      ctx.font = k.font(hs, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(head, PAD, y);
+      const xiW = cap(g.val("xi") || "XI"), xiS = k.fit(xiW, W * 0.56, tall ? 300 : 250, k.D, "", 120); y += xiS * 0.84 + 22;
+      ctx.font = k.font(xiS, k.D); ctx.fillText(xiW, PAD - 6, y);
+      ctx.restore();
+
+      // The eleven, sized to the space left.
+      const rows = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 11).map((l) => {
+        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); return m ? [m[1], m[2]] : ["", l];
+      });
+      const subs = String(g.val("subs") || "").split(/\n|,|\//).map((x) => x.trim()).filter(Boolean);
+      const subsLines = Math.ceil(subs.length / 2), subsH = subs.length ? 70 + subsLines * (tall ? 40 : 34) : 0;
+      const listTop = y + (tall ? 50 : 34), listBottom = g.footerY - 56;
+      const step = Math.min(tall ? 74 : 62, (listBottom - listTop) / Math.max(1, rows.length));
+      const fs = Math.round(step * 0.62), listW = (photo || subs.length ? W * 0.56 - 16 : W * 0.66) - PAD;
+      rows.forEach(([n, name], i) => {
+        const by = listTop + step * (i + 0.8);
+        ctx.font = k.font(Math.round(fs * 1.25), k.D); ctx.fillStyle = C.cyan; ctx.fillText(n, PAD, by);
+        const nw = listW - fs * 2.1, hs = k.fit(cap(name), nw, fs, k.H, 800, 16);
+        // A long name switches to the narrow font instead of shrinking.
+        if (hs < fs * 0.85) ctx.font = k.font(k.fit(cap(name), nw, Math.round(fs * 1.1), k.C, 700, 16), k.C, 700); else ctx.font = k.font(hs, k.H, 800);
+        ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(name), PAD + fs * 2.1, by);
+      });
+
+      // Substitutes, bottom-right, two per line with the shirt numbers in colour.
+      if (subs.length) {
+        const sx = W * (photo ? 0.5 : 0.56), sw = W - PAD - sx, sTop = g.footerY - 56 - subsH;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 12;
+        ctx.font = k.font(k.fit("SUBSTITUTES", sw, tall ? 60 : 52, k.H, 900, 24), k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText("SUBSTITUTES", sx, sTop + 48);
+        const lineH = tall ? 40 : 34, sz = tall ? 30 : 26;
+        for (let i = 0; i < subsLines; i++) {
+          let x = sx; const by = sTop + 70 + lineH * (i + 0.7);
+          subs.slice(i * 2, i * 2 + 2).forEach((s, j) => {
+            const m = s.match(/^(\d{1,2})\s+(.*)$/), part = [[m ? m[1] + " " : "", C.cyan], [cap(m ? m[2] : s) + (j === 0 && subs[i * 2 + 1] ? " / " : ""), "#FFFFFF"]];
+            part.forEach(([t, col]) => { ctx.font = k.font(sz, k.C, 700); ctx.fillStyle = col; const mw = Math.max(0, sx + sw - x); ctx.fillText(t, x, by, mw); x += Math.min(ctx.measureText(t).width, mw); });
+          });
+        }
+        ctx.restore();
+      }
+      infoLine(k, g, g.val("info"), PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
+  // ---------- Tournament photo frame ----------
+  // Any photo from the tournament, full size, with the tournament's ribbons and ring around the edges.
+  L.tframe = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
+      const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null; // a crest is not a photo
+      if (ph) {
+        k.coverImg(ph.img, 0, 0, W, H);
+        // Darken the very edges a little so the ribbons stand out.
+        const vg = ctx.createRadialGradient(cx, H * 0.45, W * 0.35, cx, H * 0.45, W * 0.95);
+        vg.addColorStop(0, "rgba(5,15,60,0)"); vg.addColorStop(1, "rgba(5,15,60,0.45)");
+        ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      } else { tourBg(k, g, true); k.photoHint(g, H * 0.45); }
+      const tag = cap(g.val("tag")), hl = String(g.val("headline") || "").trim();
+      // Fade into deep blue only behind the text at the bottom.
+      if (tag || hl) {
+        const from = g.footerY - (tall ? 520 : 440), gr = ctx.createLinearGradient(0, from, 0, H);
+        gr.addColorStop(0, "rgba(8,22,90,0)"); gr.addColorStop(0.5, "rgba(8,22,90,0.75)"); gr.addColorStop(1, "rgba(6,16,70,0.95)");
+        ctx.fillStyle = gr; ctx.fillRect(0, from, W, H - from);
+      }
+      saffEdges(k, g, { ribbons: true, frame: true });
+      // Tournament logo or name, small, top centre.
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18;
+      tourTop(k, g, cx, g.st + 20, W * 0.34, tall ? 170 : 140, "center");
+      ctx.restore();
+      // Tag and headline at the bottom, centred.
+      let base = g.footerY - 62;
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      if (hl) {
+        let lay = k.layoutRich(cap(hl), W - 2 * PAD - 80, tall ? 96 : 84, k.D, 2, 44);
+        const top = base - (lay.lines.length - 1) * lay.size * 1.02;
+        k.drawRich(lay, cx, top, lay.size * 1.02, k.D, "#FFFFFF", C.gold, "center");
+        base = top - lay.size - 14;
+      }
+      if (tag) { ctx.textAlign = "center"; ctx.font = k.font(k.fit(tag, W * 0.6, 36, k.C, 700, 20), k.C, 700); k.spaced(5); ctx.fillStyle = C.cream; ctx.fillText(tag, cx, base); k.spaced(0); }
+      ctx.restore();
+      infoLine(k, g, g.val("info"), PAD + 40, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+  // Shared with tournament2.js (fixtures, team stats, XI on the pitch).
+  BPG.tour = { tourBg, saffEdges, tourTop, teamBadge, infoLine, C, cap, num };
+})();
+
+</script>
+<script>
+// More cards in the tournament look (see tournament.js): fixtures, team stats, the XI on the pitch.
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const T = () => BPG.tour;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseFloat(String(s).replace(/[^\d.\-]/g, "")) || 0;
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+  const colourOf = (n, fb) => { const tc = BPG.TEAM_COLORS[full(n)]; return tc ? tc.accent : fb; };
+
+  // Logo or name on top, then a cream heading. Returns the y under it.
+  function top(k, g, heading) {
+    const ctx = k.ctx, { W } = g, tall = g.H / W > 1.5, { tourTop, C } = T();
+    let y = tourTop(k, g, W / 2, g.st + (tall ? 30 : 10), W * 0.46, tall ? 200 : 150, "center");
+    const h = cap(heading);
+    if (h) {
+      const s = k.fit(h, W - 2 * PAD, tall ? 100 : 88, k.D, "", 40); y += s + (tall ? 30 : 20);
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 16;
+      ctx.font = k.font(s, k.D); ctx.fillStyle = C.cream; ctx.fillText(h, W / 2, y); ctx.restore();
+    }
+    return y;
+  }
+  function glass(k, x, y, w, h, r) {
+    const ctx = k.ctx; ctx.save();
+    const pg = ctx.createLinearGradient(0, y, 0, y + h);
+    pg.addColorStop(0, "rgba(255,255,255,0.18)"); pg.addColorStop(1, "rgba(255,255,255,0.07)");
+    ctx.fillStyle = pg; k.roundRect(x, y, w, h, r); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.45)"; k.roundRect(x, y, w, h, r); ctx.stroke(); ctx.restore();
+  }
+  function bottom(k, g) {
+    T().infoLine(k, g, g.val("info"), PAD, g.footerY);
+    k.brandCorner(Object.assign({}, g, { accent: T().C.gold }), g.footerY);
+  }
+
+  // ---------- Fixtures ----------
+  // One match per line: "Sat 8 Nov | 7:00 PM | Bangladesh vs India" (the parts in any order).
+  L.fixtures = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g);
+      const y0 = top(k, g, g.val("title") || "Fixtures");
+      const rows = String(g.val("matches") || "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 7).map((l) => {
+        const parts = l.split("|").map((x) => x.trim()).filter(Boolean);
+        const m = parts.find((p) => /\s(vs?\.?|v)\s/i.test(p)) || "", rest = parts.filter((p) => p !== m);
+        const [a, b] = m.split(/\s(?:vs?\.?|v)\s/i).map((x) => x.trim());
+        return { a: a || "", b: b || "", when: rest };
+      });
+      const area = g.footerY - 70 - (y0 + 40), gap = 16, rh = Math.min(tall ? 230 : 190, (area - gap * (rows.length - 1)) / Math.max(1, rows.length));
+      rows.forEach((r, i) => {
+        const y = y0 + 40 + i * (rh + gap), cy = y + rh / 2, x = 60, w = W - 120;
+        glass(k, x, y, w, rh, 28);
+        // when, on the left
+        const dw = 230;
+        ctx.save(); ctx.textAlign = "center";
+        r.when.slice(0, 2).forEach((t, j) => {
+          ctx.font = k.font(j ? Math.round(rh * 0.2) : Math.round(rh * 0.24), j ? k.C : k.D, j ? 700 : ""); ctx.fillStyle = j ? "#FFFFFF" : C.gold;
+          ctx.fillText(cap(t), x + dw / 2, cy + (r.when.length > 1 ? (j ? rh * 0.26 : -rh * 0.04) : rh * 0.08), dw - 30);
+        });
+        ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillRect(x + dw, y + 18, 2, rh - 36);
+        // teams: flag NAME  vs  NAME flag
+        const fs = Math.round(rh * 0.5), mx = x + dw + (w - dw) / 2;
+        teamBadge(k, g, x + dw + 30 + fs * 0.55, cy, fs, r.a, null);
+        teamBadge(k, g, x + w - 30 - fs * 0.55, cy, fs, r.b, null);
+        const nw = (w - dw) / 2 - fs * 1.1 - 95; // keeps clear of the VS in the middle
+        ctx.font = k.font(Math.round(rh * 0.2), k.D); ctx.fillStyle = C.cream; ctx.fillText("VS", mx, cy + rh * 0.07);
+        ctx.font = k.font(k.fit(cap(r.a), nw, Math.round(rh * 0.26), k.D, "", 18), k.D); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
+        ctx.fillText(cap(r.a), x + dw + 40 + fs * 1.1, cy + rh * 0.09, nw);
+        ctx.font = k.font(k.fit(cap(r.b), nw, Math.round(rh * 0.26), k.D, "", 18), k.D); ctx.textAlign = "right";
+        ctx.fillText(cap(r.b), x + w - 40 - fs * 1.1, cy + rh * 0.09, nw);
+        ctx.restore();
+      });
+      bottom(k, g);
+    },
+  };
+
+  // ---------- Team stats ----------
+  // "Possession | 58 | 42", one per line. Bars in each team's colour; the bigger share in front.
+  L.tstats = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      let y = top(k, g, g.val("title") || "Match stats");
+      // teams and score
+      const fy = y + (tall ? 130 : 110), fs = tall ? 170 : 150, xs = [W * 0.2, W * 0.8];
+      teamBadge(k, g, xs[0], fy, fs, g.val("t1"), null); teamBadge(k, g, xs[1], fy, fs, g.val("t2"), null);
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+      const sc = [g.val("s1"), g.val("s2")].every((v) => String(v).trim() !== "") ? `${g.val("s1")} - ${g.val("s2")}` : "VS";
+      ctx.font = k.font(tall ? 120 : 104, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(sc, W / 2, fy + 38);
+      ctx.font = k.font(k.fit(cap(full(g.val("t1"))), W * 0.34, 44, k.D, "", 22), k.D); ctx.fillText(cap(full(g.val("t1"))), xs[0], fy + fs * 0.34 + 62);
+      ctx.font = k.font(k.fit(cap(full(g.val("t2"))), W * 0.34, 44, k.D, "", 22), k.D); ctx.fillText(cap(full(g.val("t2"))), xs[1], fy + fs * 0.34 + 62);
+      ctx.restore();
+      // rows
+      const rows = String(g.val("stats") || "").split("\n").map((l) => l.split(/[|:]/).map((x) => x.trim())).filter((r) => r.length >= 3 && r[0]).slice(0, 8);
+      const c1 = colourOf(g.val("t1"), C.gold);
+      // The away bar takes the team's other colour when both teams share one (e.g. two yellows), else cyan.
+      const near = (a, b) => { const p = (h) => [0, 2, 4].map((i) => parseInt(h.slice(1 + i, 3 + i), 16)); const x = p(a), y = p(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 120; };
+      let c2 = colourOf(g.val("t2"), C.cyan);
+      if (near(c1, c2)) { const tc = BPG.TEAM_COLORS[full(g.val("t2"))]; c2 = tc && !near(c1, tc.stroke) ? tc.stroke : C.cyan; }
+      const pTop = fy + fs * 0.34 + 100, pBot = g.footerY - 64, rh = Math.min(tall ? 150 : 128, (pBot - pTop - 30) / Math.max(1, rows.length));
+      glass(k, 60, pTop, W - 120, rows.length * rh + 30, 32);
+      rows.forEach(([label, a, b], i) => {
+        const cy = pTop + 15 + i * rh, va = num(a), vb = num(b), tot = va + vb || 1;
+        ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(Math.round(rh * 0.24), k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
+        ctx.fillText(cap(label), W / 2, cy + rh * 0.42, W * 0.5); k.spaced(0);
+        ctx.font = k.font(Math.round(rh * 0.36), k.D); ctx.fillStyle = va >= vb ? "#FFFFFF" : "rgba(255,255,255,0.7)"; ctx.textAlign = "left"; ctx.fillText(a, 100, cy + rh * 0.46);
+        ctx.fillStyle = vb >= va ? "#FFFFFF" : "rgba(255,255,255,0.7)"; ctx.textAlign = "right"; ctx.fillText(b, W - 100, cy + rh * 0.46);
+        // split bar
+        const bx = 100, bw = W - 200, by = cy + rh * 0.62, bh = Math.max(10, rh * 0.12), split = bx + bw * (va / tot);
+        ctx.fillStyle = "rgba(255,255,255,0.12)"; k.roundRect(bx, by, bw, bh, bh / 2); ctx.fill();
+        ctx.fillStyle = c1; k.roundRect(bx, by, Math.max(bh, split - bx - 3), bh, bh / 2); ctx.fill();
+        ctx.fillStyle = c2; k.roundRect(split + 3, by, Math.max(bh, bx + bw - split - 3), bh, bh / 2); ctx.fill();
+        ctx.restore();
+      });
+      bottom(k, g);
+    },
+  };
+
+  // ---------- XI on the pitch ----------
+  // Formation like 4-3-3. Players: the keeper first, then each line from left to right as drawn
+  // (left back first), up to the forwards. "10 Messi" shows the number on the shirt.
+  L.pitch = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      // header: flag, team name, formation
+      const hy = g.st + (tall ? 70 : 50), fs = tall ? 130 : 112;
+      const hasTeam = String(g.val("team") || "").trim() || g.photos[2];
+      if (hasTeam) teamBadge(k, g, PAD + fs * 0.55, hy + 10, fs, g.val("team"), g.photos[2]);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+      const tx = hasTeam ? PAD + fs * 1.2 + 20 : PAD;
+      ctx.font = k.font(k.fit(cap(g.val("title") || "Starting XI"), W - tx - 240, tall ? 70 : 62, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("title") || "Starting XI"), tx, hy + 4);
+      ctx.font = k.font(30, k.C, 700); k.spaced(4); ctx.fillStyle = C.cream;
+      ctx.fillText([cap(full(g.val("team"))), g.val("opp") ? "VS " + cap(full(g.val("opp"))) : ""].filter(Boolean).join("  "), tx, hy + 46, W - tx - 240); k.spaced(0);
+      ctx.textAlign = "right"; ctx.font = k.font(tall ? 76 : 66, k.D); ctx.fillStyle = C.gold; ctx.fillText(String(g.val("formation") || ""), W - PAD, hy + 30);
+      ctx.restore();
+      // pitch
+      const px = PAD, pw = W - 2 * PAD, pt = hy + fs * 0.45 + 50, pb = g.footerY - (g.val("coach") ? 100 : 56), ph = pb - pt;
+      ctx.save(); k.roundRect(px, pt, pw, ph, 30); ctx.clip();
+      for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? "#1E8A45" : "#22974C"; ctx.fillRect(px, pt + (ph / 10) * i, pw, ph / 10 + 1); }
+      const sh = ctx.createLinearGradient(0, pt, 0, pb); sh.addColorStop(0, "rgba(0,0,0,0.25)"); sh.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = sh; ctx.fillRect(px, pt, pw, ph);
+      ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 4;
+      ctx.strokeRect(px + 20, pt + 20, pw - 40, ph - 40);
+      ctx.beginPath(); ctx.moveTo(px + 20, pt + ph / 2); ctx.lineTo(px + pw - 20, pt + ph / 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(px + pw / 2, pt + ph / 2, ph * 0.1, 0, Math.PI * 2); ctx.stroke();
+      const boxW = pw * 0.5, boxH = ph * 0.13, sixW = pw * 0.24, sixH = ph * 0.05;
+      [[pt + 20, 1], [pb - 20, -1]].forEach(([y, d]) => {
+        ctx.strokeRect(px + (pw - boxW) / 2, d > 0 ? y : y - boxH, boxW, boxH);
+        ctx.strokeRect(px + (pw - sixW) / 2, d > 0 ? y : y - sixH, sixW, sixH);
+      });
+      ctx.restore();
+      ctx.save(); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.6)"; k.roundRect(px, pt, pw, ph, 30); ctx.stroke(); ctx.restore();
+      // players
+      const lines = String(g.val("formation") || "4-3-3").split(/[^\d]+/).map((n) => parseInt(n, 10)).filter((n) => n > 0);
+      const shape = [1, ...lines];
+      const list = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); return m ? [m[1], m[2]] : ["", l];
+      });
+      const shirt = colourOf(g.val("team"), C.gold), ink = k.inkOn(shirt), r = tall ? 40 : 34;
+      let idx = 0;
+      shape.forEach((count, row) => {
+        const y = pb - 30 - r - ((ph - 90 - 2 * r) * row) / Math.max(1, shape.length - 1);
+        for (let j = 0; j < count; j++) {
+          const p = list[idx++]; if (!p) continue;
+          const x = px + pw * ((j + 1) / (count + 1));
+          ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = shirt; ctx.fill(); ctx.restore();
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.lineWidth = 4; ctx.strokeStyle = "#FFFFFF"; ctx.stroke();
+          ctx.save(); ctx.textAlign = "center";
+          if (p[0]) { ctx.font = k.font(Math.round(r * 0.95), k.D); ctx.fillStyle = ink; ctx.fillText(p[0], x, y + r * 0.34); }
+          const nm = cap(p[1].replace(/\s*\((gk|c|vc)\)\s*$/i, (m) => " " + m.trim().toUpperCase())), maxW = Math.min(pw / (count + 0.6), 260);
+          ctx.font = k.font(k.fit(nm, maxW - 16, tall ? 28 : 24, k.C, 700, 15), k.C, 700);
+          const tw = Math.min(ctx.measureText(nm).width, maxW - 16) + 18;
+          ctx.fillStyle = "rgba(6,16,60,0.82)"; k.roundRect(x - tw / 2, y + r + 8, tw, tall ? 38 : 34, 10); ctx.fill();
+          ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, x, y + r + (tall ? 36 : 32), maxW - 16);
+          ctx.restore();
+        }
+      });
+      if (g.val("coach")) {
+        ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
+        const cl = g.t.coachLabel !== undefined ? g.t.coachLabel : "Coach: ";
+        ctx.fillText(cap(cl) + cap(g.val("coach")), PAD, g.footerY - 52, W - 2 * PAD); k.spaced(0); ctx.restore();
+      }
+      bottom(k, g);
+    },
+  };
+  BPG.tour2 = { top, glass, bottom };
+})();
+
+</script>
+<script>
+// Photo cards in the Borhan style: full clear photo, fading into dark only behind the text,
+// small tag above the headline, small logo in the corner.
+// Transfer, Instant news, Record, MVP / player of the month, Player vs player (stats).
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseFloat(String(s).replace(/[^\d.\-]/g, "")) || 0;
+
+  // Small spaced tag in the accent colour, e.g. "TRANSFER" or "BREAKING".
+  function tag(k, g, text, x, y, align) {
+    const ctx = k.ctx; if (!text) return;
+    ctx.save(); ctx.textAlign = align || "left"; ctx.font = k.font(28, k.C, 700); k.spaced(5); ctx.fillStyle = g.accent;
+    ctx.fillText(cap(text), x, y, g.W - 2 * PAD); k.spaced(0); ctx.restore();
+  }
+  function info(k, g, text, y) {
+    const ctx = k.ctx; if (!text) return;
+    ctx.save(); ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillText(cap(text), PAD, y, g.W * 0.58); k.spaced(0); ctx.restore();
+  }
+  // A club as a round disc: the uploaded crest on white, or the short name in the team's colours.
+  function clubDisc(k, g, cx, cy, r, team, pic) {
+    const ctx = k.ctx, full = (BPG.teamName && BPG.teamName(team)) || team, tc = BPG.TEAM_COLORS[full];
+    const flag = !pic && BPG.flagImg && BPG.flagImg(full);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 24;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = pic ? "#FFFFFF" : (tc ? tc.bg : "#14171F"); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    if (pic) { const im = pic.plain || pic.img, sc = Math.min((r * 1.45) / im.width, (r * 1.45) / im.height); ctx.drawImage(im, cx - (im.width * sc) / 2, cy - (im.height * sc) / 2, im.width * sc, im.height * sc); }
+    else if (flag) { const sc = Math.max((2 * r) / flag.width, (2 * r) / flag.height); ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc); }
+    else {
+      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, r * 1.5, Math.round(r * 0.75), k.D), k.D); ctx.fillStyle = tc ? tc.accent : g.accent; ctx.fillText(sh, cx, cy + r * 0.27);
+    }
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 5; ctx.strokeStyle = tc ? tc.accent : "rgba(255,255,255,0.8)"; ctx.stroke();
+  }
+  // Headline in Anton, *stars* in the accent colour, up to `lines` lines, drawn upwards from `base`. Returns its top.
+  function headline(k, g, text, base, size, lines, align) {
+    const x = align === "center" ? g.W / 2 : PAD;
+    let lay = k.layoutRich(cap(text), g.W - 2 * PAD, size, k.D, lines || 2, 40);
+    const top = base - (lay.lines.length - 1) * lay.size * 1.0;
+    k.drawRich(lay, x, top, lay.size * 1.0, k.D, "#FFFFFF", g.accent, align || "left");
+    return top - lay.size * 0.82;
+  }
+
+  // ---------- Transfer ----------
+  L.transfer = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, r = 62;
+      const infoY = g.footerY, rowY = infoY - 64 - r, nameBase = rowY - r - 40;
+      const nameSize = k.fit(cap(g.val("player")), W - 2 * PAD, 110, k.D, "", 50), tagY = nameBase - nameSize * 0.9 - 18;
+      if (!k.bleedPhoto(g, tagY - 50)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      if (g.teamTheme) k.paintSweep(g, tagY - 40, "right");
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, g, g.val("tag") || "Transfer", PAD, tagY);
+      ctx.font = k.font(nameSize, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("player")), PAD, nameBase);
+      // old club → new club, then the fee
+      const x1 = PAD + r, x2 = PAD + r * 3 + 90;
+      clubDisc(k, g, x1, rowY, r, g.val("from"), null);
+      clubDisc(k, g, x2, rowY, r, g.val("to"), g.photos[2] && g.photos[2].tpl === "transfer" ? g.photos[2] : null); // only a crest added on this card
+      ctx.strokeStyle = g.accent; ctx.lineWidth = 8; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(x1 + r + 18, rowY); ctx.lineTo(x2 - r - 22, rowY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x2 - r - 40, rowY - 16); ctx.lineTo(x2 - r - 20, rowY); ctx.lineTo(x2 - r - 40, rowY + 16); ctx.stroke();
+      const fee = cap(g.val("fee"));
+      if (fee) {
+        const fx = x2 + r + 40;
+        ctx.font = k.font(k.fit(fee, W - PAD - fx, 92, k.D, "", 36), k.D); ctx.fillStyle = g.accent; ctx.fillText(fee, fx, rowY + 20);
+        if (g.val("feeLabel")) { ctx.font = k.font(24, k.C, 700); k.spaced(4); ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.fillText(cap(g.val("feeLabel")), fx, rowY + 54, W - PAD - fx); k.spaced(0); }
+      }
+      ctx.restore();
+      const st = cap(g.val("stamp"));
+      if (st) k.stamp(st, W - 200, tagY - 50, 54, g.accent, -0.12);
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- Instant news ----------
+  L.news = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g;
+      const body = k.layoutRich(String(g.val("body") || ""), W - 2 * PAD, 34, k.B, 4, 24, 500), lh = body.size * 1.32;
+      const infoY = g.footerY, bodyTop = infoY - 54 - (body.lines.length ? body.lines.length * lh : 0);
+      const hl = k.layoutRich(cap(g.val("headline")), W - 2 * PAD, 84, k.D, 3, 44);
+      const hlBase = bodyTop - 14 - (body.lines.length ? 6 : 0), hlTop = hlBase - (hl.lines.length - 1) * hl.size, tagY = hlTop - hl.size * 0.86 - 20;
+      if (!k.bleedPhoto(g, tagY - 50)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, g, g.val("tag") || "News", PAD, tagY);
+      k.drawRich(hl, PAD, hlTop, hl.size, k.D, "#FFFFFF", g.accent, "left");
+      if (body.lines.length) k.drawRich(body, PAD, bodyTop + body.size, lh, k.B, "rgba(255,255,255,0.88)", g.accent, "left", 500);
+      ctx.restore();
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- Record / achievement ----------
+  // The big number sits behind the bottom of the photo, the record line under the name.
+  L.record = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g;
+      const line = k.layoutRich(String(g.val("line") || ""), W - 2 * PAD, 40, k.B, 3, 26, 600), lh = line.size * 1.25;
+      const infoY = g.footerY, lineTop = infoY - 54 - line.lines.length * lh;
+      const nm = cap(g.val("player")), ns = k.fit(nm, W - 2 * PAD, 76, k.D, "", 36), nameBase = lineTop - 16;
+      const big = cap(g.val("number")), bs = k.fit(big, W - 2 * PAD + 20, 300, k.D, "", 120), bigBase = nameBase - ns - 6;
+      const tagY = bigBase - bs * 0.86 - 22;
+      if (!k.bleedPhoto(g, bigBase - bs * 0.45)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 22;
+      tag(k, g, g.val("tag") || "Record", PAD, tagY);
+      ctx.font = k.font(bs, k.D); ctx.fillStyle = g.accent; ctx.fillText(big, PAD - 6, bigBase);
+      if (g.val("unit")) { const bw = ctx.measureText(big).width; ctx.font = k.font(44, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("unit")), PAD + bw + 14, bigBase, W - PAD - bw - 70); }
+      ctx.font = k.font(ns, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, PAD, nameBase);
+      if (line.lines.length) k.drawRich(line, PAD, lineTop + line.size, lh, k.B, "rgba(255,255,255,0.9)", g.accent, "left", 600);
+      ctx.restore();
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- MVP / player of the month ----------
+  L.mvp = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, gold = "#F5C542";
+      const items = String(g.val("stats") || "").split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0]).slice(0, 4).map(([a, b]) => [a, b || ""]);
+      const infoY = g.footerY, statsTop = infoY - 52 - (items.length ? 96 : 0);
+      const nm = cap(g.val("player")), ns = k.fit(nm, W - 2 * PAD, 112, k.D, "", 50), nameBase = statsTop - 22;
+      const tagY = nameBase - ns * 0.9 - 20;
+      if (!k.bleedPhoto(g, tagY - 60)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      const gg = Object.assign({}, g, { accent: gold });
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, gg, [g.val("title") || "Player of the month", g.val("period")].filter(Boolean).join("  |  "), PAD, tagY);
+      ctx.font = k.font(ns, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, PAD, nameBase);
+      ctx.restore();
+      if (items.length) k.stats(gg, items, statsTop, 88);
+      const st = cap(g.val("stamp"));
+      if (st) k.stamp(st, W - 210, tagY - 70, 46, gold, -0.12);
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(gg, infoY);
+    },
+  };
+
+  // ---------- Player vs player (stats) ----------
+  // Two photos side by side, blending into each other in the middle; the stats under them as bars.
+  // Add ↓ (or "lower") to a stat's label when the lower number is better (economy, average against).
+  L.compare = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g;
+      const rows = String(g.val("stats") || "").split("\n").map((l) => l.split(/[|:]/).map((x) => x.trim())).filter((r) => r.length >= 3 && r[0]).slice(0, 6);
+      const rowH = H / W > 1.5 ? 74 : 62, infoY = g.footerY, statsTop = infoY - 56 - rows.length * rowH;
+      const namesY = statsTop - 26, photoBottom = namesY - 40;
+      // photos
+      const halves = [[g.photos[1], 0], [g.photos[2], W / 2]];
+      halves.forEach(([p, x]) => {
+        if (!p) return;
+        ctx.save(); ctx.beginPath(); ctx.rect(x, 0, W / 2, photoBottom + 60); ctx.clip();
+        k.coverImg(p.img, x, 0, W / 2, photoBottom + 60, false); ctx.restore();
+      });
+      if (!g.photos[1]) { ctx.font = k.font(30, k.C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillText("Player 1 photo", W / 4, H * 0.3); ctx.textAlign = "left"; }
+      if (!g.photos[2]) { ctx.font = k.font(30, k.C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillText("Player 2 photo (second photo)", W * 0.75, H * 0.3); ctx.textAlign = "left"; }
+      // soft seam in the middle and the fade at the bottom
+      const seam = ctx.createLinearGradient(W / 2 - 60, 0, W / 2 + 60, 0);
+      seam.addColorStop(0, k.hexA(g.bg, 0)); seam.addColorStop(0.5, k.hexA(g.bg, 0.85)); seam.addColorStop(1, k.hexA(g.bg, 0));
+      ctx.fillStyle = seam; ctx.fillRect(W / 2 - 60, 0, 120, photoBottom + 60);
+      k.fadeBottom(g, photoBottom - 300, photoBottom + 40);
+      const top = ctx.createLinearGradient(0, 0, 0, g.st + 160); top.addColorStop(0, k.hexA(g.bg, 0.6)); top.addColorStop(1, k.hexA(g.bg, 0));
+      ctx.fillStyle = top; ctx.fillRect(0, 0, W, g.st + 160);
+      // title + VS
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16; ctx.textAlign = "center";
+      if (g.val("title")) { ctx.font = k.font(28, k.C, 700); k.spaced(5); ctx.fillStyle = g.accent; ctx.fillText(cap(g.val("title")), W / 2, g.st + 40, W - 2 * PAD); k.spaced(0); }
+      ctx.font = k.font(90, k.D); ctx.fillStyle = g.accent; ctx.fillText("VS", W / 2, namesY - 70);
+      const n1 = cap(g.val("p1")), n2 = cap(g.val("p2"));
+      ctx.font = k.font(k.fit(n1, W / 2 - 80, 60, k.D, "", 28), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(n1, W / 4, namesY);
+      ctx.font = k.font(k.fit(n2, W / 2 - 80, 60, k.D, "", 28), k.D); ctx.fillText(n2, W * 0.75, namesY);
+      ctx.restore();
+      // stat rows: value | bar ← label → bar | value; the better number in the accent colour
+      const midW = 230, barMax = W / 2 - midW / 2 - PAD - 110;
+      rows.forEach(([label, a, b], i) => {
+        const y = statsTop + i * rowH + rowH * 0.62, low = /↓|lower|\(l\)/i.test(label), lab = cap(label.replace(/↓|\(l\)|lower/gi, "").trim());
+        const va = num(a), vb = num(b), max = Math.max(va, vb) || 1, aWin = low ? va < vb : va > vb, bWin = low ? vb < va : vb > va;
+        if (i) { ctx.fillStyle = "rgba(255,255,255,0.08)"; ctx.fillRect(PAD, statsTop + i * rowH, W - 2 * PAD, 2); }
+        ctx.textAlign = "center"; ctx.font = k.font(k.fit(lab, midW - 10, 24, k.C, 700, 16), k.C, 700); k.spaced(2); ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.fillText(lab, W / 2, y - 4); k.spaced(0);
+        const la = (va / max) * barMax, lb = (vb / max) * barMax, bh = 12, by = y - 14;
+        ctx.fillStyle = aWin ? g.accent : "rgba(255,255,255,0.35)"; k.roundRect(W / 2 - midW / 2 - la, by, la, bh, 6); ctx.fill();
+        ctx.fillStyle = bWin ? g.accent : "rgba(255,255,255,0.35)"; k.roundRect(W / 2 + midW / 2, by, lb, bh, 6); ctx.fill();
+        ctx.font = k.font(46, k.D);
+        ctx.textAlign = "left"; ctx.fillStyle = aWin ? g.accent : "#FFFFFF"; ctx.fillText(a, PAD, y + 8);
+        ctx.textAlign = "right"; ctx.fillStyle = bWin ? g.accent : "#FFFFFF"; ctx.fillText(b, W - PAD, y + 8);
+        ctx.textAlign = "left";
+      });
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+})();
+
+</script>
+<script>
+// Cards Sports Timeline doesn't have, in the Borhan style (full clear photo, fade only behind the text,
+// small tag, compact text, small logo) or the tournament look for team-vs-team cards.
+// Chase tracker, Partnership, Countdown, On this day, Player profile, Debut cap, Head to head,
+// Ke jitbe? poll, and the 5-slide Match story carousel.
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseFloat(String(s).replace(/[^\d.\-]/g, "")) || 0;
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+  const short = (n) => { const f = full(n); return (BPG.teamShort && BPG.TEAM_COLORS[f] ? BPG.teamShort(f) : cap(f).slice(0, 3)) || ""; };
+  const teamCol = (n, fb) => { const tc = BPG.TEAM_COLORS[full(n)]; return tc ? tc.accent : fb; };
+  const pairs = (s, max) => String(s || "").split(/,|\n/).map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0]).slice(0, max).map(([a, b]) => [a, b || ""]);
+
+  // ---------- Building blocks for photo cards ----------
+  // A card is a list of blocks drawn top to bottom, ending just above the info line.
+  // The photo fills the card and fades into dark only behind the blocks.
+  function photoCard(k, g, blocks, o) {
+    o = o || {};
+    const ctx = k.ctx, infoY = g.footerY, list = blocks.filter(Boolean);
+    const total = list.reduce((s, b) => s + b.h, 0);
+    let y = infoY - (o.bottomGap || 52) - total;
+    const photoTop = y - 30;
+    const gp = o.photo !== undefined ? Object.assign({}, g, { photo: o.photo }) : g;
+    if (!k.bleedPhoto(gp, photoTop, o.grey)) k.photoHint(g, g.st + (photoTop - g.st) / 2);
+    g.subj = gp.subj;
+    if (o.after) o.after(photoTop);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+    list.forEach((b) => { ctx.save(); b.draw(y); ctx.restore(); y += b.h; });
+    ctx.restore();
+    if (o.foot) o.foot(infoY); else info(k, g, g.val("info"), infoY);
+    k.brandCorner(g, infoY);
+  }
+  function info(k, g, text, y) {
+    const ctx = k.ctx; if (!text) return;
+    ctx.save(); ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillText(cap(text), PAD, y, g.W * 0.58); k.spaced(0); ctx.restore();
+  }
+  const B = {
+    gap: (h) => ({ h, draw() {} }),
+    // Small spaced tag in the accent colour.
+    tag: (k, g, text, colour) => text ? { h: 48, draw(y) {
+      const ctx = k.ctx; ctx.font = k.font(28, k.C, 700); k.spaced(5); ctx.fillStyle = colour || g.accent;
+      ctx.fillText(cap(text), PAD, y + 28, g.W - 2 * PAD); k.spaced(0);
+    } } : null,
+    // Anton headline, *stars* in the accent colour.
+    head: (k, g, text, size, lines, min) => {
+      if (!String(text || "").trim()) return null;
+      const lay = k.layoutRich(cap(text), g.W - 2 * PAD, size, k.D, lines || 2, min || 40);
+      return { h: lay.lines.length * lay.size + 8, draw(y) { k.drawRich(lay, PAD, y + lay.size * 0.88, lay.size, k.D, "#FFFFFF", g.accent, "left"); } };
+    },
+    // Body text in normal sentence case.
+    text: (k, g, text, size, lines, weight, colour) => {
+      if (!String(text || "").trim()) return null;
+      const lay = k.layoutRich(String(text), g.W - 2 * PAD, size, k.B, lines || 3, 24, weight || 600), lh = lay.size * 1.28;
+      return { h: lay.lines.length * lh + 6, draw(y) { k.drawRich(lay, PAD, y + lay.size, lh, k.B, colour || "rgba(255,255,255,0.9)", g.accent, "left", weight || 600); } };
+    },
+    stats: (k, g, items, colour) => items.length ? { h: 100, draw(y) { k.stats(colour ? Object.assign({}, g, { accent: colour }) : g, items, y + 4, 88); } } : null,
+    // A huge number in the accent colour with a word next to it, e.g. "10 DAYS TO GO".
+    bigNum: (k, g, big, unit, maxSize, colour) => {
+      big = cap(big); if (!big) return null;
+      const ctx = k.ctx; ctx.font = k.font(48, k.D); const uw = unit ? ctx.measureText(cap(unit)).width + 24 : 0;
+      const s = k.fit(big, Math.max(200, g.W - 2 * PAD - Math.min(uw, g.W * 0.45)), maxSize || 280, k.D, "", 110);
+      return { h: s * 0.92, draw(y) {
+        const base = y + s * 0.88; ctx.font = k.font(s, k.D); ctx.fillStyle = colour || g.accent; ctx.fillText(big, PAD - 6, base);
+        if (unit) {
+          const bw = ctx.measureText(big).width, us = unit.split("\n");
+          ctx.fillStyle = "#FFFFFF"; ctx.font = k.font(k.fit(cap(us[0]), g.W - PAD * 2 - bw - 24, 52, k.D, "", 26), k.D);
+          ctx.fillText(cap(us[0]), PAD + bw + 18, base - (us[1] ? 46 : 4), g.W - PAD * 2 - bw - 24);
+          if (us[1]) { ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.fillText(cap(us[1]), PAD + bw + 20, base - 6, g.W - PAD * 2 - bw - 24); k.spaced(0); }
+        }
+      } };
+    },
+  };
+  BPG.blocks = { photoCard, B, info };
+
+  // A bar split in two colours with the names and numbers at the ends.
+  function splitBar(k, g, y, a, b, la, lb, ca, cb) {
+    const ctx = k.ctx, { W } = g, tot = a + b || 1, bx = PAD, bw = W - 2 * PAD, bh = 16, split = bx + bw * (a / tot);
+    ctx.font = k.font(30, k.C, 700); k.spaced(2);
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(la, bx, y + 26, bw / 2 - 10);
+    ctx.textAlign = "right"; ctx.fillText(lb, bx + bw, y + 26, bw / 2 - 10); ctx.textAlign = "left"; k.spaced(0);
+    const by = y + 42;
+    ctx.fillStyle = ca; k.roundRect(bx, by, Math.max(bh, split - bx - 3), bh, bh / 2); ctx.fill();
+    ctx.fillStyle = cb; k.roundRect(split + 3, by, Math.max(bh, bx + bw - split - 3), bh, bh / 2); ctx.fill();
+  }
+  // Second colour that still stands apart from the first.
+  function apart(c1, c2, fb) {
+    const p = (h) => [0, 2, 4].map((i) => parseInt(String(h).slice(1 + i, 3 + i), 16) || 0);
+    const x = p(c1), y = p(c2);
+    return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 120 ? fb : c2;
+  }
+
+  // ---------- Chase tracker ----------
+  // "Need 42 off 30": required rate is worked out, the win chance bar is optional.
+  L.chase = {
+    standard: false,
+    draw(k, g) {
+      const need = num(g.val("need")), balls = num(g.val("balls")), wk = String(g.val("wkts")).trim();
+      const rrr = balls ? ((need / balls) * 6).toFixed(2) : "";
+      const items = [["Req. rate", rrr], wk ? ["Wkts left", wk] : null, g.val("target") ? ["Target", g.val("target")] : null, g.val("score") ? ["Score", g.val("score")] : null].filter((x) => x && x[1] !== "");
+      const win = String(g.val("win")).trim(), w = Math.max(0, Math.min(100, num(win)));
+      const line = `NEED *${need}* OFF *${balls}*`;
+      photoCard(k, g, [
+        B.tag(k, g, [g.val("tag") || "Chase on", g.val("t1") && g.val("t2") ? `${short(g.val("t1"))} vs ${short(g.val("t2"))}` : ""].filter(Boolean).join("  ·  ")),
+        B.head(k, g, line, 150, 1, 70),
+        B.gap(10),
+        B.stats(k, g, items.slice(0, 4)),
+        win ? { h: 90, draw(y) {
+          const c1 = teamCol(g.val("t1"), g.accent), c2 = apart(c1, teamCol(g.val("t2"), "#9AA3B5"), "#9AA3B5");
+          splitBar(k, g, y + 14, w, 100 - w, `${short(g.val("t1")) || "BAT"} ${Math.round(w)}%`, `${Math.round(100 - w)}% ${short(g.val("t2")) || "BOWL"}`, c1, c2);
+        } } : null,
+      ]);
+    },
+  };
+
+  // ---------- Partnership ----------
+  L.partnership = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, runs = g.val("runs"), balls = g.val("balls");
+      const r1 = num(String(g.val("r1")).split("(")[0]), r2 = num(String(g.val("r2")).split("(")[0]);
+      photoCard(k, g, [
+        B.tag(k, g, [g.val("wkt") ? `${g.val("wkt")} wicket` : "", g.val("tag") || "Partnership"].filter(Boolean).join(" ")),
+        B.bigNum(k, g, runs, balls ? `Runs\noff ${balls} balls` : "Runs", 240),
+        B.gap(14),
+        { h: 150, draw(y) {
+          const row = (name, score, yy) => {
+            ctx.font = k.font(k.fit(cap(name), W * 0.6, 50, k.D, "", 26), k.D); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(cap(name), PAD, yy);
+            ctx.font = k.font(50, k.D); ctx.fillStyle = g.accent; ctx.textAlign = "right"; ctx.fillText(String(score), W - PAD, yy); ctx.textAlign = "left";
+          };
+          row(g.val("b1"), g.val("r1"), y + 46); row(g.val("b2"), g.val("r2"), y + 106);
+          if (r1 + r2) { ctx.shadowBlur = 0; splitBar(k, g, y + 104, r1, r2, "", "", g.accent, "rgba(255,255,255,0.55)"); }
+        } },
+      ]);
+    },
+  };
+
+  // ---------- Countdown ----------
+  L.countdown = {
+    standard: false,
+    draw(k, g) {
+      photoCard(k, g, [
+        B.tag(k, g, g.val("tag") || "Countdown"),
+        B.bigNum(k, g, g.val("number"), g.val("unit") || "Days to go", 300),
+        B.gap(8),
+        B.head(k, g, g.val("event"), 80, 2, 40),
+        B.text(k, g, g.val("line"), 34, 2, 600, "rgba(255,255,255,0.85)"),
+      ]);
+    },
+  };
+
+  // ---------- On this day ----------
+  // The photo goes black and white; "X years ago" is worked out from the year.
+  L.onthisday = {
+    standard: false,
+    draw(k, g) {
+      const yr = parseInt(g.val("year"), 10), ago = yr ? new Date().getFullYear() - yr : 0;
+      photoCard(k, g, [
+        B.tag(k, g, ["On this day", g.val("date")].filter(Boolean).join("  ·  ")),
+        B.bigNum(k, g, g.val("year"), ago > 0 ? `${ago} years\nago today` : "", 220),
+        B.gap(10),
+        B.head(k, g, g.val("headline"), 70, 2, 38),
+        B.text(k, g, g.val("line"), 34, 3, 500, "rgba(255,255,255,0.85)"),
+      ], { grey: g.val("colour") && /^(y|yes|colour|color|on)$/i.test(g.val("colour")) ? 0 : 1 });
+    },
+  };
+
+  // ---------- Player profile ----------
+  L.profile = {
+    standard: false,
+    draw(k, g) {
+      const items = pairs(g.val("stats"), 8), half = items.length > 4 ? Math.ceil(items.length / 2) : items.length;
+      photoCard(k, g, [
+        B.tag(k, g, g.val("role") || "Profile"),
+        B.head(k, g, g.val("player"), 110, 2, 50),
+        B.text(k, g, g.val("line"), 32, 2, 600, "rgba(255,255,255,0.8)"),
+        B.gap(6),
+        B.stats(k, g, items.slice(0, half)),
+        items.length > half ? B.gap(14) : null,
+        B.stats(k, g, items.slice(half)),
+      ]);
+    },
+  };
+
+  // ---------- Debut cap ----------
+  // A gold cap medal with the cap number, the name beside it.
+  L.debut = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, gold = "#F5C542", R = 104;
+      const nm = cap(g.val("player")), tx = PAD + R * 2 + 36, tw = W - PAD - tx;
+      const lay = k.layoutRich(nm, tw, 96, k.D, 2, 44);
+      photoCard(k, g, [
+        B.tag(k, g, g.val("tag") || "Welcome to the team", gold),
+        { h: R * 2 + 16, draw(y) {
+          const cx = PAD + R, cy = y + R + 4;
+          const gr = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+          gr.addColorStop(0, "#FFE08A"); gr.addColorStop(0.5, gold); gr.addColorStop(1, "#B8860B");
+          ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fillStyle = gr; ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.beginPath(); ctx.arc(cx, cy, R - 12, 0, Math.PI * 2); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(60,40,0,0.45)"; ctx.stroke();
+          ctx.textAlign = "center"; ctx.fillStyle = "#3A2A00";
+          ctx.font = k.font(24, k.C, 700); k.spaced(4); ctx.fillText(cap(g.val("format") || "") + " CAP", cx, cy - R * 0.38, R * 1.5); k.spaced(0);
+          const n = "#" + String(g.val("cap") || "").replace(/^#/, "");
+          ctx.font = k.font(k.fit(n, R * 1.55, 96, k.D, "", 40), k.D); ctx.fillText(n, cx, cy + R * 0.42);
+          ctx.textAlign = "left"; ctx.shadowBlur = 16;
+          const top = cy - (lay.lines.length * lay.size) / 2 + lay.size * 0.86;
+          k.drawRich(lay, tx, top, lay.size, k.D, "#FFFFFF", gold, "left");
+        } },
+        B.text(k, g, g.val("line"), 36, 2, 600, "rgba(255,255,255,0.88)"),
+      ], {});
+    },
+  };
+
+  // ---------- Tournament-look cards: Head to head, Ke jitbe? poll ----------
+  const T = () => BPG.tour, T2 = () => BPG.tour2;
+
+  L.h2h = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      let y = top(k, g, g.val("title") || "Head to head");
+      const fs = tall ? 200 : 160, xs = [W * 0.2, W * 0.8];
+      // Rows of the panel, worked out first so the whole block can sit in the middle of the space.
+      const rows = [["Played", g.val("played")], [g.val("dlabel") || "Draws", g.val("draws")]].filter((r) => String(r[1]).trim() !== "");
+      const last = String(g.val("last5") || "").toUpperCase().split(/[\s,\-]+/).filter((x) => /^[WLDNT]$/.test(x)).slice(-6);
+      const rh = tall ? 130 : 108, ph = rows.length * rh + (last.length ? rh + 30 : 0) + 30;
+      const head = fs * 0.36 + 110 + (tall ? 150 : 120), slack = g.footerY - 70 - y - head - ph;
+      const fy = y + (tall ? 150 : 120) + Math.max(0, slack * 0.4);
+      teamBadge(k, g, xs[0], fy, fs, g.val("t1"), null); teamBadge(k, g, xs[1], fy, fs, g.val("t2"), null);
+      const w1 = g.val("w1"), w2 = g.val("w2");
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+      ctx.font = k.font(tall ? 150 : 128, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(`${w1}-${w2}`, W / 2, fy + 46);
+      ctx.font = k.font(26, k.C, 700); k.spaced(4); ctx.fillStyle = C.gold; ctx.fillText("WINS", W / 2, fy + 92); k.spaced(0);
+      [g.val("t1"), g.val("t2")].forEach((t, i) => { const n = cap(full(t)); ctx.font = k.font(k.fit(n, W * 0.34, 44, k.D, "", 22), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(n, xs[i], fy + fs * 0.36 + 60); });
+      ctx.restore();
+      // panel: played / draws / last five
+      const pTop = fy + fs * 0.36 + 110, space = g.footerY - 70 - pTop, scale = Math.min(1, space / ph);
+      glass(k, 60, pTop, W - 120, ph * scale, 32);
+      let cy = pTop + 15;
+      const c1 = teamCol(g.val("t1"), C.gold), c2 = apart(c1, teamCol(g.val("t2"), C.cyan), C.cyan), a = num(w1), b = num(w2);
+      ctx.save();
+      // split bar of the wins
+      if (a + b) { const bx = 100, bw = W - 200, bh = 14, sp = bx + bw * (a / (a + b)); ctx.fillStyle = c1; k.roundRect(bx, cy + 6, Math.max(bh, sp - bx - 3), bh, 7); ctx.fill(); ctx.fillStyle = c2; k.roundRect(sp + 3, cy + 6, Math.max(bh, bx + bw - sp - 3), bh, 7); ctx.fill(); cy += 30; }
+      rows.forEach(([l, v]) => {
+        ctx.textAlign = "left"; ctx.font = k.font(Math.round(rh * 0.3 * scale), k.C, 700); k.spaced(3); ctx.fillStyle = C.cream; ctx.fillText(cap(l), 100, cy + rh * 0.6 * scale); k.spaced(0);
+        ctx.textAlign = "right"; ctx.font = k.font(Math.round(rh * 0.5 * scale), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(String(v), W - 100, cy + rh * 0.66 * scale);
+        cy += rh * scale;
+      });
+      if (last.length) {
+        ctx.textAlign = "left"; ctx.font = k.font(Math.round(rh * 0.26 * scale), k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
+        ctx.fillText(`LAST ${last.length} (${short(g.val("t1"))})`, 100, cy + rh * 0.62 * scale); k.spaced(0);
+        const r = Math.round(rh * 0.27 * scale);
+        last.forEach((x, i) => {
+          const cx = W - 100 - r - (last.length - 1 - i) * (r * 2 + 14), yy = cy + rh * 0.52 * scale;
+          ctx.beginPath(); ctx.arc(cx, yy, r, 0, Math.PI * 2); ctx.fillStyle = x === "W" ? "#22C55E" : x === "L" ? "#EF4444" : "#9AA3B5"; ctx.fill();
+          ctx.textAlign = "center"; ctx.font = k.font(Math.round(r * 1.1), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(x, cx, yy + r * 0.4);
+        });
+      }
+      ctx.restore();
+      bottom(k, g);
+    },
+  };
+
+  // "Ke jitbe?": two teams, comment 1 or 2. Works on Instagram and Facebook alike (no reactions needed).
+  L.poll = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
+      tourBg(k, g);
+      const y = top(k, g, g.val("question") || "Ke jitbe?");
+      const ml = cap(g.val("match"));
+      if (ml) { ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(30, k.C, 700); k.spaced(4); ctx.fillStyle = "#FFFFFF"; ctx.fillText(ml, W / 2, y + 50, W - 2 * PAD); k.spaced(0); ctx.restore(); }
+      const pTop = y + (ml ? 90 : 50), pBot = g.footerY - (tall ? 190 : 150), ph = pBot - pTop, gw = (W - 120 - 30) / 2;
+      [[g.val("t1"), "1", 60], [g.val("t2"), "2", 60 + gw + 30]].forEach(([t, n, x]) => {
+        glass(k, x, pTop, gw, ph, 32);
+        const fs = Math.min(gw * 0.62, ph * 0.42), cx = x + gw / 2;
+        teamBadge(k, g, cx, pTop + ph * 0.34, fs, t, null);
+        ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 12;
+        const nm = cap(full(t)); ctx.font = k.font(k.fit(nm, gw - 40, 54, k.D, "", 24), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, cx, pTop + ph * 0.66);
+        const r = Math.min(56, ph * 0.1), by = pTop + ph * 0.84;
+        ctx.beginPath(); ctx.arc(cx, by, r, 0, Math.PI * 2); ctx.fillStyle = C.gold; ctx.fill();
+        ctx.shadowBlur = 0; ctx.font = k.font(Math.round(r * 1.2), k.D); ctx.fillStyle = "#1A1A1A"; ctx.fillText(n, cx, by + r * 0.42);
+        ctx.restore();
+      });
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 12;
+      const cta = cap(g.val("cta") || "Comment 1 or 2");
+      ctx.font = k.font(k.fit(cta, W - 2 * PAD, tall ? 68 : 58, k.D, "", 30), k.D); ctx.fillStyle = C.cream; ctx.fillText(cta, W / 2, pBot + (tall ? 100 : 80));
+      ctx.restore();
+      bottom(k, g);
+    },
+  };
+
+  // ---------- Match story (5-slide carousel) ----------
+  // One set of fields, five slides: cover, turning point, star, numbers, Borhan's verdict.
+  // Photo 1 goes on slides 1, 3 and 5; photo 2 (if added) on 2 and 4.
+  const SLIDES = ["Cover", "Turning point", "Star", "Numbers", "Verdict"];
+  BPG.STORY_SLIDES = SLIDES;
+  L.story = {
+    standard: false, ownSweep: true, // no brush strokes: the slides carry more text
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, n = Math.min(5, Math.max(1, parseInt(g.val("slide"), 10) || 1));
+      const p1 = g.photos[1], p2 = g.photos[2] || g.photos[1];
+      // Dots on top: which slide this is.
+      const pager = () => {
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
+        // With the logo at the top right, the dots move to the left with the match line under them.
+        const r = 9, gap = 30, x0 = g.logoTop && k.logoSide(g) === "right" ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
+        SLIDES.forEach((_, i) => { ctx.beginPath(); ctx.arc(x0 + i * gap, y, i + 1 === n ? r + 2 : r - 2, 0, Math.PI * 2); ctx.fillStyle = i + 1 === n ? g.accent : "rgba(255,255,255,0.6)"; ctx.fill(); });
+        ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
+        if (g.val("tag")) { if (g.logoTop && k.logoSide(g) === "right") ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else if (g.logoTop) { ctx.textAlign = "right"; ctx.fillText(cap(g.val("tag")), W - PAD, y + 52, W * 0.5); } else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
+        k.spaced(0); ctx.restore();
+      };
+      // "Swipe" on slides 1-4, the info line on the last one.
+      const foot = (y) => {
+        if (n < 5) { ctx.save(); ctx.font = k.font(28, k.C, 700); k.spaced(4); ctx.fillStyle = g.accent; ctx.fillText(cap(g.val("swipe") || "Swipe") + "  →", PAD, y); k.spaced(0); ctx.restore(); }
+        else info(k, g, g.val("info"), y);
+      };
+      const o = (photo) => ({ photo, foot, after: pager });
+      if (n === 1) {
+        photoCard(k, g, [
+          B.tag(k, g, "Match story"),
+          B.head(k, g, g.val("headline"), 120, 3, 56),
+          B.text(k, g, g.val("result"), 36, 2, 600),
+        ], o(p1));
+      } else if (n === 2) {
+        photoCard(k, g, [
+          B.tag(k, g, g.val("turnHead") || "Turning point"),
+          B.text(k, g, g.val("turn"), 48, 5, 700, "#FFFFFF"),
+        ], o(p2));
+      } else if (n === 3) {
+        photoCard(k, g, [
+          B.tag(k, g, g.val("starTag") || "Star of the match"),
+          B.head(k, g, g.val("star"), 110, 2, 50),
+          B.gap(6),
+          B.stats(k, g, pairs(g.val("starStats"), 4)),
+        ], o(p1));
+      } else if (n === 4) {
+        const rows = String(g.val("numbers") || "").split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((r) => r[0]).slice(0, 4);
+        photoCard(k, g, [
+          B.tag(k, g, g.val("numTag") || "In numbers"),
+          ...rows.map(([v, l]) => ({ h: 118, draw(y) {
+            ctx.font = k.font(96, k.D); ctx.fillStyle = g.accent; ctx.fillText(cap(v), PAD, y + 92, W * 0.42);
+            const vw = Math.min(ctx.measureText(cap(v)).width, W * 0.42);
+            const lay = k.layoutRich(String(l || ""), W - 2 * PAD - vw - 30, 34, k.B, 2, 22, 600);
+            k.drawRich(lay, PAD + vw + 28, y + 92 - (lay.lines.length - 1) * lay.size * 1.2 - 4, lay.size * 1.2, k.B, "#FFFFFF", g.accent, "left", 600);
+          } })),
+        ], o(p2));
+      } else {
+        photoCard(k, g, [
+          B.tag(k, g, g.val("verdictTag") || "Borhan's verdict"),
+          B.text(k, g, g.val("verdict"), 52, 4, 700, "#FFFFFF"),
+          B.gap(8),
+          B.text(k, g, g.val("question"), 34, 2, 700, g.accent),
+        ], o(p1));
+      }
+    },
+  };
+})();
+
+</script>
+<script>
+// Tournaments section: each tournament gets its own set of cards in its own look, with its logo
+// kept on the phone once. To add a tournament, add an entry to BPG.TOURNAMENTS below.
+//   name     shown on the tournament button
+//   edition  the default "Tournament" line on its cards (shown when no logo is added)
+//   bg       the card colour (the ribbons and dial ring sit on top of it)
+//   cards    which tournament-look cards it has (keys of BPG.TEMPLATES to copy)
+//   example  example values that fit this tournament, per field id
+window.BPG = window.BPG || {};
+
+BPG.TOURNAMENTS = {
+  saff: {
+    name: "SAFF Championship", edition: "SAFF Championship 2026", bg: "#1640C8",
+    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
+    example: { t1: "Bangladesh", t2: "India", team: "Bangladesh", opp: "India" },
+  },
+};
+
+(function () {
+  const L = BPG.LAYOUTS, T = BPG.TEMPLATES, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+
+  // ---------- Group table (tournament look) ----------
+  // One team per line: Team | P | W | D | L | GD | Pts. The top two rows (or "qualify" count) are highlighted.
+  L.tgroup = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = BPG.tour, { top, glass, bottom } = BPG.tour2, tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      const y0 = top(k, g, g.val("title") || "Group A");
+      const rows = String(g.val("rows") || "").split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((r) => r[0]).slice(0, 8);
+      const cols = ["P", "W", "D", "L", "GD", "PTS"], q = parseInt(g.val("qualify"), 10);
+      const nq = isNaN(q) ? 2 : q;
+      const pTop = y0 + (tall ? 50 : 36), pBot = g.footerY - 70, hh = 56;
+      const rh = Math.min(tall ? 210 : 160, (pBot - pTop - hh - 20) / Math.max(1, rows.length));
+      glass(k, 60, pTop, W - 120, hh + rows.length * rh + 20, 30);
+      const cw = tall ? 84 : 76, cx0 = W - 100 - cw * (cols.length - 1);
+      ctx.save();
+      ctx.font = k.font(24, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream; ctx.textAlign = "center";
+      cols.forEach((c, i) => ctx.fillText(c, cx0 + i * cw, pTop + 40));
+      ctx.textAlign = "left"; ctx.fillText("TEAM", 100, pTop + 40); k.spaced(0);
+      rows.forEach((r, i) => {
+        const y = pTop + hh + i * rh, cy = y + rh / 2, inQ = i < nq;
+        if (inQ) { ctx.fillStyle = "rgba(255,210,63,0.16)"; k.roundRect(72, y + 4, W - 144, rh - 8, 18); ctx.fill(); ctx.fillStyle = C.gold; k.roundRect(72, y + 14, 8, rh - 28, 4); ctx.fill(); }
+        else if (i) { ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(90, y, W - 180, 2); }
+        const fs = Math.min(rh * 0.62, 84);
+        teamBadge(k, g, 104 + fs * 0.5, cy, fs, r[0], null);
+        const nm = cap(full(r[0])), nx = 104 + fs + 22;
+        ctx.textAlign = "left"; ctx.font = k.font(k.fit(nm, cx0 - nx - cw * 0.85, Math.round(rh * 0.34), k.D, "", 20), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, nx, cy + rh * 0.12);
+        ctx.textAlign = "center";
+        cols.forEach((c, j) => {
+          const v = r[j + 1] == null ? "" : r[j + 1], last = j === cols.length - 1;
+          ctx.font = last ? k.font(Math.round(rh * 0.36), k.D) : k.font(Math.round(rh * 0.27), k.C, 700);
+          ctx.fillStyle = last ? (inQ ? C.gold : "#FFFFFF") : "rgba(255,255,255,0.88)";
+          ctx.fillText(String(v), cx0 + j * cw, cy + rh * (last ? 0.13 : 0.1));
+        });
+      });
+      ctx.restore();
+      bottom(k, g);
+    },
+  };
+  T.tgroup = { cat: "football", name: "Group table (tournament look)", layout: "tgroup", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One team per line: Team | P | W | D | L | GD | Pts, top of the table first. The top rows that go through are highlighted.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Group A"],
+      ["rows","Table","Bangladesh | 2 | 2 | 0 | 0 | +3 | 6\nBhutan | 2 | 1 | 0 | 1 | 0 | 3\nMaldives | 2 | 0 | 1 | 1 | -1 | 1\nSri Lanka | 2 | 0 | 1 | 1 | -2 | 1",true,"area"],
+      ["qualify","How many go through","2"],["info","Info line (optional)","After match day 2",true],["bgc","Card colour (optional)",""]] };
+
+  // ---------- The section and its cards ----------
+  // Each tournament gets a copy of each card, filled with its own name and colour.
+  BPG.CATS = Object.assign({}, ...Object.entries(BPG.CATS).flatMap(([k, v]) => k === "football" ? [{ [k]: v }, { tour: "Tournaments" }] : [{ [k]: v }]));
+  Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => {
+    tr.cards.forEach((base) => {
+      const b = T[base]; if (!b) return;
+      const name = b.name.replace(/\s*\(tournament look\)/i, "").replace(/^Tournament photo frame$/, "Photo frame");
+      const fields = b.fields.map((f) => {
+        const c = f.slice();
+        if (c[0] === "tournament") { c[2] = tr.edition; c[1] = "Tournament (shows when no logo is added)"; }
+        if (c[0] === "bgc") c[2] = "";
+        if (tr.example && tr.example[c[0]] !== undefined && /^(t1|t2|team|opp)$/.test(c[0]) && !["pitch", "lineup", "tstats", "matchcard"].includes(base)) c[2] = tr.example[c[0]];
+        return c;
+      });
+      T[`${id}_${base}`] = Object.assign({}, b, { cat: "tour", tour: id, name, fields,
+        photo3: `${tr.name} logo (add it once, every ${tr.name} card uses it)` });
+    });
+  });
+})();
+
+</script>
+<script>
 // Quick fill: type one line like "Maaz Sadaqat 52*(38) 5x4 2x6 PAK vs SL" and the form fills itself.
 // BPG.quickParse(text) returns what it understood; BPG.quickApply(template, text) maps that onto a card's fields.
 window.BPG = window.BPG || {};
@@ -2695,6 +4113,8 @@ window.BPG = window.BPG || {};
     "Netherlands": ["ned", "nl", "holland"],
     "Scotland": ["sco"],
     "Nepal": ["nep"],
+    "Bhutan": ["bhu", "btn"],
+    "Maldives": ["mdv", "mald"],
     "UAE": ["uae"],
     "Oman": ["oma", "omn"],
     "USA": ["usa", "us"],
@@ -2822,7 +4242,7 @@ window.BPG = window.BPG || {};
   const SHORT = {
     "Bangladesh": "BAN", "Pakistan": "PAK", "Sri Lanka": "SL", "India": "IND", "Australia": "AUS", "England": "ENG",
     "South Africa": "SA", "New Zealand": "NZ", "Afghanistan": "AFG", "West Indies": "WI", "Zimbabwe": "ZIM", "Ireland": "IRE",
-    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
+    "Netherlands": "NED", "Scotland": "SCO", "Nepal": "NEP", "Bhutan": "BHU", "Maldives": "MDV", "UAE": "UAE", "Oman": "OMA", "USA": "USA", "Namibia": "NAM",
     "Canada": "CAN", "Hong Kong": "HK", "Argentina": "ARG", "Brazil": "BRA", "France": "FRA", "Germany": "GER", "Spain": "ESP",
     "Portugal": "POR", "Italy": "ITA", "Belgium": "BEL", "Croatia": "CRO", "Uruguay": "URU", "Morocco": "MAR", "Japan": "JPN", "Mexico": "MEX", "Colombia": "COL", "Ecuador": "ECU", "Chile": "CHI", "Paraguay": "PAR", "Peru": "PER", "Venezuela": "VEN", "Bolivia": "BOL", "Saudi Arabia": "KSA", "South Korea": "KOR", "Switzerland": "SUI", "Denmark": "DEN", "Senegal": "SEN", "Egypt": "EGY", "Nigeria": "NGA",
     "Uganda": "UGA", "Papua New Guinea": "PNG", "Qatar": "QAT", "Iran": "IRN", "Ghana": "GHA", "Cameroon": "CMR", "Ivory Coast": "CIV", "Algeria": "ALG", "Tunisia": "TUN", "Poland": "POL", "Austria": "AUT", "Turkey": "TUR", "Serbia": "SRB", "Wales": "WAL", "Norway": "NOR", "Sweden": "SWE", "Ukraine": "UKR", "Bayern Munich": "BAY", "Al Nassr": "NAS", "Al Hilal": "HIL", "Paris Saint-Germain": "PSG", "Juventus": "JUV", "AC Milan": "MIL", "Inter Milan": "INT", "Inter Miami": "MIA", "Atletico Madrid": "ATM", "Borussia Dortmund": "BVB", "Tottenham": "TOT", "Newcastle": "NEW", "Bayer Leverkusen": "B04",
@@ -2932,7 +4352,7 @@ window.BPG = window.BPG || {};
     put("score", p.score); put("overs", p.scoreOvers || p.overs);
     put("minute", p.minute); put("assist", p.assist);
     if (p.goals1 !== undefined) { put("t1", p.team); put("s1", p.goals1); put("t2", p.opp); put("s2", p.goals2); put("score", `${p.team} ${p.goals1}-${p.goals2} ${p.opp}`); }
-    else if (tpl.layout === "result" || tpl.layout === "fscore") { put("t1", p.team); put("t2", p.opp); }
+    else if (tpl.layout === "result" || tpl.layout === "fscore" || tpl.layout === "matchcard") { put("t1", p.team); put("t2", p.opp); }
     const labels = Object.keys(set).map((id) => tpl.fields.find((f) => f[0] === id)[1].replace(/\s*\(.*\)$/, ""));
     return { values: set, labels };
   };
@@ -2952,6 +4372,8 @@ window.BPG = window.BPG || {};
     testbowl: "Taijul 6/39 (24.4) BAN vs PAK",
     goal: "Messi 67' assist Alvarez ARG vs BRA",
     fscore: "ARG 2-1 BRA",
+    matchcard: "BAN 1-0 BHU",
+    lineup: "BAN vs BHU",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
   })[tpl.quick || tpl.layout] || "";
@@ -3104,6 +4526,18 @@ window.BPG = window.BPG || {};
     form: (v) => `${v("player")}, ${v("title")}: ${v("scores")}`,
     toss: (v) => `${v("player")} ${v("stamp")}. ${v("detail")}`,
     goal: (v) => `⚽ GOAL! ${v("player")} scores for ${v("team")} (${v("minute")}). ${v("score")}. Assist: ${v("assist")}.`,
+    matchcard: (v) => (String(v("s1")).trim() || String(v("s2")).trim() ? `${v("status") || "FT"}: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}` : `${v("stage") || "Match day"}: ${v("t1")} vs ${v("t2")}, ${v("status")}`) + ` | ${v("tournament")}\n${[v("g1"), v("g2")].filter((x) => String(x).trim()).join(" · ")}\n${v("headline")}`,
+    chase: (v) => `🏏 ${v("t1")} need ${v("need")} off ${v("balls")} balls against ${v("t2")}${v("wkts") ? ", " + v("wkts") + " wickets left" : ""}. Can they do it?`,
+    partnership: (v) => `🤝 ${v("runs")} runs${v("balls") ? " off " + v("balls") + " balls" : ""} for the ${v("wkt")} wicket. ${v("b1")} ${v("r1")}, ${v("b2")} ${v("r2")}.`,
+    poll: (v) => `${v("question")} ${v("match")}\nComment 1 for ${v("t1")}, 2 for ${v("t2")} 👇`,
+    h2h: (v) => `📊 ${v("t1")} vs ${v("t2")} head to head: ${v("w1")}-${v("w2")} in ${v("played")} matches${v("draws") ? ", " + v("draws") + " " + (v("dlabel") || "draws").toLowerCase() : ""}.`,
+    countdown: (v) => `⏳ ${v("number")} ${v("unit").toLowerCase()}: ${v("event")}. ${v("line")}`,
+    onthisday: (v) => `📅 On this day, ${v("date")} ${v("year")}: ${v("headline")}. ${v("line")}`,
+    profile: (v) => `${v("player")} | ${v("role")}\n${String(v("stats")).replace(/,\s*/g, " · ")}`,
+    debut: (v) => `🧢 ${v("format")} cap #${v("cap")}: ${v("player")}. ${v("line")}`,
+    story: (v) => `${v("headline")} (swipe ➡️)\n\n${v("result")}\n\n${v("question")}`,
+    tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
+    lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
     rating: (v) => `${v("player")} vs ${v("opp")}: ${v("rating")}/10. ${v("stats")}`,
@@ -4069,7 +5503,7 @@ window.BPG = window.BPG || {};
     cat: Object.keys(BPG.CATS)[0], tpl: firstOf(Object.keys(BPG.CATS)[0]), platform: "instagram",
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
-  const photos = { 1: null, 2: null };
+  const photos = { 1: null, 2: null, 3: null };
   let logoImg = null;
 
   try {
@@ -4107,7 +5541,17 @@ window.BPG = window.BPG || {};
   }
   function renderTypes() {
     $("types").innerHTML = "";
-    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
+    // Tournaments: pick the tournament first, then its cards.
+    let tour = null;
+    if (state.cat === "tour" && BPG.TOURNAMENTS) {
+      tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+      const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+      Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+        state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+      }));
+      $("types").appendChild(row);
+    }
+    Object.entries(T).filter(([, t]) => t.cat === state.cat && (!tour || t.tour === tour)).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
       state.tpl = key; persist(); renderAll();
     }));
   }
@@ -4194,6 +5638,14 @@ window.BPG = window.BPG || {};
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
     if (t.fontPick && BPG.fontPicker) BPG.fontPicker(box, state, persist, draw, t);
+    // Carousel cards: tap a slide to see it.
+    if (t.slides) {
+      const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Slide");
+      const cur = parseInt(val("slide"), 10) || 1;
+      (BPG.STORY_SLIDES || []).slice(0, t.slides).forEach((nm, i) => button(seg, `${i + 1} ${nm}`, cur === i + 1, () => { setVal("slide", String(i + 1)); renderFields(); }));
+      box.appendChild(seg);
+    }
+    $("allSlides").hidden = !t.slides;
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
@@ -4201,7 +5653,12 @@ window.BPG = window.BPG || {};
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
+    // Cards with no main photo but a crest or logo slot keep only those slots.
+    document.querySelectorAll("#photoBox > .fields > .field").forEach((el) => { if (el.id !== "photo2Wrap" && el.id !== "photo3Wrap") el.hidden = !!t.noMain; });
     $("photo2Label").textContent = t.photo2 || "Second photo";
+    $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
+    const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -4218,7 +5675,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
+  function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -4230,6 +5687,12 @@ window.BPG = window.BPG || {};
   };
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
+  // Where the logo sits: top right (default) or the small bottom-right corner.
+  function renderLogoPos() {
+    $("b_logopos").innerHTML = "";
+    [["bottom", "Bottom right"], ["top", "Top"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "bottom") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+  }
+  renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
@@ -4306,14 +5769,38 @@ window.BPG = window.BPG || {};
     img.bpgFocus = graded.bpgFocus = focus;
     photos[n] = { img: use, orig: use, plain: img, graded, cut: isPng, isPng, ...extra }; showCutMode(); draw();
     cutStatus(en.small ? `This photo is small (${en.w} x ${en.h}), so it was sharpened. A bigger photo (at least 1080 px wide) will still look better.` : "");
-    if (cutMode === "cut" && !isPng) makeCutout(n);
+    if (cutMode === "cut" && !isPng && !T[state.tpl].noCut) makeCutout(n);
     if (n === 1) showLibrary();
   }
-  [1, 2].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
+  [1, 2, 3].forEach((n) => $("photo" + n).addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    await usePhoto(n, await loadImage(f), { blob: f });
+    const img = await loadImage(f);
+    if (n === 3) { keepTourLogo(img); photos[3] = { img, plain: img, orig: img, isPng: true }; $("photo3Clear").hidden = false; draw(); e.target.value = ""; return; }
+    await usePhoto(n, img, { blob: f, tpl: T[state.tpl].layout }); // crests only show on the card they were added for
     e.target.value = ""; // so picking the same photo again still works
   }));
+
+  // The tournament logo stays on this phone (shrunk to 600 px), so it is added once per tournament.
+  function keepTourLogo(img) {
+    try {
+      const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      localStorage.setItem(logoKey(), c.toDataURL("image/png"));
+    } catch (e) {}
+  }
+  // Each tournament in the Tournaments section keeps its own logo; the other cards share one.
+  const logoKey = () => (T[state.tpl] && T[state.tpl].tour ? "bpg_tourlogo_" + T[state.tpl].tour : "bpg_tourlogo");
+  let logoLoaded = null;
+  function loadTourLogo() {
+    const key = logoKey(); if (key === logoLoaded) return; logoLoaded = key; photos[3] = null;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) { const i = new Image(); i.onload = () => { if (logoKey() !== key) return; photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+    } catch (e) {}
+  }
+  BPG.loadTourLogo = loadTourLogo;
+  loadTourLogo();
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.
@@ -4497,6 +5984,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
+      logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 
@@ -4597,6 +6085,22 @@ window.BPG = window.BPG || {};
     }
     for (const f of files) await saveBlob(f, f.name);
     status("Saved both sizes.");
+  });
+
+  // Carousel: every slide in one tap, in order, ready to post as one swipe post.
+  $("allSlides").addEventListener("click", async () => {
+    const t = T[state.tpl]; if (!t.slides) return;
+    const was = val("slide"), files = [], vals = (state.values[state.tpl] = state.values[state.tpl] || {});
+    for (let i = 1; i <= t.slides; i++) {
+      vals.slide = String(i); const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename().replace(".png", `-slide${i}.png`), { type: "image/png" }));
+    }
+    vals.slide = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared all slides."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status(`Saved ${files.length} slides.`);
   });
 
   // ---------- Install as an app ----------
