@@ -145,3 +145,5 @@ img { max-width: 100%; }
 .cut-editor .cut-tip { color: #fff; margin: 0; font-size: 14px; line-height: 1.4; text-align: center; max-width: 560px; }
 .cut-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
 .cut-editor .ghost { color: #fff; border-color: rgba(255,255,255,.45); background: transparent; }
+.tour-pick { grid-column: 1 / -1; margin-bottom: 4px; }
+.tour-pick button { font-weight: 700; }

@@ -158,6 +158,8 @@ img { max-width: 100%; }
 .cut-editor .cut-tip { color: #fff; margin: 0; font-size: 14px; line-height: 1.4; text-align: center; max-width: 560px; }
 .cut-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
 .cut-editor .ghost { color: #fff; border-color: rgba(255,255,255,.45); background: transparent; }
+.tour-pick { grid-column: 1 / -1; margin-bottom: 4px; }
+.tour-pick button { font-weight: 700; }
 </style>
 </head>
 <body>
@@ -279,7 +281,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v45";
+BPG.VERSION = "9 Nov 2026 · v46";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -690,10 +692,10 @@ BPG.TEMPLATES = {
       ["coach","Line at the bottom (optional)","Borhan's pick"],["tournament","League / week","BPL Week 6",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   poll: { cat: "general", name: "Ke jitbe? (poll)", layout: "poll", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
     hint: "Fans comment 1 or 2. Works on Instagram and Facebook. Flags come by themselves for countries.",
-    fields: [["question","Question","Ke jitbe?"],["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["match","Match line","SAFF Final · Sat 7:00 PM",true],["cta","Bottom line","Comment 1 or 2"],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+    fields: [["question","Question","Ke jitbe?"],["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["match","Match line","SAFF Final · Sat 7:00 PM",true],["cta","Bottom line","Comment 1 or 2"],["tournament","Tournament (optional)","",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   h2h: { cat: "general", name: "Head to head", layout: "h2h", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
     hint: "Last results from team 1's side: W L D, e.g. W L W W D. Leave draws empty for cricket or call it No result.",
-    fields: [["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["w1","Team 1 wins","4"],["w2","Team 2 wins","9"],["played","Played","16"],["draws","Draws","3"],["dlabel","Draws label","Draws"],["last5","Last results (team 1)","L D W L W"],["title","Heading","Head to head"],["tournament","Tournament (optional)","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+    fields: [["t1","Team 1","Bangladesh"],["t2","Team 2","India"],["w1","Team 1 wins","4"],["w2","Team 2 wins","9"],["played","Played","16"],["draws","Draws","3"],["dlabel","Draws label","Draws"],["last5","Last results (team 1)","L D W L W"],["title","Heading","Head to head"],["tournament","Tournament (optional)","",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   countdown: { cat: "general", name: "Countdown", layout: "countdown",
     fields: [["number","Number","10"],["unit","Next to it","Days to go"],["event","Event","*T20 World Cup* 2026",true],["line","Line (optional)","Starts 7 February in India and Sri Lanka",true],["tag","Small line","Countdown"],["info","Info line (optional)","",true]] },
   onthisday: { cat: "general", name: "On this day", layout: "onthisday",
@@ -2393,7 +2395,8 @@ window.BPG = window.BPG || {};
   // Card colour: typed hex, else royal blue.
   function baseColour(g) {
     const v = String(g.val("bgc") || "").trim().replace("#", "");
-    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : "#1640C8";
+    const tr = g.t.tour && BPG.TOURNAMENTS && BPG.TOURNAMENTS[g.t.tour];
+    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : (tr && tr.bg) || "#1640C8";
   }
   function mix(hex, to, f) {
     const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
@@ -3562,6 +3565,95 @@ window.BPG = window.BPG || {};
       }
     },
   };
+})();
+
+</script>
+<script>
+// Tournaments section: each tournament gets its own set of cards in its own look, with its logo
+// kept on the phone once. To add a tournament, add an entry to BPG.TOURNAMENTS below.
+//   name     shown on the tournament button
+//   edition  the default "Tournament" line on its cards (shown when no logo is added)
+//   bg       the card colour (the ribbons and dial ring sit on top of it)
+//   cards    which tournament-look cards it has (keys of BPG.TEMPLATES to copy)
+//   example  example values that fit this tournament, per field id
+window.BPG = window.BPG || {};
+
+BPG.TOURNAMENTS = {
+  saff: {
+    name: "SAFF Championship", edition: "SAFF Championship 2026", bg: "#1640C8",
+    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
+    example: { t1: "Bangladesh", t2: "India", team: "Bangladesh", opp: "India" },
+  },
+};
+
+(function () {
+  const L = BPG.LAYOUTS, T = BPG.TEMPLATES, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+
+  // ---------- Group table (tournament look) ----------
+  // One team per line: Team | P | W | D | L | GD | Pts. The top two rows (or "qualify" count) are highlighted.
+  L.tgroup = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = BPG.tour, { top, glass, bottom } = BPG.tour2, tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      const y0 = top(k, g, g.val("title") || "Group A");
+      const rows = String(g.val("rows") || "").split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((r) => r[0]).slice(0, 8);
+      const cols = ["P", "W", "D", "L", "GD", "PTS"], q = parseInt(g.val("qualify"), 10);
+      const nq = isNaN(q) ? 2 : q;
+      const pTop = y0 + (tall ? 50 : 36), pBot = g.footerY - 70, hh = 56;
+      const rh = Math.min(tall ? 210 : 160, (pBot - pTop - hh - 20) / Math.max(1, rows.length));
+      glass(k, 60, pTop, W - 120, hh + rows.length * rh + 20, 30);
+      const cw = tall ? 84 : 76, cx0 = W - 100 - cw * (cols.length - 1);
+      ctx.save();
+      ctx.font = k.font(24, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream; ctx.textAlign = "center";
+      cols.forEach((c, i) => ctx.fillText(c, cx0 + i * cw, pTop + 40));
+      ctx.textAlign = "left"; ctx.fillText("TEAM", 100, pTop + 40); k.spaced(0);
+      rows.forEach((r, i) => {
+        const y = pTop + hh + i * rh, cy = y + rh / 2, inQ = i < nq;
+        if (inQ) { ctx.fillStyle = "rgba(255,210,63,0.16)"; k.roundRect(72, y + 4, W - 144, rh - 8, 18); ctx.fill(); ctx.fillStyle = C.gold; k.roundRect(72, y + 14, 8, rh - 28, 4); ctx.fill(); }
+        else if (i) { ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(90, y, W - 180, 2); }
+        const fs = Math.min(rh * 0.62, 84);
+        teamBadge(k, g, 104 + fs * 0.5, cy, fs, r[0], null);
+        const nm = cap(full(r[0])), nx = 104 + fs + 22;
+        ctx.textAlign = "left"; ctx.font = k.font(k.fit(nm, cx0 - nx - cw * 0.85, Math.round(rh * 0.34), k.D, "", 20), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, nx, cy + rh * 0.12);
+        ctx.textAlign = "center";
+        cols.forEach((c, j) => {
+          const v = r[j + 1] == null ? "" : r[j + 1], last = j === cols.length - 1;
+          ctx.font = last ? k.font(Math.round(rh * 0.36), k.D) : k.font(Math.round(rh * 0.27), k.C, 700);
+          ctx.fillStyle = last ? (inQ ? C.gold : "#FFFFFF") : "rgba(255,255,255,0.88)";
+          ctx.fillText(String(v), cx0 + j * cw, cy + rh * (last ? 0.13 : 0.1));
+        });
+      });
+      ctx.restore();
+      bottom(k, g);
+    },
+  };
+  T.tgroup = { cat: "football", name: "Group table (tournament look)", layout: "tgroup", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One team per line: Team | P | W | D | L | GD | Pts, top of the table first. The top rows that go through are highlighted.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Group A"],
+      ["rows","Table","Bangladesh | 2 | 2 | 0 | 0 | +3 | 6\nBhutan | 2 | 1 | 0 | 1 | 0 | 3\nMaldives | 2 | 0 | 1 | 1 | -1 | 1\nSri Lanka | 2 | 0 | 1 | 1 | -2 | 1",true,"area"],
+      ["qualify","How many go through","2"],["info","Info line (optional)","After match day 2",true],["bgc","Card colour (optional)",""]] };
+
+  // ---------- The section and its cards ----------
+  // Each tournament gets a copy of each card, filled with its own name and colour.
+  BPG.CATS = Object.assign({}, ...Object.entries(BPG.CATS).flatMap(([k, v]) => k === "football" ? [{ [k]: v }, { tour: "Tournaments" }] : [{ [k]: v }]));
+  Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => {
+    tr.cards.forEach((base) => {
+      const b = T[base]; if (!b) return;
+      const name = b.name.replace(/\s*\(tournament look\)/i, "").replace(/^Tournament photo frame$/, "Photo frame");
+      const fields = b.fields.map((f) => {
+        const c = f.slice();
+        if (c[0] === "tournament") { c[2] = tr.edition; c[1] = "Tournament (shows when no logo is added)"; }
+        if (c[0] === "bgc") c[2] = "";
+        if (tr.example && tr.example[c[0]] !== undefined && /^(t1|t2|team|opp)$/.test(c[0]) && !["pitch", "lineup", "tstats", "matchcard"].includes(base)) c[2] = tr.example[c[0]];
+        return c;
+      });
+      T[`${id}_${base}`] = Object.assign({}, b, { cat: "tour", tour: id, name, fields,
+        photo3: `${tr.name} logo (add it once, every ${tr.name} card uses it)` });
+    });
+  });
 })();
 
 </script>
@@ -5010,7 +5102,17 @@ window.BPG = window.BPG || {};
   }
   function renderTypes() {
     $("types").innerHTML = "";
-    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
+    // Tournaments: pick the tournament first, then its cards.
+    let tour = null;
+    if (state.cat === "tour" && BPG.TOURNAMENTS) {
+      tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+      const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+      Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+        state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+      }));
+      $("types").appendChild(row);
+    }
+    Object.entries(T).filter(([, t]) => t.cat === state.cat && (!tour || t.tour === tour)).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
       state.tpl = key; persist(); renderAll();
     }));
   }
@@ -5133,7 +5235,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
+  function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -5237,14 +5339,22 @@ window.BPG = window.BPG || {};
     try {
       const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
       c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      localStorage.setItem("bpg_tourlogo", c.toDataURL("image/png"));
+      localStorage.setItem(logoKey(), c.toDataURL("image/png"));
     } catch (e) {}
   }
-  try {
-    const saved = localStorage.getItem("bpg_tourlogo");
-    if (saved) { const i = new Image(); i.onload = () => { photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
-  } catch (e) {}
-  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem("bpg_tourlogo"); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
+  // Each tournament in the Tournaments section keeps its own logo; the other cards share one.
+  const logoKey = () => (T[state.tpl] && T[state.tpl].tour ? "bpg_tourlogo_" + T[state.tpl].tour : "bpg_tourlogo");
+  let logoLoaded = null;
+  function loadTourLogo() {
+    const key = logoKey(); if (key === logoLoaded) return; logoLoaded = key; photos[3] = null;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) { const i = new Image(); i.onload = () => { if (logoKey() !== key) return; photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+    } catch (e) {}
+  }
+  BPG.loadTourLogo = loadTourLogo;
+  loadTourLogo();
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.

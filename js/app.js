@@ -49,7 +49,17 @@ window.BPG = window.BPG || {};
   }
   function renderTypes() {
     $("types").innerHTML = "";
-    Object.entries(T).filter(([, t]) => t.cat === state.cat).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
+    // Tournaments: pick the tournament first, then its cards.
+    let tour = null;
+    if (state.cat === "tour" && BPG.TOURNAMENTS) {
+      tour = T[state.tpl] && T[state.tpl].tour || Object.keys(BPG.TOURNAMENTS)[0];
+      const row = document.createElement("div"); row.className = "seg tour-pick"; row.setAttribute("aria-label", "Tournament");
+      Object.entries(BPG.TOURNAMENTS).forEach(([id, tr]) => button(row, "🏆 " + tr.name, id === tour, () => {
+        state.tpl = Object.keys(T).find((k) => T[k].tour === id); persist(); renderAll();
+      }));
+      $("types").appendChild(row);
+    }
+    Object.entries(T).filter(([, t]) => t.cat === state.cat && (!tour || t.tour === tour)).forEach(([key, t]) => button($("types"), t.name, state.tpl === key, () => {
       state.tpl = key; persist(); renderAll();
     }));
   }
@@ -172,7 +182,7 @@ window.BPG = window.BPG || {};
     Object.entries(THEMES).forEach(([key, th]) => { const o = document.createElement("option"); o.value = key; o.textContent = th.label; sel.appendChild(o); });
     sel.value = THEMES[state.theme] ? state.theme : "brand";
   }
-  function renderAll() { captionEdited = false; renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
+  function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
     state: () => state, draw: () => draw(), persist,
@@ -276,14 +286,22 @@ window.BPG = window.BPG || {};
     try {
       const sc = Math.min(1, 600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
       c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      localStorage.setItem("bpg_tourlogo", c.toDataURL("image/png"));
+      localStorage.setItem(logoKey(), c.toDataURL("image/png"));
     } catch (e) {}
   }
-  try {
-    const saved = localStorage.getItem("bpg_tourlogo");
-    if (saved) { const i = new Image(); i.onload = () => { photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
-  } catch (e) {}
-  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem("bpg_tourlogo"); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
+  // Each tournament in the Tournaments section keeps its own logo; the other cards share one.
+  const logoKey = () => (T[state.tpl] && T[state.tpl].tour ? "bpg_tourlogo_" + T[state.tpl].tour : "bpg_tourlogo");
+  let logoLoaded = null;
+  function loadTourLogo() {
+    const key = logoKey(); if (key === logoLoaded) return; logoLoaded = key; photos[3] = null;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) { const i = new Image(); i.onload = () => { if (logoKey() !== key) return; photos[3] = { img: i, plain: i, orig: i, isPng: true }; $("photo3Clear").hidden = !T[state.tpl].photo3; draw(); }; i.src = saved; }
+    } catch (e) {}
+  }
+  BPG.loadTourLogo = loadTourLogo;
+  loadTourLogo();
+  $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.

@@ -15,7 +15,8 @@ window.BPG = window.BPG || {};
   // Card colour: typed hex, else royal blue.
   function baseColour(g) {
     const v = String(g.val("bgc") || "").trim().replace("#", "");
-    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : "#1640C8";
+    const tr = g.t.tour && BPG.TOURNAMENTS && BPG.TOURNAMENTS[g.t.tour];
+    return /^[0-9a-f]{6}$/i.test(v) ? "#" + v : (tr && tr.bg) || "#1640C8";
   }
   function mix(hex, to, f) {
     const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16);
