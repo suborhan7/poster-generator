@@ -322,11 +322,14 @@ window.BPG = window.BPG || {};
 
       // Top-left: team vs opponent as small tiles.
       const tile = tall ? 150 : 132, ty = g.st + 40 + tile * 0.34;
-      teamBadge(k, g, PAD + tile / 2, ty, tile, g.val("team"), g.photos[2]);
-      ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(tall ? 50 : 44, k.H, 900); ctx.fillStyle = "#FFFFFF";
-      ctx.fillText("VS", PAD + tile + 62, ty + 16);
-      ctx.restore();
-      if (g.val("opp")) teamBadge(k, g, PAD + tile * 1.5 + 124, ty, tile, g.val("opp"), null);
+      const hasTeam = String(g.val("team") || "").trim() || g.photos[2];
+      if (hasTeam) {
+        teamBadge(k, g, PAD + tile / 2, ty, tile, g.val("team"), g.photos[2]);
+        ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(tall ? 50 : 44, k.H, 900); ctx.fillStyle = "#FFFFFF";
+        ctx.fillText("VS", PAD + tile + 62, ty + 16);
+        ctx.restore();
+      }
+      if (hasTeam && g.val("opp")) teamBadge(k, g, PAD + tile * 1.5 + 124, ty, tile, g.val("opp"), null);
       // Top-right: tournament logo or name.
       tourTop(k, g, W - PAD, g.st + 20, W * 0.36, tall ? 300 : 250, "right");
 
@@ -335,8 +338,8 @@ window.BPG = window.BPG || {};
       const head = cap(g.val("title") || "Starting"), hs = k.fit(head, W * 0.5, tall ? 104 : 92, k.H, 900, 40);
       let y = ty + tile * 0.34 + 30 + hs * 0.9;
       ctx.font = k.font(hs, k.H, 900); ctx.fillStyle = "#FFFFFF"; ctx.fillText(head, PAD, y);
-      const xiS = tall ? 300 : 250; y += xiS * 0.84 + 22;
-      ctx.font = k.font(xiS, k.D); ctx.fillText("XI", PAD - 6, y);
+      const xiW = cap(g.val("xi") || "XI"), xiS = k.fit(xiW, W * 0.56, tall ? 300 : 250, k.D, "", 120); y += xiS * 0.84 + 22;
+      ctx.font = k.font(xiS, k.D); ctx.fillText(xiW, PAD - 6, y);
       ctx.restore();
 
       // The eleven, sized to the space left.

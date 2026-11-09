@@ -128,9 +128,10 @@ window.BPG = window.BPG || {};
       tourBg(k, g, true);
       // header: flag, team name, formation
       const hy = g.st + (tall ? 70 : 50), fs = tall ? 130 : 112;
-      teamBadge(k, g, PAD + fs * 0.55, hy + 10, fs, g.val("team"), g.photos[2]);
+      const hasTeam = String(g.val("team") || "").trim() || g.photos[2];
+      if (hasTeam) teamBadge(k, g, PAD + fs * 0.55, hy + 10, fs, g.val("team"), g.photos[2]);
       ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
-      const tx = PAD + fs * 1.2 + 20;
+      const tx = hasTeam ? PAD + fs * 1.2 + 20 : PAD;
       ctx.font = k.font(k.fit(cap(g.val("title") || "Starting XI"), W - tx - 240, tall ? 70 : 62, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("title") || "Starting XI"), tx, hy + 4);
       ctx.font = k.font(30, k.C, 700); k.spaced(4); ctx.fillStyle = C.cream;
       ctx.fillText([cap(full(g.val("team"))), g.val("opp") ? "VS " + cap(full(g.val("opp"))) : ""].filter(Boolean).join("  "), tx, hy + 46, W - tx - 240); k.spaced(0);
@@ -181,9 +182,11 @@ window.BPG = window.BPG || {};
       });
       if (g.val("coach")) {
         ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
-        ctx.fillText("COACH: " + cap(g.val("coach")), PAD, g.footerY - 52, W - 2 * PAD); k.spaced(0); ctx.restore();
+        const cl = g.t.coachLabel !== undefined ? g.t.coachLabel : "Coach: ";
+        ctx.fillText(cap(cl) + cap(g.val("coach")), PAD, g.footerY - 52, W - 2 * PAD); k.spaced(0); ctx.restore();
       }
       bottom(k, g);
     },
   };
+  BPG.tour2 = { top, glass, bottom };
 })();

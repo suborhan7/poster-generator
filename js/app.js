@@ -135,6 +135,14 @@ window.BPG = window.BPG || {};
     if (ex || BPG.aiKey()) quickBox(box, t, ex);
     addField(box, "f_kicker", "Match tag (optional, shows small at the bottom)", state.kicker, true, "text", (v) => { state.kicker = v; persist(); draw(); });
     addField(box, "f_verdict", "Your verdict (optional, shows at the bottom)", state.verdict || "", true, "text", (v) => { state.verdict = v; persist(); draw(); });
+    // Carousel cards: tap a slide to see it.
+    if (t.slides) {
+      const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Slide");
+      const cur = parseInt(val("slide"), 10) || 1;
+      (BPG.STORY_SLIDES || []).slice(0, t.slides).forEach((nm, i) => button(seg, `${i + 1} ${nm}`, cur === i + 1, () => { setVal("slide", String(i + 1)); renderFields(); }));
+      box.appendChild(seg);
+    }
+    $("allSlides").hidden = !t.slides;
     if (t.big) addField(box, "f_big", "Big headline word", val("__big") || t.big, false, "text", (v) => setVal("__big", v));
     t.fields.forEach(([id, label, , wide, type]) => addField(box, `f_${state.tpl}_${id}`, label, val(id), wide, type, (v) => { setVal(id, v); if (NAME_FIELDS.includes(id)) nameChanged(); }));
     // Cards with no team field can still take a team's jersey colours.
@@ -559,6 +567,22 @@ window.BPG = window.BPG || {};
     }
     for (const f of files) await saveBlob(f, f.name);
     status("Saved both sizes.");
+  });
+
+  // Carousel: every slide in one tap, in order, ready to post as one swipe post.
+  $("allSlides").addEventListener("click", async () => {
+    const t = T[state.tpl]; if (!t.slides) return;
+    const was = val("slide"), files = [], vals = (state.values[state.tpl] = state.values[state.tpl] || {});
+    for (let i = 1; i <= t.slides; i++) {
+      vals.slide = String(i); const blob = await toBlob();
+      if (blob) files.push(new File([blob], filename().replace(".png", `-slide${i}.png`), { type: "image/png" }));
+    }
+    vals.slide = was; draw();
+    if (navigator.canShare && navigator.canShare({ files }) && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ files }); status("Shared all slides."); return; } catch (e) { if (e.name === "AbortError") return; }
+    }
+    for (const f of files) await saveBlob(f, f.name);
+    status(`Saved ${files.length} slides.`);
   });
 
   // ---------- Install as an app ----------

@@ -21,9 +21,9 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | Group | Cards |
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
-| Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss, Playing XI (tournament look) |
-| Football | Goal, Full-time score, Transfer, Match card, Starting XI and Tournament photo frame, Fixtures, Match stats, XI on the pitch (formations) (clean tournament look: tournament logo, waving flags or crests, ribbons around the edges, full time / live / kick-off, winner line), Red card, Player rating |
-| General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Player vs player (stats with bars), Breaking news, Instant news, Record / achievement, Did you know?, MVP / player of the month, Photo frame |
+| Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss, Playing XI (tournament look), Chase tracker (required rate, win chance bar), Partnership, Team of the week |
+| Football | Goal, Full-time score, Transfer, Match card, Starting XI and Tournament photo frame, Fixtures, Match stats, XI on the pitch (formations) (clean tournament look: tournament logo, waving flags or crests, ribbons around the edges, full time / live / kick-off, winner line), Red card, Player rating, Team of the week on the pitch |
+| General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Player vs player (stats with bars), Breaking news, Instant news, Record / achievement, Did you know?, MVP / player of the month, Photo frame, Ke jitbe? poll (comment 1 or 2), Head to head, Countdown, On this day (black and white photo), Player profile, Debut cap, Match story (5-slide carousel with a Download all slides button) |
 
 Features on every card:
 
