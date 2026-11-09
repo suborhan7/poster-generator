@@ -21,6 +21,7 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | Group | Cards |
 | --- | --- |
 | Borhan Rants | Match reaction, Day report (your own style, with the Rant Meter) |
+| Stylish | Runs milestone, Wicket haul, Goal moment, Result, Big number / record: one huge worn headline (`219* RUNS!`) with a font and texture you pick |
 | Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss |
 | Football | Goal, Full-time score, Red card, Player rating |
 | General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Breaking news, Photo frame |
@@ -41,6 +42,8 @@ Features on every card:
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/stylish.js` | The Stylish cards: headline font list, the worn-print texture, the font picker | To add a headline font or change the texture |
+| `css/fonts.css`, `fonts/` | Headline fonts saved with the site (free Google Fonts, OFL) so they work offline | To add a font |
 | `js/zip.js` | Reads and writes .zip files in the browser, and works out a player's name from a folder or file name | To change how names are read from a zip |
 | `js/library.js` | Photo library: player photos saved on the phone (IndexedDB) and found by name | To change how names are matched |
 | `js/smartfill.js` | Smart fill: sends the quick fill note to Google's free Gemini AI (your own free key) and gets back which field each piece goes in | To change the AI's instructions or the models it tries |

@@ -251,7 +251,7 @@ window.BPG = window.BPG || {};
     put("team", ids.has("abbr") || tpl.layout !== "reaction" ? p.team : BPG.teamShort(p.team));
     put("abbr", p.team && BPG.teamShort(p.team));
     put("opp", p.opp);
-    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" ? p.given : p.runs);
+    put("runs", tpl.layout === "bowling" || tpl.layout === "testbowl" || tpl.quick === "bowling" ? p.given : p.runs);
     put("balls", tpl.layout === "over" ? undefined : p.balls);
     put("fours", p.fours); put("sixes", p.sixes);
     put("wkts", p.wkts);
@@ -280,5 +280,5 @@ window.BPG = window.BPG || {};
     fscore: "ARG 2-1 BRA",
     redcard: "Casemiro 58' BRA vs ARG",
     rating: "Messi ARG vs BRA",
-  })[tpl.layout] || "";
+  })[tpl.quick || tpl.layout] || "";
 })();

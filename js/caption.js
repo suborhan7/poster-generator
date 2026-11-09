@@ -37,6 +37,13 @@ window.BPG = window.BPG || {};
     stumps: (v) => `${v("status")}: ${v("t1")} ${v("s1")}, ${v("t2")} ${v("s2")}. ${v("line")}`,
     testresult: (v) => `${v("winner")} beat ${v("loser")} ${v("margin")}! ${v("series")} ${v("potm") ? "Player of the match: " + v("potm") + "." : ""}`,
     squad: (v, t, raw) => { const n = String(raw("players")).split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")); return `🚨 ${v("team")} ${v("title").toLowerCase() || "squad"} is out! ${n.length} players:\n${n.join(", ")}`; },
+    grunge: (v, t) => ({
+      runs: () => `🔥 ${v("player")}: ${v("runs")} ${v("unit").toLowerCase() || "runs!"} ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+      wickets: () => `🎯 ${v("player")}: ${v("wkts")} wickets${v("runs") ? " for " + v("runs") : ""}${v("overs") ? " in " + v("overs") + " overs" : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+      goal: () => `⚽ ${v("player")} ${v("minute")}! ${v("score")}. ${v("info")}`,
+      result: () => `🏆 ${v("winner")} ${(v("word") || "win").toLowerCase().replace(/!+$/, "")} ${v("margin")}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+      number: () => `${v("name")}: ${v("number")} ${v("unit").toLowerCase()} ${v("info").replace(/\s*\|\s*/g, " · ")}`,
+    })[t.kind](),
     bigknock: (v) => `🔥 ${v("player")}: ${v("runs")}${v("balls") ? " off " + v("balls") : " runs"}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     bigresult: (v) => `${v("winner")} ${v("verb") || "beat"} ${v("loser")}${v("margin") ? " " + v("margin") : ""}! ${v("info").replace(/\s*\|\s*/g, " · ")}`,
     seriesscore: () => { const s = BPG.series && BPG.series.current(); if (!s) return ""; if (s.teams.length > 2) return `${s.name}: results so far.`; const st = BPG.series.seriesLine(s); return `${s.name}: ${st.text.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}.`; },

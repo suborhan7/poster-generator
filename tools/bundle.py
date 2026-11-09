@@ -2,6 +2,7 @@
 
 Run from the repository root:  python3 tools/bundle.py
 """
+import base64
 import pathlib
 import re
 
@@ -10,6 +11,11 @@ html = (root / "index.html").read_text(encoding="utf-8")
 
 css = (root / "css" / "styles.css").read_text(encoding="utf-8")
 html = html.replace('<link rel="stylesheet" href="css/styles.css">', "<style>\n" + css + "</style>")
+
+# The headline fonts go inside the file too, so the single file works offline.
+fonts = (root / "css" / "fonts.css").read_text(encoding="utf-8")
+fonts = re.sub(r"url\(\.\./fonts/([^)]+)\)", lambda m: "url(data:font/woff2;base64," + base64.b64encode((root / "fonts" / m.group(1)).read_bytes()).decode() + ")", fonts)
+html = html.replace('<link rel="stylesheet" href="css/fonts.css">', "<style>\n" + fonts + "</style>")
 
 
 def inline_script(match):

@@ -44,6 +44,23 @@ BPG.TEMPLATES = {
   assists: { cat: "series", name: "Most assists (football)", layout: "leaders", stat: "assists", big: "MOST ASSISTS",
     fields: [["title","Title (optional)",""],["rows","How many players","5"],["tag","Small line above (optional)","",true]] },
 
+  // ---------------- Stylish (big worn headline, pick the font and texture: js/stylish.js) ----------------
+  gruns: { cat: "stylish", name: "Runs milestone", layout: "grunge", kind: "runs", fontPick: true, quick: "bigknock",
+    hint: "Pick the headline font and texture below the fields. Use | in the info line to split it.",
+    fields: [["player","Player","Mushfiqur Rahim"],["team","Team (sets the colours)","Bangladesh"],["runs","Runs","219*"],["unit","Word after the number","RUNS!"],["info","Info line","1st Test | Day 3 | BAN vs PAK",true]] },
+  gwkts: { cat: "stylish", name: "Wicket haul", layout: "grunge", kind: "wickets", fontPick: true, quick: "bowling",
+    hint: "The figures (6/39) go at the start of the info line for you.",
+    fields: [["player","Bowler","Taijul Islam"],["team","Team (sets the colours)","Bangladesh"],["wkts","Wickets","6"],["unit","Word after the number","WICKETS!"],["runs","Runs given","39"],["overs","Overs","24.4"],["info","Info line","2nd Test | Mirpur",true]] },
+  ggoal: { cat: "stylish", name: "Goal moment", layout: "grunge", kind: "goal", big: "GOAL!", fontPick: true, quick: "goal",
+    hint: "Change the big word for HAT-TRICK!, WHAT A STRIKE! and so on. Put *stars* around the words to colour, otherwise it's all in colour.",
+    fields: [["player","Scorer","Lionel Messi"],["team","Team (sets the colours)","Argentina"],["minute","Minute","67'"],["score","Score now","ARG 1-0 BRA",true],["info","Info line (optional)","WC qualifier",true]] },
+  gresult: { cat: "stylish", name: "Result", layout: "grunge", kind: "result", fontPick: true,
+    hint: "The winning team goes in colour. A long name drops to two lines by itself.",
+    fields: [["winner","Winning team","Bangladesh"],["word","Word after it","WIN!"],["tag","Small label (optional)","Series clinched"],["margin","Margin","by 7 wickets"],["info","Info line","3rd ODI | Chattogram",true]] },
+  gnumber: { cat: "stylish", name: "Big number / record", layout: "grunge", kind: "number", fontPick: true,
+    hint: "Any record or stat: 900 GOALS!, 100th TEST!, 15 SIXES! The number goes in colour.",
+    fields: [["name","Name label","Cristiano Ronaldo"],["number","Number","950"],["unit","Word after the number","GOALS!"],["info","Info line","Career goals | All competitions",true]] },
+
   // ---------------- Cricket ----------------
   fifty: { cat: "cricket", name: "Fifty", layout: "batting", milestone: "50", big: "FIFTY",
     hint: "Strike rate and the fours/sixes/running split are worked out for you. With a cutout photo, the big 50 sits behind the player.",
