@@ -48,6 +48,13 @@
     <section class="box" id="photoBox">
       <span class="label">Photo</span>
       <div class="fields">
+        <div class="field wide" id="collageWrap" hidden>
+          <label for="collageAdd">Collage photos</label>
+          <div class="quick-row"><button type="button" id="collagePick">Add photos</button><button class="ghost" type="button" id="collageClear">Clear all</button></div>
+          <input id="collageAdd" type="file" accept="image/*" multiple hidden>
+          <div class="lib-grid col-grid" id="collageGrid"></div>
+          <p class="hint" id="collageStatus"></p>
+        </div>
         <div class="field wide"><label for="photo1">Player photo</label><input id="photo1" type="file" accept="image/*"></div>
         <div class="field wide lib" id="libWrap">
           <label for="libName">My photo library (saved on this phone)</label>
@@ -139,6 +146,7 @@
 <script src="js/tournament2.js"></script>
 <script src="js/morecards.js"></script>
 <script src="js/newcards.js"></script>
+<script src="js/collage.js"></script>
 <script src="js/tournaments.js"></script>
 <script src="js/quickfill.js"></script>
 <script src="js/smartfill.js"></script>

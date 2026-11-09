@@ -3,7 +3,7 @@
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v48";
+BPG.VERSION = "9 Nov 2026 · v49";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -33,7 +33,7 @@ BPG.PLATFORMS = {
   tiktok: { label: "TikTok 9:16", w: 1080, h: 1920, top: 230, bottom: 1536 },
 };
 
-BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", test: "Test cricket", football: "Football", general: "General" };
+BPG.CATS = { rants: "Borhan Rants", series: "Series", cricket: "Cricket", test: "Test cricket", football: "Football", general: "General", collage: "Collage" };
 
 // Fonts used on the posters. Bangla text falls back to Hind Siliguri automatically.
 // Jersey colours, used by the "Team colours" theme. bg = dark base, accent = highlight, stroke = paint strokes.

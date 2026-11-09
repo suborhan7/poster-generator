@@ -23,7 +23,8 @@ window.BPG = window.BPG || {};
     let y = infoY - (o.bottomGap || 52) - total;
     const photoTop = y - 30;
     const gp = o.photo !== undefined ? Object.assign({}, g, { photo: o.photo }) : g;
-    if (!k.bleedPhoto(gp, photoTop, o.grey)) k.photoHint(g, g.st + (photoTop - g.st) / 2);
+    // o.drawPhoto replaces the one photo with something else, e.g. a collage (collage.js).
+    if (!(o.drawPhoto ? o.drawPhoto(photoTop) : k.bleedPhoto(gp, photoTop, o.grey))) k.photoHint(g, g.st + (photoTop - g.st) / 2);
     g.subj = gp.subj;
     if (o.after) o.after(photoTop);
     ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
