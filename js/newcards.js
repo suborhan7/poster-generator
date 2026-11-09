@@ -217,7 +217,7 @@ window.BPG = window.BPG || {};
   const T = () => BPG.tour, T2 = () => BPG.tour2;
 
   L.h2h = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -266,7 +266,7 @@ window.BPG = window.BPG || {};
 
   // "Ke jitbe?": two teams, comment 1 or 2. Works on Instagram and Facebook alike (no reactions needed).
   L.poll = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -306,10 +306,11 @@ window.BPG = window.BPG || {};
       // Dots on top: which slide this is.
       const pager = () => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
-        const r = 9, gap = 30, x0 = W - PAD - (SLIDES.length - 1) * gap, y = g.st + 44;
+        // With the logo at the top right, the dots move to the left with the match line under them.
+        const r = 9, gap = 30, x0 = g.logoTop ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
         SLIDES.forEach((_, i) => { ctx.beginPath(); ctx.arc(x0 + i * gap, y, i + 1 === n ? r + 2 : r - 2, 0, Math.PI * 2); ctx.fillStyle = i + 1 === n ? g.accent : "rgba(255,255,255,0.6)"; ctx.fill(); });
         ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
-        if (g.val("tag")) ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40);
+        if (g.val("tag")) { if (g.logoTop) ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
         k.spaced(0); ctx.restore();
       };
       // "Swipe" on slides 1-4, the info line on the last one.

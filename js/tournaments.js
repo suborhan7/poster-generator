@@ -23,7 +23,7 @@ BPG.TOURNAMENTS = {
   // ---------- Group table (tournament look) ----------
   // One team per line: Team | P | W | D | L | GD | Pts. The top two rows (or "qualify" count) are highlighted.
   L.tgroup = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = BPG.tour, { top, glass, bottom } = BPG.tour2, tall = g.H / W > 1.5;
       tourBg(k, g, true);

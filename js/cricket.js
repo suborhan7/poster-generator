@@ -640,7 +640,7 @@ window.BPG = window.BPG || {};
   // One name per line. A blank line starts a new group; a line starting with # is a small group heading.
   // (C), (VC) and (WK) after a name are shown small in the accent colour.
   L.squad = {
-    standard: false, ownSweep: true,
+    standard: false, ownSweep: true, logoBottom: true, // the team name owns the top
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, colW = W * 0.55;
       // No player photo here: the team's flag, waving on the right, fading into the team colour.

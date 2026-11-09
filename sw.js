@@ -1,6 +1,6 @@
 // Lets the studio open offline and install as an app.
 // Network first: when you're online you always get the newest version; the saved copy is only used offline.
-const CACHE = "borhan-studio-v9";
+const CACHE = "borhan-studio-v10";
 const FILES = ["./", "index.html", "css/styles.css", "manifest.webmanifest", "icons/icon-192.png",
   "js/config.js", "js/templates.js", "js/engine.js", "js/layouts.js", "js/cricket.js", "js/testcards.js", "js/tournament.js", "js/tournament2.js", "js/morecards.js", "js/newcards.js", "js/tournaments.js", "js/quickfill.js", "js/smartfill.js", "js/zip.js", "js/library.js", "js/caption.js", "js/series.js", "js/app.js", "js/series-ui.js", "js/cutout.js", "js/cutfix.js", "js/enhance.js"];
 

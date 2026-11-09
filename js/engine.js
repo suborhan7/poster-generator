@@ -172,11 +172,35 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
-  // Logo + name, small, in the bottom-right corner. y is the baseline of the bottom row.
+  // Logo + name. By default at the top right, like a TV channel bug: round badge, a thin line, the page name.
+  // Tournament-look cards (and "Logo place: Bottom" in Brand settings) keep it small in the bottom-right corner.
+  // y is the baseline of the bottom row.
   k.brandCorner = (g, y) => {
+    if (g.logoTop) { k.brandTop(g); return; }
     const size = 40;
     k.logoMark(g, g.W - 56 - size, y - size + 4, size);
     if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+  };
+  k.brandTop = (g) => {
+    const logo = env.logo(), top = g.st + (g.H / g.W > 1.5 ? 10 : 34), right = g.W - 52;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 14;
+    if (logo) { // your own logo already has the name in it
+      const h = 76, sc = h / logo.height, w = Math.min(logo.width * sc, 300);
+      ctx.drawImage(logo, right - w, top, w, w === 300 ? logo.height * (300 / logo.width) : h); ctx.restore(); return;
+    }
+    const name = String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants";
+    ctx.font = k.font(38, k.B, 500); const tw = ctx.measureText(name).width;
+    const s = 62, cy = top + s / 2, tx = right - tw;
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(name, tx, cy + 13);
+    ctx.fillRect(tx - 18, cy - 22, 2.5, 44); // the thin line between badge and name
+    // round badge with the BR bubble inside
+    const bx = tx - 30 - s / 2;
+    ctx.beginPath(); ctx.arc(bx, cy, s / 2, 0, Math.PI * 2);
+    const gr = ctx.createLinearGradient(bx, cy - s / 2, bx, cy + s / 2); gr.addColorStop(0, "#1B2A4A"); gr.addColorStop(1, "#0B1326");
+    ctx.fillStyle = gr; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 3; ctx.strokeStyle = g.accent; ctx.stroke();
+    ctx.restore();
+    k.logoMark(g, bx - 21, cy - 19, 42);
   };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.

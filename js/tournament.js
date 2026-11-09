@@ -210,7 +210,7 @@ window.BPG = window.BPG || {};
 
   // ---------- Match card: full time, live, half time, or kick-off ----------
   L.matchcard = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, cx = W / 2, tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -298,7 +298,7 @@ window.BPG = window.BPG || {};
   // ---------- Starting XI ----------
   // "20 Gyeltshen Zangpo (GK)" one per line. Subs: one per line or comma between.
   L.lineup = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, tall = H / W > 1.5;
       tourBg(k, g, true);
@@ -384,7 +384,7 @@ window.BPG = window.BPG || {};
   // ---------- Tournament photo frame ----------
   // Any photo from the tournament, full size, with the tournament's ribbons and ring around the edges.
   L.tframe = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
       const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null; // a crest is not a photo

@@ -223,6 +223,7 @@ img { max-width: 100%; }
         <summary>Brand settings</summary>
         <div class="fields">
           <div class="field wide"><label for="b_theme">Colour theme</label><select id="b_theme"></select></div>
+          <div class="field wide"><span class="label">Logo place</span><div class="seg" id="b_logopos" role="group" aria-label="Logo place"></div></div>
           <div class="field"><label for="b_handle">Handle</label><input id="b_handle" type="text"></div>
           <div class="field"><label for="b_name">Page name</label><input id="b_name" type="text"></div>
           <div class="field"><label for="b_accent">Accent colour</label><input id="b_accent" type="color"></div>
@@ -281,7 +282,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v46";
+BPG.VERSION = "9 Nov 2026 · v47";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -892,11 +893,35 @@ BPG.createKit = function (ctx, env) {
     ctx.font = k.font(34, D); ctx.fillStyle = k.inkOn(g.accent); ctx.textAlign = "center"; ctx.fillText("BR", 0, 13);
     ctx.restore(); ctx.textAlign = "left";
   };
-  // Logo + name, small, in the bottom-right corner. y is the baseline of the bottom row.
+  // Logo + name. By default at the top right, like a TV channel bug: round badge, a thin line, the page name.
+  // Tournament-look cards (and "Logo place: Bottom" in Brand settings) keep it small in the bottom-right corner.
+  // y is the baseline of the bottom row.
   k.brandCorner = (g, y) => {
+    if (g.logoTop) { k.brandTop(g); return; }
     const size = 40;
     k.logoMark(g, g.W - 56 - size, y - size + 4, size);
     if (!env.logo()) k.wordmark(g, g.W - 56 - size - 12, y - 4, "right", 20);
+  };
+  k.brandTop = (g) => {
+    const logo = env.logo(), top = g.st + (g.H / g.W > 1.5 ? 10 : 34), right = g.W - 52;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 14;
+    if (logo) { // your own logo already has the name in it
+      const h = 76, sc = h / logo.height, w = Math.min(logo.width * sc, 300);
+      ctx.drawImage(logo, right - w, top, w, w === 300 ? logo.height * (300 / logo.width) : h); ctx.restore(); return;
+    }
+    const name = String(env.state().brand.name || "").replace(/\s+about.*$/i, "").trim() || "Borhan Rants";
+    ctx.font = k.font(38, k.B, 500); const tw = ctx.measureText(name).width;
+    const s = 62, cy = top + s / 2, tx = right - tw;
+    ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left"; ctx.fillText(name, tx, cy + 13);
+    ctx.fillRect(tx - 18, cy - 22, 2.5, 44); // the thin line between badge and name
+    // round badge with the BR bubble inside
+    const bx = tx - 30 - s / 2;
+    ctx.beginPath(); ctx.arc(bx, cy, s / 2, 0, Math.PI * 2);
+    const gr = ctx.createLinearGradient(bx, cy - s / 2, bx, cy + s / 2); gr.addColorStop(0, "#1B2A4A"); gr.addColorStop(1, "#0B1326");
+    ctx.fillStyle = gr; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 3; ctx.strokeStyle = g.accent; ctx.stroke();
+    ctx.restore();
+    k.logoMark(g, bx - 21, cy - 19, 42);
   };
   // Small "BORHAN RANTS" next to the logo: first word white, second in the accent colour.
   // align "right": the text ends at x; "left": it starts at x. y is the baseline.
@@ -2061,7 +2086,7 @@ window.BPG = window.BPG || {};
   // One name per line. A blank line starts a new group; a line starting with # is a small group heading.
   // (C), (VC) and (WK) after a name are shown small in the accent colour.
   L.squad = {
-    standard: false, ownSweep: true,
+    standard: false, ownSweep: true, logoBottom: true, // the team name owns the top
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, colW = W * 0.55;
       // No player photo here: the team's flag, waving on the right, fading into the team colour.
@@ -2590,7 +2615,7 @@ window.BPG = window.BPG || {};
 
   // ---------- Match card: full time, live, half time, or kick-off ----------
   L.matchcard = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, cx = W / 2, tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -2678,7 +2703,7 @@ window.BPG = window.BPG || {};
   // ---------- Starting XI ----------
   // "20 Gyeltshen Zangpo (GK)" one per line. Subs: one per line or comma between.
   L.lineup = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, tall = H / W > 1.5;
       tourBg(k, g, true);
@@ -2764,7 +2789,7 @@ window.BPG = window.BPG || {};
   // ---------- Tournament photo frame ----------
   // Any photo from the tournament, full size, with the tournament's ribbons and ring around the edges.
   L.tframe = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
       const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null; // a crest is not a photo
@@ -2846,7 +2871,7 @@ window.BPG = window.BPG || {};
   // ---------- Fixtures ----------
   // One match per line: "Sat 8 Nov | 7:00 PM | Bangladesh vs India" (the parts in any order).
   L.fixtures = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -2888,7 +2913,7 @@ window.BPG = window.BPG || {};
   // ---------- Team stats ----------
   // "Possession | 58 | 42", one per line. Bars in each team's colour; the bigger share in front.
   L.tstats = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -2932,7 +2957,7 @@ window.BPG = window.BPG || {};
   // Formation like 4-3-3. Players: the keeper first, then each line from left to right as drawn
   // (left back first), up to the forwards. "10 Messi" shows the number on the shirt.
   L.pitch = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -3425,7 +3450,7 @@ window.BPG = window.BPG || {};
   const T = () => BPG.tour, T2 = () => BPG.tour2;
 
   L.h2h = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -3474,7 +3499,7 @@ window.BPG = window.BPG || {};
 
   // "Ke jitbe?": two teams, comment 1 or 2. Works on Instagram and Facebook alike (no reactions needed).
   L.poll = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), { top, glass, bottom } = T2(), tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -3514,10 +3539,11 @@ window.BPG = window.BPG || {};
       // Dots on top: which slide this is.
       const pager = () => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
-        const r = 9, gap = 30, x0 = W - PAD - (SLIDES.length - 1) * gap, y = g.st + 44;
+        // With the logo at the top right, the dots move to the left with the match line under them.
+        const r = 9, gap = 30, x0 = g.logoTop ? PAD + 10 : W - PAD - (SLIDES.length - 1) * gap, y = g.st + (g.logoTop ? (g.H / W > 1.5 ? 30 : 50) : 44);
         SLIDES.forEach((_, i) => { ctx.beginPath(); ctx.arc(x0 + i * gap, y, i + 1 === n ? r + 2 : r - 2, 0, Math.PI * 2); ctx.fillStyle = i + 1 === n ? g.accent : "rgba(255,255,255,0.6)"; ctx.fill(); });
         ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
-        if (g.val("tag")) ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40);
+        if (g.val("tag")) { if (g.logoTop) ctx.fillText(cap(g.val("tag")), PAD, y + 52, W * 0.5); else ctx.fillText(cap(g.val("tag")), PAD, y + 9, x0 - PAD - 40); }
         k.spaced(0); ctx.restore();
       };
       // "Swipe" on slides 1-4, the info line on the last one.
@@ -3594,7 +3620,7 @@ BPG.TOURNAMENTS = {
   // ---------- Group table (tournament look) ----------
   // One team per line: Team | P | W | D | L | GD | Pts. The top two rows (or "qualify" count) are highlighted.
   L.tgroup = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = BPG.tour, { top, glass, bottom } = BPG.tour2, tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -5247,6 +5273,12 @@ window.BPG = window.BPG || {};
   };
 
   $("b_theme").addEventListener("change", (e) => { state.theme = e.target.value; persist(); draw(); });
+  // Where the logo sits: top right (default) or the small bottom-right corner.
+  function renderLogoPos() {
+    $("b_logopos").innerHTML = "";
+    [["top", "Top right"], ["bottom", "Bottom right"]].forEach(([key, label]) => button($("b_logopos"), label, (state.logoPos || "top") === key, () => { state.logoPos = key; persist(); renderLogoPos(); draw(); }));
+  }
+  renderLogoPos();
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
@@ -5538,6 +5570,7 @@ window.BPG = window.BPG || {};
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
+      logoTop: state.logoPos !== "bottom" && !layout.tourLook && !layout.logoBottom,
       t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
     };
 

@@ -36,7 +36,7 @@ window.BPG = window.BPG || {};
   // ---------- Fixtures ----------
   // One match per line: "Sat 8 Nov | 7:00 PM | Bangladesh vs India" (the parts in any order).
   L.fixtures = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g);
@@ -78,7 +78,7 @@ window.BPG = window.BPG || {};
   // ---------- Team stats ----------
   // "Possession | 58 | 42", one per line. Bars in each team's colour; the bigger share in front.
   L.tstats = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
@@ -122,7 +122,7 @@ window.BPG = window.BPG || {};
   // Formation like 4-3-3. Players: the keeper first, then each line from left to right as drawn
   // (left back first), up to the forwards. "10 Messi" shows the number on the shirt.
   L.pitch = {
-    standard: false, ownSweep: true,
+    standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
       tourBg(k, g, true);
