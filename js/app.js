@@ -531,13 +531,17 @@ window.BPG = window.BPG || {};
     const tc = state.theme === "team" ? BPG.TEAM_COLORS[teamName] : null;
     const th = tc || THEMES[state.theme] || THEMES.brand, look = state.theme === "brand" || (state.theme === "team" && !tc) ? t.look || {} : {};
     const footerY = p.bottom - 4, statsTop = footerY - 124, subBase = statsTop - 22, nameBase = subBase - 44, bigBase = nameBase - 84;
+    // Cards marked noCut (tournament frame, line-ups, match card) always use the full photo, even when a
+    // cutout was made on another card: the Full photo / Cutout switch is hidden there, so it can't be undone.
+    const full = (ph) => (ph && ph.cut && !ph.isPng ? Object.assign({}, ph, { img: ph.orig, cut: false }) : ph);
+    const shown = t.noCut ? { 1: full(photos[1]), 2: full(photos[2]), 3: photos[3] } : photos;
     const g = {
       W: p.w, H: p.h, st: p.top, sb: p.bottom, footerY, statsTop, subBase, nameBase, bigBase, blockTop: bigBase - 120,
       accent: (tc ? null : t.accent) || look.accent || th.accent || state.brand.accent,
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
       logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
-      t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
+      t, val, big: val("__big") || t.big || "", photo: shown[1], photos: shown, shade: adjust().shade, ctx,
     };
 
     ctx.clearRect(0, 0, g.W, g.H);
