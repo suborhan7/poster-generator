@@ -307,20 +307,17 @@ window.BPG = window.BPG || {};
       if (photo) {
         const bw = W * 0.6, bh = g.footerY - photoTop + 60, bx = W - bw;
         const sc = Math.max(bw / photo.width, bh / photo.height), dw = photo.width * sc, dh = photo.height * sc;
-        const f = photo.bpgFocus, fx = f ? (f.x + f.w / 2) / photo.width : 0.5, fy = f ? f.y / photo.height : 0.15;
-        ctx.save(); ctx.beginPath(); ctx.rect(bx, photoTop, bw, bh); ctx.clip();
-        ctx.drawImage(photo, Math.min(bx, Math.max(bx + bw - dw, bx + bw / 2 - dw * fx)), Math.min(photoTop, Math.max(photoTop + bh - dh, photoTop + 40 - dh * fy)), dw, dh);
-        ctx.restore();
-        const dark = mix(base, "#000000", 0.3);
-        const side = ctx.createLinearGradient(bx, 0, bx + bw * 0.55, 0);
-        side.addColorStop(0, k.hexA(dark, 1)); side.addColorStop(1, k.hexA(dark, 0));
-        ctx.fillStyle = side; ctx.fillRect(bx - 2, photoTop, bw * 0.55 + 2, bh);
-        const topF = ctx.createLinearGradient(0, photoTop, 0, photoTop + 160);
-        topF.addColorStop(0, k.hexA(base, 1)); topF.addColorStop(1, k.hexA(base, 0));
-        ctx.fillStyle = topF; ctx.fillRect(bx, photoTop - 2, bw, 162);
-        const low = ctx.createLinearGradient(0, g.footerY - 420, 0, g.footerY + 40);
-        low.addColorStop(0, k.hexA(dark, 0)); low.addColorStop(1, k.hexA(dark, 0.95));
-        ctx.fillStyle = low; ctx.fillRect(bx, g.footerY - 420, bw, H - g.footerY + 420);
+        const f = photo.bpgFocus, fx = f && isFinite(f.cx) ? f.cx : 0.5, fy = f && isFinite(f.t) ? f.t : 0.12; // focus is in 0..1 of the photo
+        // Draw on its own layer and fade the left, top and bottom edges to see-through, so no edge shows.
+        const lay = document.createElement("canvas"); lay.width = Math.round(bw); lay.height = Math.round(bh);
+        const lc = lay.getContext("2d");
+        lc.drawImage(photo, Math.min(0, Math.max(bw - dw, bw / 2 - dw * fx)), Math.min(0, Math.max(bh - dh, 40 - dh * fy)), dw, dh);
+        lc.globalCompositeOperation = "destination-in";
+        const mx = lc.createLinearGradient(0, 0, bw * 0.6, 0); mx.addColorStop(0, "rgba(0,0,0,0)"); mx.addColorStop(1, "rgba(0,0,0,1)");
+        lc.fillStyle = mx; lc.fillRect(0, 0, bw, bh);
+        const my = lc.createLinearGradient(0, 0, 0, bh); my.addColorStop(0, "rgba(0,0,0,0)"); my.addColorStop(0.22, "rgba(0,0,0,1)"); my.addColorStop(0.7, "rgba(0,0,0,1)"); my.addColorStop(1, "rgba(0,0,0,0)");
+        lc.fillStyle = my; lc.fillRect(0, 0, bw, bh);
+        ctx.drawImage(lay, bx, photoTop);
       }
 
       // Top-left: team vs opponent as small tiles.
@@ -421,4 +418,6 @@ window.BPG = window.BPG || {};
       k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
     },
   };
+  // Shared with tournament2.js (fixtures, team stats, XI on the pitch).
+  BPG.tour = { tourBg, saffEdges, tourTop, teamBadge, infoLine, C, cap, num };
 })();

@@ -142,10 +142,12 @@ window.BPG = window.BPG || {};
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
+    // Cards with no main photo but a crest or logo slot keep only those slots.
+    document.querySelectorAll("#photoBox > .fields > .field").forEach((el) => { if (el.id !== "photo2Wrap" && el.id !== "photo3Wrap") el.hidden = !!t.noMain; });
     $("photo2Label").textContent = t.photo2 || "Second photo";
     $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
     const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
-    $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }

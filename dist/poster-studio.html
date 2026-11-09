@@ -278,7 +278,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "6 Nov 2026 · v43";
+BPG.VERSION = "9 Nov 2026 · v44";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -575,6 +575,12 @@ BPG.TEMPLATES = {
     fields: [["winner","Winning team","Bangladesh"],["loser","Losing team","Pakistan"],["margin","Margin","by 10 wickets",true],["series","Series line (optional)","Bangladesh lead the series 1-0",true],["potm","Player of the match","Mushfiqur Rahim"],["info","Match line","1st Test | Rawalpindi",true]] },
 
   // ---------------- Football ----------------
+  playingxi: { cat: "cricket", name: "Playing XI (tournament look)", layout: "lineup", noCut: true,
+    photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament / series logo (optional, kept on this phone)",
+    hint: "Batting order, one per line: 1 Tanzid Hasan. (C) and (WK) after a name. Bench players go under Substitutes.",
+    fields: [["tournament","Series","Bangladesh vs Pakistan 2026",true],["team","Team","Bangladesh"],["opp","Opponent","Pakistan"],["title","Top word","Playing"],
+      ["players","Playing XI","1 Batter One\n2 Batter Two\n3 Batter Three\n4 Batter Four (C)\n5 Keeper Five (WK)\n6 All-rounder Six\n7 All-rounder Seven\n8 Bowler Eight\n9 Bowler Nine\n10 Bowler Ten\n11 Bowler Eleven",true,"area"],
+      ["subs","Bench (optional)","",true,"area"],["info","Info line","1st ODI | Dhaka",true],["bgc","Card colour (optional)",""]] },
   squad: { cat: "cricket", name: "Squad announcement", layout: "squad",
     noPhoto: true,
     hint: "The team's flag is added for you. One player per line. Leave an empty line between groups, or start a line with # for a small heading (# Bowlers). (C), (VC) and (WK) after a name show in colour.",
@@ -602,6 +608,21 @@ BPG.TEMPLATES = {
       ["players","Starting XI","20 Gyeltshen Zangpo (GK)\n7 Chencho Gyeltshen (C)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n16 Tshelthrim Namgyel\n18 Kinzang Tashi Tobden",true,"area"],
       ["subs","Substitutes","1 Locho Nima, 2 Tandin Tshewang, 5 Deychog Drakar Dorji, 9 Kinzang Tenzin, 11 Kinga Wangchuk, 12 Kinley Penjor, 13 Jigdrel Wangchuk, 17 Jetsuen Dorji, 19 Sonam Dorji, 21 Dhendup Namgyel, 22 Jigme Tshelthrium, 23 Bikash Pradhan",true,"area"],
       ["info","Info line","Kick-off 7:00 PM | Dhaka",true],["bgc","Card colour (optional)",""]] },
+  transfer: { cat: "football", name: "Transfer", layout: "transfer", photo2: "New club crest (optional)",
+    hint: "Old club and new club show as discs in their colours (a crest you add goes on the new club). The stamp sits small on the top right; leave it empty for none.",
+    fields: [["player","Player","Player Name",true],["from","From","Abahani"],["to","To","Mohammedan"],["fee","Fee (optional)","Tk 50 lakh"],["feeLabel","Under the fee (optional)","Two-year deal"],["tag","Small line","Transfer"],["stamp","Stamp (optional)","DONE DEAL"],["info","Info line (optional)","",true]] },
+  fixtures: { cat: "football", name: "Fixtures (tournament look)", layout: "fixtures", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One match per line: day | time | Team vs Team. Up to 7 matches. Flags come by themselves for countries.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Fixtures"],["matches","Matches","Sat 8 Nov | 4:00 PM | Nepal vs Maldives\nSat 8 Nov | 7:00 PM | Bangladesh vs India\nSun 9 Nov | 4:00 PM | Bhutan vs Sri Lanka\nSun 9 Nov | 7:00 PM | Pakistan vs Nepal",true,"area"],["info","Info line","BD time | Dhaka",true],["bgc","Card colour (optional)",""]] },
+  tstats: { cat: "football", name: "Match stats (tournament look)", layout: "tstats", noMain: true, photo3: "Tournament logo (optional, kept on this phone)",
+    hint: "One stat per line: name | home | away. The bars use each team's colours.",
+    fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Match stats"],["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
+      ["stats","Stats","Possession % | 58 | 42\nShots | 14 | 6\nShots on target | 5 | 2\nCorners | 7 | 3\nFouls | 11 | 14",true,"area"],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
+  pitch: { cat: "football", name: "XI on the pitch (formation)", layout: "pitch", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)", noCut: true, noMain: true,
+    hint: "Formation like 4-3-3, 4-2-3-1, 4-4-2, 3-5-2. Players: keeper first, then each line from left to right as you look at the card (left back first), forwards last. A number before the name goes on the shirt.",
+    fields: [["title","Heading","Starting XI"],["team","Team","Bhutan"],["opp","Opponent (optional)","Bangladesh"],["formation","Formation","4-3-3"],
+      ["players","Players","20 Gyeltshen Zangpo (GK)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n16 Tshelthrim Namgyel\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n7 Chencho Gyeltshen (C)\n18 Kinzang Tashi Tobden",true,"area"],
+      ["coach","Coach (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
@@ -629,6 +650,21 @@ BPG.TEMPLATES = {
   versus: { cat: "general", name: "Who's better?", layout: "versus", photo2: "Second player photo",
     hint: "Photo 1 goes on the left, photo 2 on the right.",
     fields: [["p1","Player 1","Messi"],["p2","Player 2","Ronaldo"],["question","Question","WHO'S THE GOAT?",true]] },
+  news: { cat: "general", name: "Instant news", layout: "news",
+    hint: "For news with details. Headline up to 3 lines, body up to 4 lines. *Stars* colour words.",
+    fields: [["tag","Small line","News"],["headline","Headline","*Bangladesh* name squad for the SAFF Championship",true],["body","Body (optional)","Jamal Bhuyan leads a 23-man squad. Two new faces get a call-up.",true,"area"],["info","Info line (optional)","",true]] },
+  record: { cat: "general", name: "Record / achievement", layout: "record",
+    hint: "The big number goes in colour behind the bottom of the photo. *Stars* colour words in the record line.",
+    fields: [["tag","Small line","New record"],["number","Big number","100"],["unit","After the number (optional)","caps"],["player","Player","Player Name",true],["line","Record line","First *Bangladeshi* footballer to reach 100 caps",true,"area"],["info","Info line (optional)","",true]] },
+  trivia: { cat: "general", name: "Did you know?", layout: "hottake", big: "DID YOU KNOW?",
+    hint: "One fact in normal sentence case. *Stars* colour words.",
+    fields: [["quote","The fact","Bangladesh won their *first ever* SAFF Championship title in 2003, at home in Dhaka.",true,"area"],["by","Signed (optional)",""]] },
+  mvp: { cat: "general", name: "MVP / player of the month", layout: "mvp",
+    hint: "Stats are Label: value, comma between (up to 4). The stamp sits small at the top right.",
+    fields: [["title","Title","Player of the month"],["period","Month / series","October 2026"],["player","Player","Player Name",true],["stats","Stats","Matches: 5, Goals: 4, Assists: 2, Rating: 8.1",true],["stamp","Stamp (optional)","BORHAN'S PICK"],["info","Info line (optional)","",true]] },
+  compare: { cat: "general", name: "Player vs player (stats)", layout: "compare", photo2: "Player 2 photo",
+    hint: "Photo 1 on the left, photo 2 on the right. One stat per line: name | player 1 | player 2. Add ↓ to a stat name when lower is better (e.g. Economy ↓).",
+    fields: [["title","Small line on top (optional)","Last 10 ODIs"],["p1","Player 1","Player One"],["p2","Player 2","Player Two"],["stats","Stats","Runs | 412 | 389\nAverage | 45.8 | 43.2\nStrike rate | 92.1 | 88.4\n50s | 4 | 3\n100s | 1 | 1",true,"area"],["info","Info line (optional)","",true]] },
   breaking: { cat: "general", name: "Breaking news", layout: "breaking", big: "BREAKING", accent: "#FF3B3B",
     hint: "Put *stars* around words to colour them.",
     fields: [["headline","Headline","Mushfiqur Rahim *announces ODI retirement*",true,"area"],["detail","Detail line","Ends a 19-year career with the Tigers",true]] },
@@ -2608,20 +2644,17 @@ window.BPG = window.BPG || {};
       if (photo) {
         const bw = W * 0.6, bh = g.footerY - photoTop + 60, bx = W - bw;
         const sc = Math.max(bw / photo.width, bh / photo.height), dw = photo.width * sc, dh = photo.height * sc;
-        const f = photo.bpgFocus, fx = f ? (f.x + f.w / 2) / photo.width : 0.5, fy = f ? f.y / photo.height : 0.15;
-        ctx.save(); ctx.beginPath(); ctx.rect(bx, photoTop, bw, bh); ctx.clip();
-        ctx.drawImage(photo, Math.min(bx, Math.max(bx + bw - dw, bx + bw / 2 - dw * fx)), Math.min(photoTop, Math.max(photoTop + bh - dh, photoTop + 40 - dh * fy)), dw, dh);
-        ctx.restore();
-        const dark = mix(base, "#000000", 0.3);
-        const side = ctx.createLinearGradient(bx, 0, bx + bw * 0.55, 0);
-        side.addColorStop(0, k.hexA(dark, 1)); side.addColorStop(1, k.hexA(dark, 0));
-        ctx.fillStyle = side; ctx.fillRect(bx - 2, photoTop, bw * 0.55 + 2, bh);
-        const topF = ctx.createLinearGradient(0, photoTop, 0, photoTop + 160);
-        topF.addColorStop(0, k.hexA(base, 1)); topF.addColorStop(1, k.hexA(base, 0));
-        ctx.fillStyle = topF; ctx.fillRect(bx, photoTop - 2, bw, 162);
-        const low = ctx.createLinearGradient(0, g.footerY - 420, 0, g.footerY + 40);
-        low.addColorStop(0, k.hexA(dark, 0)); low.addColorStop(1, k.hexA(dark, 0.95));
-        ctx.fillStyle = low; ctx.fillRect(bx, g.footerY - 420, bw, H - g.footerY + 420);
+        const f = photo.bpgFocus, fx = f && isFinite(f.cx) ? f.cx : 0.5, fy = f && isFinite(f.t) ? f.t : 0.12; // focus is in 0..1 of the photo
+        // Draw on its own layer and fade the left, top and bottom edges to see-through, so no edge shows.
+        const lay = document.createElement("canvas"); lay.width = Math.round(bw); lay.height = Math.round(bh);
+        const lc = lay.getContext("2d");
+        lc.drawImage(photo, Math.min(0, Math.max(bw - dw, bw / 2 - dw * fx)), Math.min(0, Math.max(bh - dh, 40 - dh * fy)), dw, dh);
+        lc.globalCompositeOperation = "destination-in";
+        const mx = lc.createLinearGradient(0, 0, bw * 0.6, 0); mx.addColorStop(0, "rgba(0,0,0,0)"); mx.addColorStop(1, "rgba(0,0,0,1)");
+        lc.fillStyle = mx; lc.fillRect(0, 0, bw, bh);
+        const my = lc.createLinearGradient(0, 0, 0, bh); my.addColorStop(0, "rgba(0,0,0,0)"); my.addColorStop(0.22, "rgba(0,0,0,1)"); my.addColorStop(0.7, "rgba(0,0,0,1)"); my.addColorStop(1, "rgba(0,0,0,0)");
+        lc.fillStyle = my; lc.fillRect(0, 0, bw, bh);
+        ctx.drawImage(lay, bx, photoTop);
       }
 
       // Top-left: team vs opponent as small tiles.
@@ -2720,6 +2753,403 @@ window.BPG = window.BPG || {};
       ctx.restore();
       infoLine(k, g, g.val("info"), PAD + 40, g.footerY);
       k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+  // Shared with tournament2.js (fixtures, team stats, XI on the pitch).
+  BPG.tour = { tourBg, saffEdges, tourTop, teamBadge, infoLine, C, cap, num };
+})();
+
+</script>
+<script>
+// More cards in the tournament look (see tournament.js): fixtures, team stats, the XI on the pitch.
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const T = () => BPG.tour;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseFloat(String(s).replace(/[^\d.\-]/g, "")) || 0;
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+  const colourOf = (n, fb) => { const tc = BPG.TEAM_COLORS[full(n)]; return tc ? tc.accent : fb; };
+
+  // Logo or name on top, then a cream heading. Returns the y under it.
+  function top(k, g, heading) {
+    const ctx = k.ctx, { W } = g, tall = g.H / W > 1.5, { tourTop, C } = T();
+    let y = tourTop(k, g, W / 2, g.st + (tall ? 30 : 10), W * 0.46, tall ? 200 : 150, "center");
+    const h = cap(heading);
+    if (h) {
+      const s = k.fit(h, W - 2 * PAD, tall ? 100 : 88, k.D, "", 40); y += s + (tall ? 30 : 20);
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 16;
+      ctx.font = k.font(s, k.D); ctx.fillStyle = C.cream; ctx.fillText(h, W / 2, y); ctx.restore();
+    }
+    return y;
+  }
+  function glass(k, x, y, w, h, r) {
+    const ctx = k.ctx; ctx.save();
+    const pg = ctx.createLinearGradient(0, y, 0, y + h);
+    pg.addColorStop(0, "rgba(255,255,255,0.18)"); pg.addColorStop(1, "rgba(255,255,255,0.07)");
+    ctx.fillStyle = pg; k.roundRect(x, y, w, h, r); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.45)"; k.roundRect(x, y, w, h, r); ctx.stroke(); ctx.restore();
+  }
+  function bottom(k, g) {
+    T().infoLine(k, g, g.val("info"), PAD, g.footerY);
+    k.brandCorner(Object.assign({}, g, { accent: T().C.gold }), g.footerY);
+  }
+
+  // ---------- Fixtures ----------
+  // One match per line: "Sat 8 Nov | 7:00 PM | Bangladesh vs India" (the parts in any order).
+  L.fixtures = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g);
+      const y0 = top(k, g, g.val("title") || "Fixtures");
+      const rows = String(g.val("matches") || "").split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 7).map((l) => {
+        const parts = l.split("|").map((x) => x.trim()).filter(Boolean);
+        const m = parts.find((p) => /\s(vs?\.?|v)\s/i.test(p)) || "", rest = parts.filter((p) => p !== m);
+        const [a, b] = m.split(/\s(?:vs?\.?|v)\s/i).map((x) => x.trim());
+        return { a: a || "", b: b || "", when: rest };
+      });
+      const area = g.footerY - 70 - (y0 + 40), gap = 16, rh = Math.min(tall ? 230 : 190, (area - gap * (rows.length - 1)) / Math.max(1, rows.length));
+      rows.forEach((r, i) => {
+        const y = y0 + 40 + i * (rh + gap), cy = y + rh / 2, x = 60, w = W - 120;
+        glass(k, x, y, w, rh, 28);
+        // when, on the left
+        const dw = 230;
+        ctx.save(); ctx.textAlign = "center";
+        r.when.slice(0, 2).forEach((t, j) => {
+          ctx.font = k.font(j ? Math.round(rh * 0.2) : Math.round(rh * 0.24), j ? k.C : k.D, j ? 700 : ""); ctx.fillStyle = j ? "#FFFFFF" : C.gold;
+          ctx.fillText(cap(t), x + dw / 2, cy + (r.when.length > 1 ? (j ? rh * 0.26 : -rh * 0.04) : rh * 0.08), dw - 30);
+        });
+        ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillRect(x + dw, y + 18, 2, rh - 36);
+        // teams: flag NAME  vs  NAME flag
+        const fs = Math.round(rh * 0.5), mx = x + dw + (w - dw) / 2;
+        teamBadge(k, g, x + dw + 30 + fs * 0.55, cy, fs, r.a, null);
+        teamBadge(k, g, x + w - 30 - fs * 0.55, cy, fs, r.b, null);
+        const nw = (w - dw) / 2 - fs * 1.1 - 95; // keeps clear of the VS in the middle
+        ctx.font = k.font(Math.round(rh * 0.2), k.D); ctx.fillStyle = C.cream; ctx.fillText("VS", mx, cy + rh * 0.07);
+        ctx.font = k.font(k.fit(cap(r.a), nw, Math.round(rh * 0.26), k.D, "", 18), k.D); ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "left";
+        ctx.fillText(cap(r.a), x + dw + 40 + fs * 1.1, cy + rh * 0.09, nw);
+        ctx.font = k.font(k.fit(cap(r.b), nw, Math.round(rh * 0.26), k.D, "", 18), k.D); ctx.textAlign = "right";
+        ctx.fillText(cap(r.b), x + w - 40 - fs * 1.1, cy + rh * 0.09, nw);
+        ctx.restore();
+      });
+      bottom(k, g);
+    },
+  };
+
+  // ---------- Team stats ----------
+  // "Possession | 58 | 42", one per line. Bars in each team's colour; the bigger share in front.
+  L.tstats = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      let y = top(k, g, g.val("title") || "Match stats");
+      // teams and score
+      const fy = y + (tall ? 130 : 110), fs = tall ? 170 : 150, xs = [W * 0.2, W * 0.8];
+      teamBadge(k, g, xs[0], fy, fs, g.val("t1"), null); teamBadge(k, g, xs[1], fy, fs, g.val("t2"), null);
+      ctx.save(); ctx.textAlign = "center"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+      const sc = [g.val("s1"), g.val("s2")].every((v) => String(v).trim() !== "") ? `${g.val("s1")} - ${g.val("s2")}` : "VS";
+      ctx.font = k.font(tall ? 120 : 104, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(sc, W / 2, fy + 38);
+      ctx.font = k.font(k.fit(cap(full(g.val("t1"))), W * 0.34, 44, k.D, "", 22), k.D); ctx.fillText(cap(full(g.val("t1"))), xs[0], fy + fs * 0.34 + 62);
+      ctx.font = k.font(k.fit(cap(full(g.val("t2"))), W * 0.34, 44, k.D, "", 22), k.D); ctx.fillText(cap(full(g.val("t2"))), xs[1], fy + fs * 0.34 + 62);
+      ctx.restore();
+      // rows
+      const rows = String(g.val("stats") || "").split("\n").map((l) => l.split(/[|:]/).map((x) => x.trim())).filter((r) => r.length >= 3 && r[0]).slice(0, 8);
+      const c1 = colourOf(g.val("t1"), C.gold);
+      // The away bar takes the team's other colour when both teams share one (e.g. two yellows), else cyan.
+      const near = (a, b) => { const p = (h) => [0, 2, 4].map((i) => parseInt(h.slice(1 + i, 3 + i), 16)); const x = p(a), y = p(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 120; };
+      let c2 = colourOf(g.val("t2"), C.cyan);
+      if (near(c1, c2)) { const tc = BPG.TEAM_COLORS[full(g.val("t2"))]; c2 = tc && !near(c1, tc.stroke) ? tc.stroke : C.cyan; }
+      const pTop = fy + fs * 0.34 + 100, pBot = g.footerY - 64, rh = Math.min(tall ? 150 : 128, (pBot - pTop - 30) / Math.max(1, rows.length));
+      glass(k, 60, pTop, W - 120, rows.length * rh + 30, 32);
+      rows.forEach(([label, a, b], i) => {
+        const cy = pTop + 15 + i * rh, va = num(a), vb = num(b), tot = va + vb || 1;
+        ctx.save(); ctx.textAlign = "center"; ctx.font = k.font(Math.round(rh * 0.24), k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
+        ctx.fillText(cap(label), W / 2, cy + rh * 0.42, W * 0.5); k.spaced(0);
+        ctx.font = k.font(Math.round(rh * 0.36), k.D); ctx.fillStyle = va >= vb ? "#FFFFFF" : "rgba(255,255,255,0.7)"; ctx.textAlign = "left"; ctx.fillText(a, 100, cy + rh * 0.46);
+        ctx.fillStyle = vb >= va ? "#FFFFFF" : "rgba(255,255,255,0.7)"; ctx.textAlign = "right"; ctx.fillText(b, W - 100, cy + rh * 0.46);
+        // split bar
+        const bx = 100, bw = W - 200, by = cy + rh * 0.62, bh = Math.max(10, rh * 0.12), split = bx + bw * (va / tot);
+        ctx.fillStyle = "rgba(255,255,255,0.12)"; k.roundRect(bx, by, bw, bh, bh / 2); ctx.fill();
+        ctx.fillStyle = c1; k.roundRect(bx, by, Math.max(bh, split - bx - 3), bh, bh / 2); ctx.fill();
+        ctx.fillStyle = c2; k.roundRect(split + 3, by, Math.max(bh, bx + bw - split - 3), bh, bh / 2); ctx.fill();
+        ctx.restore();
+      });
+      bottom(k, g);
+    },
+  };
+
+  // ---------- XI on the pitch ----------
+  // Formation like 4-3-3. Players: the keeper first, then each line from left to right as drawn
+  // (left back first), up to the forwards. "10 Messi" shows the number on the shirt.
+  L.pitch = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      // header: flag, team name, formation
+      const hy = g.st + (tall ? 70 : 50), fs = tall ? 130 : 112;
+      teamBadge(k, g, PAD + fs * 0.55, hy + 10, fs, g.val("team"), g.photos[2]);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
+      const tx = PAD + fs * 1.2 + 20;
+      ctx.font = k.font(k.fit(cap(g.val("title") || "Starting XI"), W - tx - 240, tall ? 70 : 62, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("title") || "Starting XI"), tx, hy + 4);
+      ctx.font = k.font(30, k.C, 700); k.spaced(4); ctx.fillStyle = C.cream;
+      ctx.fillText([cap(full(g.val("team"))), g.val("opp") ? "VS " + cap(full(g.val("opp"))) : ""].filter(Boolean).join("  "), tx, hy + 46, W - tx - 240); k.spaced(0);
+      ctx.textAlign = "right"; ctx.font = k.font(tall ? 76 : 66, k.D); ctx.fillStyle = C.gold; ctx.fillText(String(g.val("formation") || ""), W - PAD, hy + 30);
+      ctx.restore();
+      // pitch
+      const px = PAD, pw = W - 2 * PAD, pt = hy + fs * 0.45 + 50, pb = g.footerY - (g.val("coach") ? 100 : 56), ph = pb - pt;
+      ctx.save(); k.roundRect(px, pt, pw, ph, 30); ctx.clip();
+      for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? "#1E8A45" : "#22974C"; ctx.fillRect(px, pt + (ph / 10) * i, pw, ph / 10 + 1); }
+      const sh = ctx.createLinearGradient(0, pt, 0, pb); sh.addColorStop(0, "rgba(0,0,0,0.25)"); sh.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = sh; ctx.fillRect(px, pt, pw, ph);
+      ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 4;
+      ctx.strokeRect(px + 20, pt + 20, pw - 40, ph - 40);
+      ctx.beginPath(); ctx.moveTo(px + 20, pt + ph / 2); ctx.lineTo(px + pw - 20, pt + ph / 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(px + pw / 2, pt + ph / 2, ph * 0.1, 0, Math.PI * 2); ctx.stroke();
+      const boxW = pw * 0.5, boxH = ph * 0.13, sixW = pw * 0.24, sixH = ph * 0.05;
+      [[pt + 20, 1], [pb - 20, -1]].forEach(([y, d]) => {
+        ctx.strokeRect(px + (pw - boxW) / 2, d > 0 ? y : y - boxH, boxW, boxH);
+        ctx.strokeRect(px + (pw - sixW) / 2, d > 0 ? y : y - sixH, sixW, sixH);
+      });
+      ctx.restore();
+      ctx.save(); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.6)"; k.roundRect(px, pt, pw, ph, 30); ctx.stroke(); ctx.restore();
+      // players
+      const lines = String(g.val("formation") || "4-3-3").split(/[^\d]+/).map((n) => parseInt(n, 10)).filter((n) => n > 0);
+      const shape = [1, ...lines];
+      const list = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); return m ? [m[1], m[2]] : ["", l];
+      });
+      const shirt = colourOf(g.val("team"), C.gold), ink = k.inkOn(shirt), r = tall ? 40 : 34;
+      let idx = 0;
+      shape.forEach((count, row) => {
+        const y = pb - 30 - r - ((ph - 90 - 2 * r) * row) / Math.max(1, shape.length - 1);
+        for (let j = 0; j < count; j++) {
+          const p = list[idx++]; if (!p) continue;
+          const x = px + pw * ((j + 1) / (count + 1));
+          ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = shirt; ctx.fill(); ctx.restore();
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.lineWidth = 4; ctx.strokeStyle = "#FFFFFF"; ctx.stroke();
+          ctx.save(); ctx.textAlign = "center";
+          if (p[0]) { ctx.font = k.font(Math.round(r * 0.95), k.D); ctx.fillStyle = ink; ctx.fillText(p[0], x, y + r * 0.34); }
+          const nm = cap(p[1].replace(/\s*\((gk|c|vc)\)\s*$/i, (m) => " " + m.trim().toUpperCase())), maxW = Math.min(pw / (count + 0.6), 260);
+          ctx.font = k.font(k.fit(nm, maxW - 16, tall ? 28 : 24, k.C, 700, 15), k.C, 700);
+          const tw = Math.min(ctx.measureText(nm).width, maxW - 16) + 18;
+          ctx.fillStyle = "rgba(6,16,60,0.82)"; k.roundRect(x - tw / 2, y + r + 8, tw, tall ? 38 : 34, 10); ctx.fill();
+          ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, x, y + r + (tall ? 36 : 32), maxW - 16);
+          ctx.restore();
+        }
+      });
+      if (g.val("coach")) {
+        ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
+        ctx.fillText("COACH: " + cap(g.val("coach")), PAD, g.footerY - 52, W - 2 * PAD); k.spaced(0); ctx.restore();
+      }
+      bottom(k, g);
+    },
+  };
+})();
+
+</script>
+<script>
+// Photo cards in the Borhan style: full clear photo, fading into dark only behind the text,
+// small tag above the headline, small logo in the corner.
+// Transfer, Instant news, Record, MVP / player of the month, Player vs player (stats).
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const num = (s) => parseFloat(String(s).replace(/[^\d.\-]/g, "")) || 0;
+
+  // Small spaced tag in the accent colour, e.g. "TRANSFER" or "BREAKING".
+  function tag(k, g, text, x, y, align) {
+    const ctx = k.ctx; if (!text) return;
+    ctx.save(); ctx.textAlign = align || "left"; ctx.font = k.font(28, k.C, 700); k.spaced(5); ctx.fillStyle = g.accent;
+    ctx.fillText(cap(text), x, y, g.W - 2 * PAD); k.spaced(0); ctx.restore();
+  }
+  function info(k, g, text, y) {
+    const ctx = k.ctx; if (!text) return;
+    ctx.save(); ctx.font = k.font(26, k.C, 700); k.spaced(3); ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillText(cap(text), PAD, y, g.W * 0.58); k.spaced(0); ctx.restore();
+  }
+  // A club as a round disc: the uploaded crest on white, or the short name in the team's colours.
+  function clubDisc(k, g, cx, cy, r, team, pic) {
+    const ctx = k.ctx, full = (BPG.teamName && BPG.teamName(team)) || team, tc = BPG.TEAM_COLORS[full];
+    const flag = !pic && BPG.flagImg && BPG.flagImg(full);
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 24;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = pic ? "#FFFFFF" : (tc ? tc.bg : "#14171F"); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    if (pic) { const im = pic.plain || pic.img, sc = Math.min((r * 1.45) / im.width, (r * 1.45) / im.height); ctx.drawImage(im, cx - (im.width * sc) / 2, cy - (im.height * sc) / 2, im.width * sc, im.height * sc); }
+    else if (flag) { const sc = Math.max((2 * r) / flag.width, (2 * r) / flag.height); ctx.drawImage(flag, cx - (flag.width * sc) / 2, cy - (flag.height * sc) / 2, flag.width * sc, flag.height * sc); }
+    else {
+      const sh = BPG.teamShort ? BPG.teamShort(full) : cap(full).slice(0, 3);
+      ctx.textAlign = "center"; ctx.font = k.font(k.fit(sh, r * 1.5, Math.round(r * 0.75), k.D), k.D); ctx.fillStyle = tc ? tc.accent : g.accent; ctx.fillText(sh, cx, cy + r * 0.27);
+    }
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 5; ctx.strokeStyle = tc ? tc.accent : "rgba(255,255,255,0.8)"; ctx.stroke();
+  }
+  // Headline in Anton, *stars* in the accent colour, up to `lines` lines, drawn upwards from `base`. Returns its top.
+  function headline(k, g, text, base, size, lines, align) {
+    const x = align === "center" ? g.W / 2 : PAD;
+    let lay = k.layoutRich(cap(text), g.W - 2 * PAD, size, k.D, lines || 2, 40);
+    const top = base - (lay.lines.length - 1) * lay.size * 1.0;
+    k.drawRich(lay, x, top, lay.size * 1.0, k.D, "#FFFFFF", g.accent, align || "left");
+    return top - lay.size * 0.82;
+  }
+
+  // ---------- Transfer ----------
+  L.transfer = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, r = 62;
+      const infoY = g.footerY, rowY = infoY - 64 - r, nameBase = rowY - r - 40;
+      const nameSize = k.fit(cap(g.val("player")), W - 2 * PAD, 110, k.D, "", 50), tagY = nameBase - nameSize * 0.9 - 18;
+      if (!k.bleedPhoto(g, tagY - 50)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      if (g.teamTheme) k.paintSweep(g, tagY - 40, "right");
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, g, g.val("tag") || "Transfer", PAD, tagY);
+      ctx.font = k.font(nameSize, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("player")), PAD, nameBase);
+      // old club → new club, then the fee
+      const x1 = PAD + r, x2 = PAD + r * 3 + 90;
+      clubDisc(k, g, x1, rowY, r, g.val("from"), null);
+      clubDisc(k, g, x2, rowY, r, g.val("to"), g.photos[2] && g.photos[2].tpl === "transfer" ? g.photos[2] : null); // only a crest added on this card
+      ctx.strokeStyle = g.accent; ctx.lineWidth = 8; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(x1 + r + 18, rowY); ctx.lineTo(x2 - r - 22, rowY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x2 - r - 40, rowY - 16); ctx.lineTo(x2 - r - 20, rowY); ctx.lineTo(x2 - r - 40, rowY + 16); ctx.stroke();
+      const fee = cap(g.val("fee"));
+      if (fee) {
+        const fx = x2 + r + 40;
+        ctx.font = k.font(k.fit(fee, W - PAD - fx, 92, k.D, "", 36), k.D); ctx.fillStyle = g.accent; ctx.fillText(fee, fx, rowY + 20);
+        if (g.val("feeLabel")) { ctx.font = k.font(24, k.C, 700); k.spaced(4); ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.fillText(cap(g.val("feeLabel")), fx, rowY + 54, W - PAD - fx); k.spaced(0); }
+      }
+      ctx.restore();
+      const st = cap(g.val("stamp"));
+      if (st) k.stamp(st, W - 200, tagY - 50, 54, g.accent, -0.12);
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- Instant news ----------
+  L.news = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g;
+      const body = k.layoutRich(String(g.val("body") || ""), W - 2 * PAD, 34, k.B, 4, 24, 500), lh = body.size * 1.32;
+      const infoY = g.footerY, bodyTop = infoY - 54 - (body.lines.length ? body.lines.length * lh : 0);
+      const hl = k.layoutRich(cap(g.val("headline")), W - 2 * PAD, 84, k.D, 3, 44);
+      const hlBase = bodyTop - 14 - (body.lines.length ? 6 : 0), hlTop = hlBase - (hl.lines.length - 1) * hl.size, tagY = hlTop - hl.size * 0.86 - 20;
+      if (!k.bleedPhoto(g, tagY - 50)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, g, g.val("tag") || "News", PAD, tagY);
+      k.drawRich(hl, PAD, hlTop, hl.size, k.D, "#FFFFFF", g.accent, "left");
+      if (body.lines.length) k.drawRich(body, PAD, bodyTop + body.size, lh, k.B, "rgba(255,255,255,0.88)", g.accent, "left", 500);
+      ctx.restore();
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- Record / achievement ----------
+  // The big number sits behind the bottom of the photo, the record line under the name.
+  L.record = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g;
+      const line = k.layoutRich(String(g.val("line") || ""), W - 2 * PAD, 40, k.B, 3, 26, 600), lh = line.size * 1.25;
+      const infoY = g.footerY, lineTop = infoY - 54 - line.lines.length * lh;
+      const nm = cap(g.val("player")), ns = k.fit(nm, W - 2 * PAD, 76, k.D, "", 36), nameBase = lineTop - 16;
+      const big = cap(g.val("number")), bs = k.fit(big, W - 2 * PAD + 20, 300, k.D, "", 120), bigBase = nameBase - ns - 6;
+      const tagY = bigBase - bs * 0.86 - 22;
+      if (!k.bleedPhoto(g, bigBase - bs * 0.45)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 22;
+      tag(k, g, g.val("tag") || "Record", PAD, tagY);
+      ctx.font = k.font(bs, k.D); ctx.fillStyle = g.accent; ctx.fillText(big, PAD - 6, bigBase);
+      if (g.val("unit")) { const bw = ctx.measureText(big).width; ctx.font = k.font(44, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("unit")), PAD + bw + 14, bigBase, W - PAD - bw - 70); }
+      ctx.font = k.font(ns, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, PAD, nameBase);
+      if (line.lines.length) k.drawRich(line, PAD, lineTop + line.size, lh, k.B, "rgba(255,255,255,0.9)", g.accent, "left", 600);
+      ctx.restore();
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
+    },
+  };
+
+  // ---------- MVP / player of the month ----------
+  L.mvp = {
+    standard: false,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, gold = "#F5C542";
+      const items = String(g.val("stats") || "").split(",").map((x) => x.split(":").map((y) => y.trim())).filter((x) => x[0]).slice(0, 4).map(([a, b]) => [a, b || ""]);
+      const infoY = g.footerY, statsTop = infoY - 52 - (items.length ? 96 : 0);
+      const nm = cap(g.val("player")), ns = k.fit(nm, W - 2 * PAD, 112, k.D, "", 50), nameBase = statsTop - 22;
+      const tagY = nameBase - ns * 0.9 - 20;
+      if (!k.bleedPhoto(g, tagY - 60)) k.photoHint(g, g.st + (tagY - g.st) / 2);
+      const gg = Object.assign({}, g, { accent: gold });
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16;
+      tag(k, gg, [g.val("title") || "Player of the month", g.val("period")].filter(Boolean).join("  |  "), PAD, tagY);
+      ctx.font = k.font(ns, k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, PAD, nameBase);
+      ctx.restore();
+      if (items.length) k.stats(gg, items, statsTop, 88);
+      const st = cap(g.val("stamp"));
+      if (st) k.stamp(st, W - 210, tagY - 70, 46, gold, -0.12);
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(gg, infoY);
+    },
+  };
+
+  // ---------- Player vs player (stats) ----------
+  // Two photos side by side, blending into each other in the middle; the stats under them as bars.
+  // Add ↓ (or "lower") to a stat's label when the lower number is better (economy, average against).
+  L.compare = {
+    standard: false, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g;
+      const rows = String(g.val("stats") || "").split("\n").map((l) => l.split(/[|:]/).map((x) => x.trim())).filter((r) => r.length >= 3 && r[0]).slice(0, 6);
+      const rowH = H / W > 1.5 ? 74 : 62, infoY = g.footerY, statsTop = infoY - 56 - rows.length * rowH;
+      const namesY = statsTop - 26, photoBottom = namesY - 40;
+      // photos
+      const halves = [[g.photos[1], 0], [g.photos[2], W / 2]];
+      halves.forEach(([p, x]) => {
+        if (!p) return;
+        ctx.save(); ctx.beginPath(); ctx.rect(x, 0, W / 2, photoBottom + 60); ctx.clip();
+        k.coverImg(p.img, x, 0, W / 2, photoBottom + 60, false); ctx.restore();
+      });
+      if (!g.photos[1]) { ctx.font = k.font(30, k.C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillText("Player 1 photo", W / 4, H * 0.3); ctx.textAlign = "left"; }
+      if (!g.photos[2]) { ctx.font = k.font(30, k.C, 600); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.fillText("Player 2 photo (second photo)", W * 0.75, H * 0.3); ctx.textAlign = "left"; }
+      // soft seam in the middle and the fade at the bottom
+      const seam = ctx.createLinearGradient(W / 2 - 60, 0, W / 2 + 60, 0);
+      seam.addColorStop(0, k.hexA(g.bg, 0)); seam.addColorStop(0.5, k.hexA(g.bg, 0.85)); seam.addColorStop(1, k.hexA(g.bg, 0));
+      ctx.fillStyle = seam; ctx.fillRect(W / 2 - 60, 0, 120, photoBottom + 60);
+      k.fadeBottom(g, photoBottom - 300, photoBottom + 40);
+      const top = ctx.createLinearGradient(0, 0, 0, g.st + 160); top.addColorStop(0, k.hexA(g.bg, 0.6)); top.addColorStop(1, k.hexA(g.bg, 0));
+      ctx.fillStyle = top; ctx.fillRect(0, 0, W, g.st + 160);
+      // title + VS
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 16; ctx.textAlign = "center";
+      if (g.val("title")) { ctx.font = k.font(28, k.C, 700); k.spaced(5); ctx.fillStyle = g.accent; ctx.fillText(cap(g.val("title")), W / 2, g.st + 40, W - 2 * PAD); k.spaced(0); }
+      ctx.font = k.font(90, k.D); ctx.fillStyle = g.accent; ctx.fillText("VS", W / 2, namesY - 70);
+      const n1 = cap(g.val("p1")), n2 = cap(g.val("p2"));
+      ctx.font = k.font(k.fit(n1, W / 2 - 80, 60, k.D, "", 28), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(n1, W / 4, namesY);
+      ctx.font = k.font(k.fit(n2, W / 2 - 80, 60, k.D, "", 28), k.D); ctx.fillText(n2, W * 0.75, namesY);
+      ctx.restore();
+      // stat rows: value | bar ← label → bar | value; the better number in the accent colour
+      const midW = 230, barMax = W / 2 - midW / 2 - PAD - 110;
+      rows.forEach(([label, a, b], i) => {
+        const y = statsTop + i * rowH + rowH * 0.62, low = /↓|lower|\(l\)/i.test(label), lab = cap(label.replace(/↓|\(l\)|lower/gi, "").trim());
+        const va = num(a), vb = num(b), max = Math.max(va, vb) || 1, aWin = low ? va < vb : va > vb, bWin = low ? vb < va : vb > va;
+        if (i) { ctx.fillStyle = "rgba(255,255,255,0.08)"; ctx.fillRect(PAD, statsTop + i * rowH, W - 2 * PAD, 2); }
+        ctx.textAlign = "center"; ctx.font = k.font(k.fit(lab, midW - 10, 24, k.C, 700, 16), k.C, 700); k.spaced(2); ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.fillText(lab, W / 2, y - 4); k.spaced(0);
+        const la = (va / max) * barMax, lb = (vb / max) * barMax, bh = 12, by = y - 14;
+        ctx.fillStyle = aWin ? g.accent : "rgba(255,255,255,0.35)"; k.roundRect(W / 2 - midW / 2 - la, by, la, bh, 6); ctx.fill();
+        ctx.fillStyle = bWin ? g.accent : "rgba(255,255,255,0.35)"; k.roundRect(W / 2 + midW / 2, by, lb, bh, 6); ctx.fill();
+        ctx.font = k.font(46, k.D);
+        ctx.textAlign = "left"; ctx.fillStyle = aWin ? g.accent : "#FFFFFF"; ctx.fillText(a, PAD, y + 8);
+        ctx.textAlign = "right"; ctx.fillStyle = bWin ? g.accent : "#FFFFFF"; ctx.fillText(b, W - PAD, y + 8);
+        ctx.textAlign = "left";
+      });
+      info(k, g, g.val("info"), infoY);
+      k.brandCorner(g, infoY);
     },
   };
 })();
@@ -4254,10 +4684,12 @@ window.BPG = window.BPG || {};
       addField(box, `f_${state.tpl}_colorteam`, "Team colours (optional, e.g. BAN or Real Madrid)", val("colorteam"), true, "text", (v) => setVal("colorteam", v));
     $("photo2Wrap").hidden = !t.photo2;
     $("photoBox").hidden = !!t.noPhoto; // the squad card uses the team's flag instead of a photo
+    // Cards with no main photo but a crest or logo slot keep only those slots.
+    document.querySelectorAll("#photoBox > .fields > .field").forEach((el) => { if (el.id !== "photo2Wrap" && el.id !== "photo3Wrap") el.hidden = !!t.noMain; });
     $("photo2Label").textContent = t.photo2 || "Second photo";
     $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
     const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
-    $("cutMode").parentNode.hidden = !!t.noCut; // crests never get cut out
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
