@@ -24,6 +24,7 @@ It's plain HTML, CSS and JavaScript, with no build step, no server and no accoun
 | Cricket | Fifty, Century (with sun rays), Knock (X off Y, DUCK stamp on 0), Wicket (flying stumps, scorecard line), Five-wicket haul (one ball per wicket), Brilliant over and Bad over (six balls with running total), Score update (TV score bar with run rate), Innings break (target and required rate), Match result, Recent form (bar chart with average), Toss, Playing XI (tournament look), Chase tracker (required rate, win chance bar), Partnership, Team of the week |
 | Football | Goal, Full-time score, Transfer, Match card, Starting XI and Tournament photo frame, Fixtures, Match stats, XI on the pitch (formations) (clean tournament look: tournament logo, waving flags or crests, ribbons around the edges, full time / live / kick-off, winner line), Red card, Player rating, Team of the week on the pitch, Group table |
 | Tournaments | SAFF Championship: Match card, Starting XI, XI on the pitch, Fixtures, Group table, Match stats, Head to head, Ke jitbe? poll, Photo frame, all in the SAFF look. Add the SAFF logo once and every SAFF card uses it. Add more tournaments in `js/tournaments.js`. |
+| Collage | 2 side by side, Before / after (labels like 2015, 2026 on the photos), 2 top and bottom, 1 big + 2, 3 in a row, 4 grid, 1 big + 3. Pick up to 4 photos under **Collage photos**; tap one to move it with the zoom and move sliders, the arrow changes the order. A photo tapped in your photo library joins the collage. |
 | General | Status (In the XI, Ruled out…), Hot take, Quote, Top list, Who's better?, Player vs player (stats with bars), Breaking news, Instant news, Record / achievement, Did you know?, MVP / player of the month, Photo frame, Ke jitbe? poll (comment 1 or 2), Head to head, Countdown, On this day (black and white photo), Player profile, Debut cap, Match story (5-slide carousel with a Download all slides button) |
 
 Features on every card:
@@ -42,6 +43,7 @@ Features on every card:
 | `js/config.js` | Brand name, handle, colours, themes, sizes | Sometimes |
 | `js/templates.js` | The list of cards and their input fields | **Often**: new cards go here |
 | `js/cricket.js` | The cricket designs (fifty, century, wicket, overs, scores, form, toss) | When you want a new cricket look |
+| `js/collage.js` | Photo collage cards (2, 3 or 4 photos): the cell shapes and the cards | To add a new collage shape |
 | `js/zip.js` | Reads and writes .zip files in the browser, and works out a player's name from a folder or file name | To change how names are read from a zip |
 | `js/library.js` | Photo library: player photos saved on the phone (IndexedDB) and found by name | To change how names are matched |
 | `js/smartfill.js` | Smart fill: sends the quick fill note to Google's free Gemini AI (your own free key) and gets back which field each piece goes in | To change the AI's instructions or the models it tries |

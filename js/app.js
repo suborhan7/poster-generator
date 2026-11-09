@@ -12,6 +12,8 @@ window.BPG = window.BPG || {};
     values: {}, kicker: "", verdict: "", cta: "en", theme: "team", brand: { ...BPG.BRAND },
   };
   const photos = { 1: null, 2: null, 3: null };
+  const collage = []; // collage photos (collage.js), up to 4: { img, plain, graded, adj, url }
+  let colSel = 0, colOn = false, mainAdj = null;
   let logoImg = null;
 
   try {
@@ -165,7 +167,10 @@ window.BPG = window.BPG || {};
     $("photo2Label").textContent = t.photo2 || "Second photo";
     $("photo3Wrap").hidden = !t.photo3; $("photo3Label").textContent = t.photo3 || "Tournament logo"; $("photo3Clear").hidden = !photos[3];
     const l1 = document.querySelector('label[for="photo1"]'); if (l1) l1.textContent = t.photo1 || "Player photo";
-    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain; // crests never get cut out
+    $("cutMode").parentNode.hidden = !!t.noCut || !!t.noMain || !!t.collage; // crests never get cut out
+    // Collage cards: the Collage photos picker instead of the one player photo.
+    $("collageWrap").hidden = !t.collage; if (t.collage) $("photo1").parentNode.hidden = true;
+    collageMode(!!t.collage);
     $("tplHint").textContent = t.hint || "";
     $("tplHint").hidden = !t.hint;
   }
@@ -203,8 +208,8 @@ window.BPG = window.BPG || {};
   ["b_handle", "b_name", "b_accent", "b_bg"].forEach((id) => $(id).addEventListener("input", (e) => {
     state.brand[{ b_handle: "handle", b_name: "name", b_accent: "accent", b_bg: "bg" }[id]] = e.target.value; persist(); draw();
   }));
-  ["zoom", "offx", "offy", "shade"].forEach((id) => $(id).addEventListener("input", draw));
-  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0; draw(); });
+  ["zoom", "offx", "offy", "shade"].forEach((id) => $(id).addEventListener("input", () => { collageAdj(); draw(); }));
+  $("resetPhoto").addEventListener("click", () => { $("zoom").value = 1; $("offx").value = 0; $("offy").value = 0; $("shade").value = 0; collageAdj(); draw(); });
 
   // ---------- Photos ----------
   function loadImage(file) {
@@ -253,6 +258,7 @@ window.BPG = window.BPG || {};
     const b = e.target.closest("button"); if (!b) return;
     cutMode = b.dataset.v;
     try { localStorage.setItem("bpg_cutmode", cutMode); } catch (err) {}
+    collage.forEach((p) => { p.img = v === "pro" ? p.graded : p.plain; });
     [1, 2].forEach((n) => {
       const p = photos[n]; if (!p || p.isPng) return;
       if (cutMode === "cut") makeCutout(n); else { Object.assign(p, { img: p.orig, cut: false }); cutStatus(""); }
@@ -309,6 +315,74 @@ window.BPG = window.BPG || {};
   loadTourLogo();
   $("photo3Clear").addEventListener("click", () => { photos[3] = null; try { localStorage.removeItem(logoKey()); } catch (e) {} $("photo3Clear").hidden = true; draw(); });
 
+  // ---------- Collage photos (collage.js) ----------
+  // Up to 4 photos. Each goes through the same clean-up as the player photo (sharpen, Pro finish, find the player)
+  // and keeps its own zoom / move: tap a photo to pick it, then the sliders move that one.
+  const MAX_COL = 4, colStatus = (m) => { $("collageStatus").textContent = m; };
+  async function addCollage(files) {
+    const room = MAX_COL - collage.length;
+    if (room <= 0) { colStatus(`The collage already has ${MAX_COL} photos. Remove one (×) to add another.`); return; }
+    const list = Array.from(files).slice(0, room);
+    colStatus(`Adding ${list.length} photo${list.length > 1 ? "s" : ""}…`);
+    let small = 0;
+    for (const f of list) {
+      try {
+        const raw = await loadImage(f);
+        const en = BPG.enhancePhoto ? BPG.enhancePhoto(raw) : { img: raw, small: false }, plain = en.img;
+        const graded = BPG.gradePhoto ? BPG.gradePhoto(plain) : plain;
+        plain.bpgFocus = graded.bpgFocus = BPG.findSubject ? BPG.findSubject(plain) : null;
+        if (en.small) small++;
+        collage.push({ plain, graded, img: proMode === "pro" ? graded : plain, adj: { zoom: 1, offx: 0, offy: 0 }, url: URL.createObjectURL(f) });
+      } catch (e) { colStatus("Couldn't open one of those photos."); }
+    }
+    colSel = collage.length - 1; showCollage(); loadAdj(); draw();
+    const n = T[state.tpl].collage || MAX_COL;
+    colStatus((files.length > list.length ? `Only ${MAX_COL} photos fit, so the first ${list.length} were added. ` : "") +
+      (collage.length < n ? `${collage.length} of ${n} photos. Add ${n - collage.length} more.` : "Tap a photo to move it with the sliders; the arrow moves it one place earlier.") +
+      (small ? " A small photo was sharpened; bigger photos look better." : ""));
+  }
+  function showCollage() {
+    const grid = $("collageGrid"), n = T[state.tpl].collage || MAX_COL; grid.innerHTML = "";
+    collage.forEach((p, i) => {
+      const box = document.createElement("div"); box.className = "lib-item" + (i >= n ? " off" : "");
+      const pick = document.createElement("button"); pick.type = "button"; pick.className = "lib-pick"; pick.setAttribute("aria-pressed", String(i === colSel));
+      pick.setAttribute("aria-label", `Photo ${i + 1}: tap to move it with the sliders`);
+      const im = document.createElement("img"); im.src = p.url; im.alt = ""; pick.appendChild(im);
+      pick.onclick = () => { colSel = i; showCollage(); loadAdj(); };
+      const num = document.createElement("span"); num.className = "col-num"; num.textContent = String(i + 1);
+      const del = document.createElement("button"); del.type = "button"; del.className = "lib-del"; del.textContent = "×"; del.setAttribute("aria-label", `Remove photo ${i + 1}`);
+      del.onclick = () => { URL.revokeObjectURL(p.url); collage.splice(i, 1); colSel = Math.min(colSel, Math.max(0, collage.length - 1)); showCollage(); loadAdj(); draw(); };
+      box.append(pick, num, del);
+      if (i > 0) {
+        const mv = document.createElement("button"); mv.type = "button"; mv.className = "col-move"; mv.textContent = "←"; mv.setAttribute("aria-label", `Move photo ${i + 1} one place earlier`);
+        mv.onclick = () => { [collage[i - 1], collage[i]] = [collage[i], collage[i - 1]]; colSel = i - 1; showCollage(); loadAdj(); draw(); };
+        box.appendChild(mv);
+      }
+      grid.appendChild(box);
+    });
+    $("collageClear").hidden = !collage.length;
+    if (collage.length > n) colStatus(`This card uses ${n} photos; the faded ones are left out. Use the arrows to choose which.`);
+  }
+  // The zoom / move sliders belong to the picked collage photo while a collage card is open.
+  function collageAdj() {
+    if (!colOn || !collage[colSel]) return;
+    collage[colSel].adj = { zoom: parseFloat($("zoom").value), offx: parseFloat($("offx").value), offy: parseFloat($("offy").value) };
+  }
+  function loadAdj() {
+    if (!colOn) return;
+    const a = (collage[colSel] && collage[colSel].adj) || { zoom: 1, offx: 0, offy: 0 };
+    $("zoom").value = a.zoom; $("offx").value = a.offx; $("offy").value = a.offy;
+  }
+  // Switching between a collage card and a one-photo card keeps the player photo's slider positions.
+  function collageMode(on) {
+    if (on === colOn) { if (on) showCollage(); return; }
+    if (on) { mainAdj = { zoom: $("zoom").value, offx: $("offx").value, offy: $("offy").value }; colOn = true; showCollage(); loadAdj(); }
+    else { colOn = false; if (mainAdj) { $("zoom").value = mainAdj.zoom; $("offx").value = mainAdj.offx; $("offy").value = mainAdj.offy; } }
+  }
+  $("collagePick").addEventListener("click", () => $("collageAdd").click());
+  $("collageAdd").addEventListener("change", async (e) => { const fs = Array.from(e.target.files || []); e.target.value = ""; if (fs.length) await addCollage(fs); });
+  $("collageClear").addEventListener("click", () => { collage.splice(0).forEach((p) => URL.revokeObjectURL(p.url)); colSel = 0; showCollage(); loadAdj(); colStatus(""); draw(); });
+
   // ---------- Photo library (library.js) ----------
   // When the player's name is filled, their newest saved photo goes on the card by itself.
   // A photo you picked yourself is never replaced; one the library put there is, when the name changes.
@@ -328,12 +402,13 @@ window.BPG = window.BPG || {};
       if (name) $("libName").value = name;
       const found = await showLibrary();
       const p = photos[1];
-      if (found.length && T[state.tpl] && !T[state.tpl].noPhoto && (!p || p.auto) && (!p || p.libId !== found[0].id)) {
+      if (found.length && T[state.tpl] && !T[state.tpl].noPhoto && !T[state.tpl].collage && (!p || p.auto) && (!p || p.libId !== found[0].id)) {
         await useLibPhoto(found[0], true);
       }
     }, 350);
   }
   async function useLibPhoto(item, auto) {
+    if (T[state.tpl].collage) { if (!auto) await addCollage([item.blob]); return; } // on a collage card a tapped photo joins the collage
     try { await usePhoto(1, await loadImage(item.blob), { libId: item.id, auto: !!auto, blob: item.blob }); }
     catch (e) { libStatus("Couldn't open that photo."); }
   }
@@ -492,7 +567,7 @@ window.BPG = window.BPG || {};
       bg: look.bg || th.bg || state.brand.bg,
       stroke: (tc && tc.stroke) || null, hot: (tc && tc.hot) || null, sweep: state.theme === "team" && !layout.ownSweep && !NO_SWEEP.has(t.layout), teamTheme: state.theme === "team",
       logoTop: state.logoPos === "top" && !layout.tourLook && !layout.logoBottom,
-      t, val, big: val("__big") || t.big || "", photo: photos[1], photos, shade: adjust().shade, ctx,
+      t, val, big: val("__big") || t.big || "", photo: photos[1], photos, collage, shade: adjust().shade, ctx,
     };
 
     ctx.clearRect(0, 0, g.W, g.H);
