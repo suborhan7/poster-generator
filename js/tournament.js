@@ -422,6 +422,51 @@ window.BPG = window.BPG || {};
       k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
     },
   };
+  // ---------- Simple photo card ----------
+  // The clean one: the full photo, untouched, fading into the tournament blue only behind the text.
+  // A small tournament tag, one big headline, the logo bottom-right. No ribbons, no ring.
+  L.tphoto = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
+      const deep = mix(baseColour(g), "#000000", 0.55);
+      const hl = String(g.val("headline") || "").trim(), tag = cap(g.val("tag")), info = g.val("info");
+      // Lay the headline out first so the photo fade starts right above it.
+      const lay = hl ? k.layoutRich(cap(hl), W - 2 * PAD - 20, tall ? 130 : 116, k.D, 2, 64) : null;
+      const lh = lay ? lay.size * 0.98 : 0, nl = lay ? lay.lines.length : 0;
+      const hlBase = g.footerY - (info ? 70 : 64), hlTop = hlBase - (nl - 1) * lh;
+      const textTop = lay ? hlTop - lay.size - (tag ? 70 : 10) : g.footerY - 120;
+      const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null;
+      if (ph) {
+        // The whole photo, no auto zoom: it covers the card and the sliders nudge it.
+        const img = ph.img, a = BPG.app && BPG.app.adjust ? BPG.app.adjust() : { zoom: 1, offx: 0, offy: 0, shade: 0 };
+        // The photo only has to reach a little below the text top (solid blue under that), so it is zoomed in as little as possible.
+        const bh = Math.min(H, textTop + 300), s = Math.max(W / img.width, bh / img.height) * a.zoom, dw = img.width * s, dh = img.height * s;
+        ctx.fillStyle = deep; ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(img, (W - dw) / 2 + (a.offx / 100) * W, Math.min(0, (bh - dh) * 0.2) + (a.offy / 100) * H, dw, dh);
+        if (a.shade > 0) { ctx.fillStyle = k.hexA(deep, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, W, H); }
+        // Fade into the tournament blue only behind the text.
+        const from = textTop - 260, to = Math.min(H, bh), gr = ctx.createLinearGradient(0, from, 0, to);
+        gr.addColorStop(0, k.hexA(deep, 0)); gr.addColorStop(0.3, k.hexA(deep, 0.5)); gr.addColorStop(0.6, k.hexA(deep, 0.9)); gr.addColorStop(1, k.hexA(deep, 1));
+        ctx.fillStyle = gr; ctx.fillRect(0, from, W, to - from); ctx.fillStyle = deep; ctx.fillRect(0, to - 2, W, H - to + 2);
+      } else { tourBg(k, g, true); k.photoHint(g, H * 0.45); }
+      // Tournament logo (optional), small, top-left like a broadcast bug.
+      if (g.photos[3]) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; tourTop(k, g, PAD + 10, g.st + 30, W * 0.2, tall ? 130 : 110, "left"); ctx.restore(); }
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 20;
+      if (lay) k.drawRich(lay, cx, hlTop, lh, k.D, "#FFFFFF", C.gold, "center");
+      ctx.restore();
+      if (tag) {
+        // Tag in a small SAFF-green pill above the headline.
+        ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(5);
+        const tw = Math.min(ctx.measureText(tag).width, W * 0.7), y = (lay ? hlTop - lay.size : g.footerY - 120) - 34;
+        ctx.fillStyle = "#13A04E"; k.roundRect(cx - tw / 2 - 24, y - 34, tw + 48, 50, 25); ctx.fill();
+        ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center"; ctx.fillText(tag, cx + 2, y, W * 0.7); k.spaced(0); ctx.restore();
+      }
+      infoLine(k, g, info, PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
   // Shared with tournament2.js (fixtures, team stats, XI on the pitch).
   BPG.tour = { tourBg, saffEdges, tourTop, teamBadge, infoLine, C, cap, num };
 })();

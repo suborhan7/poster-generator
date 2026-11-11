@@ -416,7 +416,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v49";
+BPG.VERSION = "11 Nov 2026 · v50";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -756,6 +756,10 @@ BPG.TEMPLATES = {
     photo1: "Photo from the tournament", photo3: "Tournament logo (optional, kept on this phone)",
     hint: "Pick any photo from the tournament: it fills the card with the tournament ribbons around the edges. Text is optional; leave it empty for a clean photo.",
     fields: [["tournament","Tournament","SAFF Championship 2026",true],["tag","Small line (optional)","Match day 1"],["headline","Headline (optional, *stars* colour words)","*Ibrahim* wins it for Bangladesh",true],["info","Info line (optional)","",true]] },
+  tphoto: { cat: "football", name: "Tournament photo card (simple)", layout: "tphoto", noCut: true,
+    photo1: "Photo from the tournament", photo3: "Tournament logo (optional, small in the top corner)",
+    hint: "The clean one: your full photo, a big headline at the bottom and the tournament colour fading in only behind the text. Put *stars* around words to make them gold.",
+    fields: [["headline","Headline (*stars* = gold)","BEST BALLER OF *SAFF*",true],["tag","Small line above (optional)","SAFF Championship 2026"],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   lineup: { cat: "football", name: "Starting XI (tournament look)", layout: "lineup", noCut: true,
     photo1: "Player photo (optional, shows on the right)", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)",
     hint: "One player per line: shirt number, then the name, e.g. 20 Gyeltshen Zangpo (GK). Substitutes one per line or with commas.",
@@ -3282,6 +3286,51 @@ window.BPG = window.BPG || {};
       k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
     },
   };
+  // ---------- Simple photo card ----------
+  // The clean one: the full photo, untouched, fading into the tournament blue only behind the text.
+  // A small tournament tag, one big headline, the logo bottom-right. No ribbons, no ring.
+  L.tphoto = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W, H } = g, cx = W / 2, tall = H / W > 1.5;
+      const deep = mix(baseColour(g), "#000000", 0.55);
+      const hl = String(g.val("headline") || "").trim(), tag = cap(g.val("tag")), info = g.val("info");
+      // Lay the headline out first so the photo fade starts right above it.
+      const lay = hl ? k.layoutRich(cap(hl), W - 2 * PAD - 20, tall ? 130 : 116, k.D, 2, 64) : null;
+      const lh = lay ? lay.size * 0.98 : 0, nl = lay ? lay.lines.length : 0;
+      const hlBase = g.footerY - (info ? 70 : 64), hlTop = hlBase - (nl - 1) * lh;
+      const textTop = lay ? hlTop - lay.size - (tag ? 70 : 10) : g.footerY - 120;
+      const ph = g.photos[1] && g.photos[1].tpl !== "matchcard" ? g.photos[1] : null;
+      if (ph) {
+        // The whole photo, no auto zoom: it covers the card and the sliders nudge it.
+        const img = ph.img, a = BPG.app && BPG.app.adjust ? BPG.app.adjust() : { zoom: 1, offx: 0, offy: 0, shade: 0 };
+        // The photo only has to reach a little below the text top (solid blue under that), so it is zoomed in as little as possible.
+        const bh = Math.min(H, textTop + 300), s = Math.max(W / img.width, bh / img.height) * a.zoom, dw = img.width * s, dh = img.height * s;
+        ctx.fillStyle = deep; ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(img, (W - dw) / 2 + (a.offx / 100) * W, Math.min(0, (bh - dh) * 0.2) + (a.offy / 100) * H, dw, dh);
+        if (a.shade > 0) { ctx.fillStyle = k.hexA(deep, Math.min(0.9, a.shade)); ctx.fillRect(0, 0, W, H); }
+        // Fade into the tournament blue only behind the text.
+        const from = textTop - 260, to = Math.min(H, bh), gr = ctx.createLinearGradient(0, from, 0, to);
+        gr.addColorStop(0, k.hexA(deep, 0)); gr.addColorStop(0.3, k.hexA(deep, 0.5)); gr.addColorStop(0.6, k.hexA(deep, 0.9)); gr.addColorStop(1, k.hexA(deep, 1));
+        ctx.fillStyle = gr; ctx.fillRect(0, from, W, to - from); ctx.fillStyle = deep; ctx.fillRect(0, to - 2, W, H - to + 2);
+      } else { tourBg(k, g, true); k.photoHint(g, H * 0.45); }
+      // Tournament logo (optional), small, top-left like a broadcast bug.
+      if (g.photos[3]) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 18; tourTop(k, g, PAD + 10, g.st + 30, W * 0.2, tall ? 130 : 110, "left"); ctx.restore(); }
+      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = 20;
+      if (lay) k.drawRich(lay, cx, hlTop, lh, k.D, "#FFFFFF", C.gold, "center");
+      ctx.restore();
+      if (tag) {
+        // Tag in a small SAFF-green pill above the headline.
+        ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(5);
+        const tw = Math.min(ctx.measureText(tag).width, W * 0.7), y = (lay ? hlTop - lay.size : g.footerY - 120) - 34;
+        ctx.fillStyle = "#13A04E"; k.roundRect(cx - tw / 2 - 24, y - 34, tw + 48, 50, 25); ctx.fill();
+        ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center"; ctx.fillText(tag, cx + 2, y, W * 0.7); k.spaced(0); ctx.restore();
+      }
+      infoLine(k, g, info, PAD, g.footerY);
+      k.brandCorner(Object.assign({}, g, { accent: C.gold }), g.footerY);
+    },
+  };
+
   // Shared with tournament2.js (fixtures, team stats, XI on the pitch).
   BPG.tour = { tourBg, saffEdges, tourTop, teamBadge, infoLine, C, cap, num };
 })();
@@ -4063,7 +4112,7 @@ window.BPG = window.BPG || {};
 BPG.TOURNAMENTS = {
   saff: {
     name: "SAFF Championship", edition: "SAFF Championship 2026", bg: "#1640C8",
-    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
+    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe", "tphoto"],
     example: { t1: "Bangladesh", t2: "India", team: "Bangladesh", opp: "India" },
   },
 };
@@ -4197,6 +4246,7 @@ window.BPG = window.BPG || {};
     redcard:     ["🟥", "Red card", "football", "A player is sent off", "red card sent off lal card"],
     rating:      ["⭐", "Player rating", "football", "Rate a player out of 10", "rating rate 10 player"],
     transfer:    ["🔁", "Transfer", "football", "A player moves club: old club, new club, fee", "transfer sign signing deal here we go"],
+    tphoto:      ["📸", "Tournament photo card", "football", "Full photo, one big headline, tournament colours", "photo simple clean headline tournament saff best player"],
     tframe:      ["🖼️", "Tournament photo frame", "football", "Any photo with the tournament ribbons around it", "frame tournament ribbons photo"],
 
     // News & talk
@@ -4256,7 +4306,7 @@ window.BPG = window.BPG || {};
   };
 
   // Tournament copies (saff_matchcard…) take the base card's emoji and a short name.
-  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame" };
+  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame", tphoto: "Photo card (simple)" };
 
   Object.entries(T).forEach(([key, t]) => {
     let c = CARDS[key];
@@ -4738,6 +4788,7 @@ window.BPG = window.BPG || {};
     profile: (v) => `${v("player")} | ${v("role")}\n${String(v("stats")).replace(/,\s*/g, " · ")}`,
     debut: (v) => `🧢 ${v("format")} cap #${v("cap")}: ${v("player")}. ${v("line")}`,
     story: (v) => `${v("headline")} (swipe ➡️)\n\n${v("result")}\n\n${v("question")}`,
+    tphoto: (v) => `${v("headline")}\n${v("tag")}`,
     tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
     lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
@@ -5924,7 +5975,7 @@ window.BPG = window.BPG || {};
   function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
-    state: () => state, draw: () => draw(), persist,
+    state: () => state, draw: () => draw(), persist, adjust: () => adjust(),
     open(tpl, values, big) {
       state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign({}, state.values[tpl] || {}, values, big ? { __big: big } : {});

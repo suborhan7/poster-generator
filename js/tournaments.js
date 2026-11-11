@@ -10,7 +10,7 @@ window.BPG = window.BPG || {};
 BPG.TOURNAMENTS = {
   saff: {
     name: "SAFF Championship", edition: "SAFF Championship 2026", bg: "#1640C8",
-    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
+    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe", "tphoto"],
     example: { t1: "Bangladesh", t2: "India", team: "Bangladesh", opp: "India" },
   },
 };

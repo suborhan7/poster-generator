@@ -31,6 +31,7 @@ window.BPG = window.BPG || {};
     profile: (v) => `${v("player")} | ${v("role")}\n${String(v("stats")).replace(/,\s*/g, " · ")}`,
     debut: (v) => `🧢 ${v("format")} cap #${v("cap")}: ${v("player")}. ${v("line")}`,
     story: (v) => `${v("headline")} (swipe ➡️)\n\n${v("result")}\n\n${v("question")}`,
+    tphoto: (v) => `${v("headline")}\n${v("tag")}`,
     tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
     lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
