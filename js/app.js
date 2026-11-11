@@ -230,7 +230,7 @@ window.BPG = window.BPG || {};
   function renderAll() { captionEdited = false; if (BPG.loadTourLogo) BPG.loadTourLogo(); renderCats(); renderTypes(); renderFields(); if (BPG.seriesUI) BPG.seriesUI.refresh(); draw(); nameChanged(); }
   // Lets series-ui.js open a card with its details already filled in.
   BPG.app = {
-    state: () => state, draw: () => draw(), persist,
+    state: () => state, draw: () => draw(), persist, adjust: () => adjust(),
     open(tpl, values, big) {
       state.tpl = tpl; state.cat = BPG.shelfOf(tpl);
       state.values[tpl] = Object.assign({}, state.values[tpl] || {}, values, big ? { __big: big } : {});

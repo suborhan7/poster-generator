@@ -55,6 +55,7 @@ window.BPG = window.BPG || {};
     redcard:     ["🟥", "Red card", "football", "A player is sent off", "red card sent off lal card"],
     rating:      ["⭐", "Player rating", "football", "Rate a player out of 10", "rating rate 10 player"],
     transfer:    ["🔁", "Transfer", "football", "A player moves club: old club, new club, fee", "transfer sign signing deal here we go"],
+    tphoto:      ["📸", "Tournament photo card", "football", "Full photo, one big headline, tournament colours", "photo simple clean headline tournament saff best player"],
     tframe:      ["🖼️", "Tournament photo frame", "football", "Any photo with the tournament ribbons around it", "frame tournament ribbons photo"],
 
     // News & talk
@@ -114,7 +115,7 @@ window.BPG = window.BPG || {};
   };
 
   // Tournament copies (saff_matchcard…) take the base card's emoji and a short name.
-  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame" };
+  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame", tphoto: "Photo card (simple)" };
 
   Object.entries(T).forEach(([key, t]) => {
     let c = CARDS[key];
