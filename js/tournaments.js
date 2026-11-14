@@ -10,7 +10,7 @@ window.BPG = window.BPG || {};
 BPG.TOURNAMENTS = {
   saff: {
     name: "SAFF Championship", edition: "SAFF Championship 2026", bg: "#1640C8",
-    cards: ["matchcard", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
+    cards: ["matchcard", "xipitch", "lineup", "pitch", "fixtures", "tgroup", "tstats", "h2h", "poll", "tframe"],
     example: { t1: "Bangladesh", t2: "India", team: "Bangladesh", opp: "India" },
   },
 };
@@ -76,7 +76,7 @@ BPG.TOURNAMENTS = {
         const c = f.slice();
         if (c[0] === "tournament") { c[2] = tr.edition; c[1] = "Tournament (shows when no logo is added)"; }
         if (c[0] === "bgc") c[2] = "";
-        if (tr.example && tr.example[c[0]] !== undefined && /^(t1|t2|team|opp)$/.test(c[0]) && !["pitch", "lineup", "tstats", "matchcard"].includes(base)) c[2] = tr.example[c[0]];
+        if (tr.example && tr.example[c[0]] !== undefined && /^(t1|t2|team|opp)$/.test(c[0]) && !["pitch", "xipitch", "lineup", "tstats", "matchcard"].includes(base)) c[2] = tr.example[c[0]];
         return c;
       });
       T[`${id}_${base}`] = Object.assign({}, b, { cat: "tour", tour: id, name, fields,
