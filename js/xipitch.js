@@ -237,7 +237,7 @@ window.BPG = window.BPG || {};
 
   BPG.TEMPLATES.xipitch = { cat: "football", name: "Starting XI (modern pitch)", layout: "xipitch", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)", noCut: true, noMain: true,
     hint: "Names in Bangla or English. Keeper first, then each line from left to right as you look at the card (left back first), forwards last. Add (C) for the captain, a number in front for the shirt (\"10 হামজা\"), or \"| LW\" at the end to set the role yourself. \"Team\" (in English) picks the flag; \"Name on the card\" is what shows big.",
-    fields: [["title","Small heading","শুরুর একাদশ"],["teamname","Name on the card","বাংলাদেশ"],["team","Team (English, sets the flag)","Bangladesh"],["opp","Opponent (optional)","Pakistan"],["formation","Formation","4-2-1-3"],
-      ["players","Players","শ্রাবণ\nজায়ান\nজিদান\nতারিক\nরহমত\nশমিত\nকাজেম\nহামজা (C)\nফারহান\nশুকি\nরাকিব",true,"area"],
+    fields: [["title","Small heading","Starting XI"],["teamname","Name on the card","Bangladesh"],["team","Team (English, sets the flag)","Bangladesh"],["opp","Opponent (optional)","Pakistan"],["formation","Formation","4-2-1-3"],
+      ["players","Players","Shrabon\nZayyan\nZidan\nTariq\nRahmat\nShomit\nKazem\nHamza (C)\nFarhan\nShuki\nRakib",true,"area"],
       ["coach","Coach line (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] };
 })();
