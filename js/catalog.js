@@ -84,7 +84,7 @@ window.BPG = window.BPG || {};
     playingxi:   ["📋", "Playing XI (cricket)", "teams", "Cricket team's eleven for the match", "playing xi 11 eleven lineup cricket team"],
     squad:       ["🏏", "Squad (cricket)", "teams", "Cricket squad announced, with the flag", "squad announcement dol দল cricket"],
     lineup:      ["📋", "Starting XI (football)", "teams", "Football eleven as a list", "starting xi lineup 11 football"],
-    pitch:       ["🏟️", "XI on the pitch", "teams", "Football eleven drawn on a pitch with a formation", "pitch formation 4-3-3 lineup xi"],
+    pitch:       ["🏟️", "XI on the pitch", "teams", "Eleven on a modern pitch: shirts with roles, names in Bangla or English", "pitch formation 4-3-3 lineup xi starting shirt jersey bangla shuru ekadosh একাদশ"],
     fsquad:      ["⚽", "Squad (football)", "teams", "Football squad announced, with the flag", "squad announcement football dol"],
     totwc:       ["🌟", "Team of the week (cricket)", "teams", "Best cricket XI of the week", "team of the week totw best xi cricket"],
     totw:        ["🌟", "Team of the week (football)", "teams", "Best football XI of the week, on a pitch", "team of the week totw best xi football"],

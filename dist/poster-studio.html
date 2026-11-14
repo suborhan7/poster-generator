@@ -416,7 +416,7 @@ img { max-width: 100%; }
 window.BPG = window.BPG || {};
 
 // Shown at the top of the page, so you can tell if your phone has the latest version.
-BPG.VERSION = "9 Nov 2026 · v49";
+BPG.VERSION = "14 Nov 2026 · v50";
 
 BPG.BRAND = {
   handle: "@borhanrants",
@@ -774,10 +774,10 @@ BPG.TEMPLATES = {
     fields: [["tournament","Tournament","SAFF Championship 2026",true],["title","Heading","Match stats"],["t1","Home team","Bangladesh"],["s1","Home goals","1"],["t2","Away team","Bhutan"],["s2","Away goals","0"],
       ["stats","Stats","Possession % | 58 | 42\nShots | 14 | 6\nShots on target | 5 | 2\nCorners | 7 | 3\nFouls | 11 | 14",true,"area"],["info","Info line","Dhaka | 5 Nov 2026",true],["bgc","Card colour (optional)",""]] },
   pitch: { cat: "football", name: "XI on the pitch (formation)", layout: "pitch", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)", noCut: true, noMain: true,
-    hint: "Formation like 4-3-3, 4-2-3-1, 4-4-2, 3-5-2. Players: keeper first, then each line from left to right as you look at the card (left back first), forwards last. A number before the name goes on the shirt.",
-    fields: [["title","Heading","Starting XI"],["team","Team","Bhutan"],["opp","Opponent (optional)","Bangladesh"],["formation","Formation","4-3-3"],
-      ["players","Players","20 Gyeltshen Zangpo (GK)\n3 Phuntsho Jigme\n4 Tenzin Norbu\n6 Jigme Seltob Dorji\n16 Tshelthrim Namgyel\n8 Pema Zangpo\n10 Orgyen Wangchuk Tshering\n14 Dawa Tshering\n15 Nima Wangdi\n7 Chencho Gyeltshen (C)\n18 Kinzang Tashi Tobden",true,"area"],
-      ["coach","Coach (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
+    hint: "Names in English or Bangla. Keeper first, then each line from left to right as you look at the card (left back first), forwards last. Add (C) for the captain, a number in front for the shirt (\"10 Hamza\"), or \"| LW\" at the end to set the role yourself. \"Team\" picks the flag; \"Name on the card\" is what shows big (leave it empty to use the team).",
+    fields: [["title","Small heading","Starting XI"],["teamname","Name on the card (optional)",""],["team","Team (sets the flag)","Bangladesh"],["opp","Opponent (optional)","Pakistan"],["formation","Formation","4-2-1-3"],
+      ["players","Players","Shrabon\nZayyan\nZidan\nTariq\nRahmat\nShomit\nKazem\nHamza (C)\nFarhan\nShuki\nRakib",true,"area"],
+      ["coach","Coach line (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] },
   fbigresult: { cat: "football", name: "Result (bold)", layout: "bigresult",
     hint: "Colours follow the winning team's jersey when the theme is Team colours.",
     fields: [["winner","Winning team","Argentina"],["loser","Losing team","Brazil"],["verb","Word in colour","beat"],["margin","Score","2-1"],["info","Info line","World Cup qualifier | Buenos Aires",true]] },
@@ -3408,76 +3408,7 @@ window.BPG = window.BPG || {};
     },
   };
 
-  // ---------- XI on the pitch ----------
-  // Formation like 4-3-3. Players: the keeper first, then each line from left to right as drawn
-  // (left back first), up to the forwards. "10 Messi" shows the number on the shirt.
-  L.pitch = {
-    standard: false, tourLook: true, ownSweep: true,
-    draw(k, g) {
-      const ctx = k.ctx, { W } = g, { tourBg, teamBadge, C } = T(), tall = g.H / W > 1.5;
-      tourBg(k, g, true);
-      // header: flag, team name, formation
-      const hy = g.st + (tall ? 70 : 50), fs = tall ? 130 : 112;
-      const hasTeam = String(g.val("team") || "").trim() || g.photos[2];
-      if (hasTeam) teamBadge(k, g, PAD + fs * 0.55, hy + 10, fs, g.val("team"), g.photos[2]);
-      ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 14;
-      const tx = hasTeam ? PAD + fs * 1.2 + 20 : PAD;
-      ctx.font = k.font(k.fit(cap(g.val("title") || "Starting XI"), W - tx - 240, tall ? 70 : 62, k.D, "", 30), k.D); ctx.fillStyle = "#FFFFFF"; ctx.fillText(cap(g.val("title") || "Starting XI"), tx, hy + 4);
-      ctx.font = k.font(30, k.C, 700); k.spaced(4); ctx.fillStyle = C.cream;
-      ctx.fillText([cap(full(g.val("team"))), g.val("opp") ? "VS " + cap(full(g.val("opp"))) : ""].filter(Boolean).join("  "), tx, hy + 46, W - tx - 240); k.spaced(0);
-      ctx.textAlign = "right"; ctx.font = k.font(tall ? 76 : 66, k.D); ctx.fillStyle = C.gold; ctx.fillText(String(g.val("formation") || ""), W - PAD, hy + 30);
-      ctx.restore();
-      // pitch
-      const px = PAD, pw = W - 2 * PAD, pt = hy + fs * 0.45 + 50, pb = g.footerY - (g.val("coach") ? 100 : 56), ph = pb - pt;
-      ctx.save(); k.roundRect(px, pt, pw, ph, 30); ctx.clip();
-      for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? "#1E8A45" : "#22974C"; ctx.fillRect(px, pt + (ph / 10) * i, pw, ph / 10 + 1); }
-      const sh = ctx.createLinearGradient(0, pt, 0, pb); sh.addColorStop(0, "rgba(0,0,0,0.25)"); sh.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = sh; ctx.fillRect(px, pt, pw, ph);
-      ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = 4;
-      ctx.strokeRect(px + 20, pt + 20, pw - 40, ph - 40);
-      ctx.beginPath(); ctx.moveTo(px + 20, pt + ph / 2); ctx.lineTo(px + pw - 20, pt + ph / 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(px + pw / 2, pt + ph / 2, ph * 0.1, 0, Math.PI * 2); ctx.stroke();
-      const boxW = pw * 0.5, boxH = ph * 0.13, sixW = pw * 0.24, sixH = ph * 0.05;
-      [[pt + 20, 1], [pb - 20, -1]].forEach(([y, d]) => {
-        ctx.strokeRect(px + (pw - boxW) / 2, d > 0 ? y : y - boxH, boxW, boxH);
-        ctx.strokeRect(px + (pw - sixW) / 2, d > 0 ? y : y - sixH, sixW, sixH);
-      });
-      ctx.restore();
-      ctx.save(); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.6)"; k.roundRect(px, pt, pw, ph, 30); ctx.stroke(); ctx.restore();
-      // players
-      const lines = String(g.val("formation") || "4-3-3").split(/[^\d]+/).map((n) => parseInt(n, 10)).filter((n) => n > 0);
-      const shape = [1, ...lines];
-      const list = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
-        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); return m ? [m[1], m[2]] : ["", l];
-      });
-      const shirt = colourOf(g.val("team"), C.gold), ink = k.inkOn(shirt), r = tall ? 40 : 34;
-      let idx = 0;
-      shape.forEach((count, row) => {
-        const y = pb - 30 - r - ((ph - 90 - 2 * r) * row) / Math.max(1, shape.length - 1);
-        for (let j = 0; j < count; j++) {
-          const p = list[idx++]; if (!p) continue;
-          const x = px + pw * ((j + 1) / (count + 1));
-          ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14;
-          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = shirt; ctx.fill(); ctx.restore();
-          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.lineWidth = 4; ctx.strokeStyle = "#FFFFFF"; ctx.stroke();
-          ctx.save(); ctx.textAlign = "center";
-          if (p[0]) { ctx.font = k.font(Math.round(r * 0.95), k.D); ctx.fillStyle = ink; ctx.fillText(p[0], x, y + r * 0.34); }
-          const nm = cap(p[1].replace(/\s*\((gk|c|vc)\)\s*$/i, (m) => " " + m.trim().toUpperCase())), maxW = Math.min(pw / (count + 0.6), 260);
-          ctx.font = k.font(k.fit(nm, maxW - 16, tall ? 28 : 24, k.C, 700, 15), k.C, 700);
-          const tw = Math.min(ctx.measureText(nm).width, maxW - 16) + 18;
-          ctx.fillStyle = "rgba(6,16,60,0.82)"; k.roundRect(x - tw / 2, y + r + 8, tw, tall ? 38 : 34, 10); ctx.fill();
-          ctx.fillStyle = "#FFFFFF"; ctx.fillText(nm, x, y + r + (tall ? 36 : 32), maxW - 16);
-          ctx.restore();
-        }
-      });
-      if (g.val("coach")) {
-        ctx.save(); ctx.font = k.font(30, k.C, 700); k.spaced(3); ctx.fillStyle = C.cream;
-        const cl = g.t.coachLabel !== undefined ? g.t.coachLabel : "Coach: ";
-        ctx.fillText(cap(cl) + cap(g.val("coach")), PAD, g.footerY - 52, W - 2 * PAD); k.spaced(0); ctx.restore();
-      }
-      bottom(k, g);
-    },
-  };
+  // The XI on the pitch lives in xipitch.js (modern perspective pitch).
   BPG.tour2 = { top, glass, bottom };
 })();
 
@@ -4051,6 +3982,269 @@ window.BPG = window.BPG || {};
 
 </script>
 <script>
+// Starting XI on a modern pitch: jersey shapes with the role (LW, CB…) or shirt number on them,
+// a clean name chip under each (Bangla or English), the captain marked, the team's flag waving in the header.
+// Tournament look (SAFF blue, green and gold by default), no player photos.
+//
+// Players: keeper first, then each line from left to right as you look at the card (left back first),
+// forwards last. Optional extras on a line: a shirt number in front ("10 Hamza"), "(C)" for the captain,
+// and "| LW" at the end to set the role yourself. Without a role, it is worked out from the formation.
+window.BPG = window.BPG || {};
+
+(function () {
+  const L = BPG.LAYOUTS, PAD = 56;
+  const BN = '"Anek Bangla", "Hind Siliguri", "Noto Sans Bengali", sans-serif';
+  // English text uses a sharp sports font; Bangla letters fall through to Anek Bangla.
+  const XF = () => window.__xiFont || { fam: "Montserrat", w: 900, up: true };
+  const LF = () => XF().fam + ", " + BN, LW = () => XF().w;
+  const up = (s) => (XF().up ? String(s).toUpperCase() : String(s));
+  const cap = (s) => String(s == null ? "" : s).toUpperCase();
+  const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
+  const GOLD = "#FFD23F", CREAM = "#FFE6BF";
+
+  // Bangla fonts load on first use; redraw once they are ready so the names never show in a fallback font.
+  const asked = new Set();
+  function ensure(spec, text) {
+    if (!document.fonts || !document.fonts.load || asked.has(spec)) return;
+    asked.add(spec);
+    document.fonts.load(spec, text).then(() => { if (BPG.draw) BPG.draw(); }, () => {});
+  }
+
+  // Roles from the formation: [4,2,1,3] -> defenders, two midfield lines, forwards.
+  function rolesFor(lines) {
+    const out = [["GK"]], n = lines.length;
+    lines.forEach((c, i) => {
+      if (i === 0) out.push({ 1: ["CB"], 2: ["CB", "CB"], 3: ["CB", "CB", "CB"], 4: ["LB", "CB", "CB", "RB"], 5: ["LWB", "CB", "CB", "CB", "RWB"] }[c] || Array(c).fill("DF"));
+      else if (i === n - 1) out.push({ 1: ["ST"], 2: ["ST", "ST"], 3: ["LW", "CF", "RW"], 4: ["LW", "ST", "ST", "RW"] }[c] || Array(c).fill("FW"));
+      else {
+        const mids = n - 2, pos = i - 1; // which midfield line, from the back
+        const deep = mids > 1 && pos === 0, high = mids > 1 && pos === mids - 1;
+        if (deep) out.push({ 1: ["DM"], 2: ["CM", "CM"], 3: ["DM", "DM", "DM"] }[c] || Array(c).fill("DM"));
+        else if (high) out.push({ 1: ["AM"], 2: ["AM", "AM"], 3: ["LW", "AM", "RW"], 4: ["LM", "AM", "AM", "RM"] }[c] || Array(c).fill("AM"));
+        else out.push({ 1: ["CM"], 2: ["CM", "CM"], 3: ["CM", "CM", "CM"], 4: ["LM", "CM", "CM", "RM"], 5: ["LM", "CM", "CM", "CM", "RM"] }[c] || Array(c).fill("MF"));
+      }
+    });
+    return out;
+  }
+
+  // A football shirt, centred on (cx, top) with width w (height is about w * 0.92).
+  function shirtPath(ctx, cx, top, w) {
+    const h = w * 0.92, x = cx - w / 2, P = (a, b) => [x + a * w, top + b * h];
+    ctx.beginPath();
+    ctx.moveTo(...P(0.36, 0.0));
+    ctx.quadraticCurveTo(...P(0.5, 0.13), ...P(0.64, 0.0));   // collar dip
+    ctx.lineTo(...P(0.84, 0.06));
+    ctx.quadraticCurveTo(...P(0.95, 0.12), ...P(1.0, 0.3));   // shoulder to sleeve end
+    ctx.lineTo(...P(0.83, 0.4));
+    ctx.lineTo(...P(0.8, 0.34));
+    ctx.lineTo(...P(0.8, 0.94));
+    ctx.quadraticCurveTo(...P(0.8, 1.0), ...P(0.74, 1.0));
+    ctx.lineTo(...P(0.26, 1.0));
+    ctx.quadraticCurveTo(...P(0.2, 1.0), ...P(0.2, 0.94));
+    ctx.lineTo(...P(0.2, 0.34));
+    ctx.lineTo(...P(0.17, 0.4));
+    ctx.lineTo(...P(0.0, 0.3));
+    ctx.quadraticCurveTo(...P(0.05, 0.12), ...P(0.16, 0.06));
+    ctx.closePath();
+    return h;
+  }
+
+  function drawShirt(k, cx, top, w, gk) {
+    const ctx = k.ctx, h = w * 0.92;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.45)"; ctx.shadowBlur = 22; ctx.shadowOffsetY = 10;
+    shirtPath(ctx, cx, top, w);
+    const gr = ctx.createLinearGradient(cx - w / 2, top, cx + w / 2, top + h);
+    if (gk) { gr.addColorStop(0, "#FFE680"); gr.addColorStop(1, "#F2B705"); }
+    else { gr.addColorStop(0, "#3BE07A"); gr.addColorStop(0.55, "#16B358"); gr.addColorStop(1, "#0B8A43"); }
+    ctx.fillStyle = gr; ctx.fill(); ctx.restore();
+    ctx.save(); shirtPath(ctx, cx, top, w); ctx.clip();
+    // a soft diagonal sheen and a darker hem, so the shirt reads as fabric, not a flat icon
+    const sh = ctx.createLinearGradient(cx - w / 2, top, cx + w * 0.1, top + h * 0.7);
+    sh.addColorStop(0, "rgba(255,255,255,0.28)"); sh.addColorStop(0.5, "rgba(255,255,255,0)"); sh.addColorStop(1, "rgba(0,0,0,0.12)");
+    ctx.fillStyle = sh; ctx.fillRect(cx - w / 2, top, w, h);
+    // sleeve cuffs and side panels in the trim colour
+    ctx.strokeStyle = gk ? "#0B1E6B" : GOLD; ctx.lineWidth = w * 0.045;
+    const x = cx - w / 2;
+    ctx.beginPath(); ctx.moveTo(x + w * 0.02, top + h * 0.27); ctx.lineTo(x + w * 0.19, top + h * 0.38); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + w * 0.98, top + h * 0.27); ctx.lineTo(x + w * 0.81, top + h * 0.38); ctx.stroke();
+    ctx.restore();
+    // collar
+    ctx.save(); ctx.strokeStyle = gk ? "#0B1E6B" : GOLD; ctx.lineWidth = w * 0.05; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(cx - w * 0.14, top + h * 0.005); ctx.quadraticCurveTo(cx, top + h * 0.13, cx + w * 0.14, top + h * 0.005); ctx.stroke();
+    ctx.restore();
+    // thin light outline
+    ctx.save(); shirtPath(ctx, cx, top, w); ctx.lineWidth = 2.5; ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.stroke(); ctx.restore();
+    return h;
+  }
+
+  // The pitch in perspective, drawn only as thin glowing lines on the card colour (no grass, so the
+  // SAFF blue stays clean). Returns a mapper from pitch space (u across 0..1, v from far end 0..1) to the card.
+  function pitch(k, g, top, bot) {
+    const ctx = k.ctx, { W } = g, ph = bot - top;
+    const wTop = W * 0.66, wBot = W * 1.08;
+    const P = (u, v) => [W / 2 + (u - 0.5) * (wTop + (wBot - wTop) * v), top + ph * v];
+    ctx.save();
+    // very soft lighter panel inside the pitch so the shape reads, still all blue
+    ctx.beginPath(); ctx.moveTo(...P(0, 0)); ctx.lineTo(...P(1, 0)); ctx.lineTo(...P(1, 1)); ctx.lineTo(...P(0, 1)); ctx.closePath();
+    const pg = ctx.createLinearGradient(0, top, 0, bot);
+    pg.addColorStop(0, "rgba(255,255,255,0)"); pg.addColorStop(0.25, "rgba(255,255,255,0.06)"); pg.addColorStop(1, "rgba(255,255,255,0.03)");
+    ctx.fillStyle = pg; ctx.fill();
+    // faint bands, like mown stripes, in white
+    for (let i = 0; i < 12; i += 2) {
+      const v0 = i / 12, v1 = (i + 1) / 12;
+      ctx.beginPath(); ctx.moveTo(...P(0, v0)); ctx.lineTo(...P(1, v0)); ctx.lineTo(...P(1, v1)); ctx.lineTo(...P(0, v1)); ctx.closePath();
+      ctx.fillStyle = "rgba(255,255,255,0.025)"; ctx.fill();
+    }
+    const line = (pts, close) => { ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo : ctx.moveTo).apply(ctx, P(q[0], q[1]))); if (close) ctx.closePath(); ctx.stroke(); };
+    const rect = (u0, v0, u1, v1) => line([[u0, v0], [u1, v0], [u1, v1], [u0, v1]], true);
+    const arc = (cu, cv, ru, rv, a0, a1) => { const pts = []; for (let i = 0; i <= 48; i++) { const a = a0 + (a1 - a0) * (i / 48); pts.push([cu + Math.cos(a) * ru, cv + Math.sin(a) * rv]); } line(pts); };
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.42)"; ctx.shadowColor = "rgba(140,190,255,0.9)"; ctx.shadowBlur = 12; ctx.lineJoin = "round";
+    rect(0, 0, 1, 1);
+    line([[0, 0.5], [1, 0.5]]);
+    arc(0.5, 0.5, 0.135, 0.087, 0, Math.PI * 2);
+    const bw = 0.59, bd = 0.157, sw = 0.27, sd = 0.052;
+    rect(0.5 - bw / 2, 1 - bd, 0.5 + bw / 2, 1); rect(0.5 - sw / 2, 1 - sd, 0.5 + sw / 2, 1);
+    arc(0.5, 1 - bd, 0.135, 0.087 * 0.75, Math.PI * 1.22, Math.PI * 1.78);
+    rect(0.5 - bw / 2, 0, 0.5 + bw / 2, bd); rect(0.5 - sw / 2, 0, 0.5 + sw / 2, sd);
+    arc(0.5, bd, 0.135, 0.087 * 0.75, Math.PI * 0.22, Math.PI * 0.78);
+    ctx.shadowBlur = 0; ctx.fillStyle = "rgba(255,255,255,0.6)";
+    [[0.5, 0.5], [0.5, 1 - 0.105], [0.5, 0.105]].forEach(([u, v]) => { const [x, y] = P(u, v); ctx.beginPath(); ctx.ellipse(x, y, 6, 4, 0, 0, Math.PI * 2); ctx.fill(); });
+    ctx.restore();
+    return { P };
+  }
+
+  L.pitch = {
+    standard: false, tourLook: true, ownSweep: true,
+    draw(k, g) {
+      const ctx = k.ctx, { W } = g, { tourBg, teamBadge } = BPG.tour, tall = g.H / W > 1.5;
+      tourBg(k, g, true);
+      let title = String(g.val("title") || "").trim(), tname = String(g.val("teamname") || "").trim() || full(g.val("team"));
+      if (!tname) { tname = title || "Starting XI"; title = ""; }
+      const opp = String(g.val("opp") || "").trim(), team = full(g.val("team"));
+      ensure(`800 40px "Anek Bangla"`, title + tname + String(g.val("players")));
+      ensure(`${LW()} 40px ${XF().fam}`, "AZaz");
+
+      // ---------- header: small tag, big team name, match line; the waving flag on the right ----------
+      const top = g.st + (tall ? 10 : 30);
+      const flagSize = tall ? 210 : 180, flagCx = W - PAD - flagSize * 0.5, textMax = W - PAD * 2 - flagSize - 30;
+      let y = top;
+      ctx.save(); ctx.textAlign = "left";
+      if (title) {
+        const ts = tall ? 40 : 36;
+        ctx.font = k.font(ts, LF(), LW()); ctx.fillStyle = GOLD; title = up(title);
+        ctx.fillRect(PAD, y + ts * 0.25, 34, 6);
+        ctx.fillText(title, PAD + 48, y + ts * 0.62, textMax - 48);
+        y += ts + 6;
+      }
+      tname = up(tname);
+      const ns = k.fit(tname, textMax, tall ? 136 : 128, LF(), LW(), 60);
+      ctx.font = k.font(ns, LF(), LW()); ctx.fillStyle = "#FFFFFF"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 18;
+      ctx.fillText(tname, PAD - 4, y + ns * 0.92);
+      ctx.shadowBlur = 0;
+      y += ns * 1.08 + (tall ? 44 : 38);
+      const ml = [opp ? `${cap(team)} VS ${cap(full(opp))}` : cap(team), cap(g.val("tournament"))].filter(Boolean);
+      ctx.font = k.font(tall ? 32 : 28, k.C, 700); k.spaced(3);
+      let mx = PAD;
+      ml.forEach((part, i) => {
+        if (i) { ctx.fillStyle = GOLD; ctx.fillText("  •  ", mx, y); mx += ctx.measureText("  •  ").width; }
+        ctx.fillStyle = i ? "rgba(255,230,191,0.9)" : "#FFFFFF"; ctx.fillText(part, mx, y, W - PAD - mx - 10); mx += Math.min(ctx.measureText(part).width, W - PAD - mx - 10);
+      });
+      k.spaced(0); ctx.restore();
+      const headBot = y + 14;
+      // flag + formation chip
+      const fCy = top + flagSize * 0.36;
+      if (team || g.photos[2]) teamBadge(k, g, flagCx, fCy, flagSize, team, g.photos[2]);
+      const form = String(g.val("formation") || "").trim();
+      if (form) {
+        ctx.save(); ctx.font = k.font(tall ? 34 : 30, k.C, 700); k.spaced(2);
+        const fw = ctx.measureText(form).width + 34, fh = tall ? 50 : 46, fx = flagCx - fw / 2, fy = fCy + flagSize * 0.42;
+        ctx.fillStyle = GOLD; k.roundRect(fx, fy, fw, fh, 4); ctx.fill();
+        ctx.fillStyle = "#0B1E6B"; ctx.textAlign = "center"; ctx.fillText(form, flagCx + 1, fy + fh * 0.72); k.spaced(0); ctx.restore();
+      }
+
+      // ---------- pitch + players ----------
+      const pTop = headBot + (tall ? 16 : 6), pBot = g.footerY - (tall ? 76 : 66);
+      const pz = pitch(k, g, pTop - 10, pBot + 8);
+      const lines = String(form || "4-3-3").split(/[^\d]+/).map((n) => parseInt(n, 10)).filter((n) => n > 0);
+      const shape = [1, ...lines], roles = rolesFor(lines);
+      const list = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+        let role = "", num = "", c = false;
+        const pipe = l.split("|"); if (pipe.length > 1) { role = pipe.slice(1).join("|").trim().toUpperCase(); l = pipe[0].trim(); }
+        l = l.replace(/\s*\((gk|wk)\)\s*/i, " ").replace(/\s*[([]\s*(c|ক|অধিনায়ক)\s*[)\]]\s*/i, () => { c = true; return " "; }).trim();
+        const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); if (m) { num = m[1]; l = m[2].trim(); }
+        return { name: l, role, num, c };
+      });
+      const rows = shape.length, rowH = (pBot - pTop) / rows;
+      const maxPer = Math.max(...shape);
+      const sw0 = Math.min(tall ? 150 : 128, rowH * 0.62, (W - 2 * PAD) / maxPer * 0.62);
+      const nameS0 = tall ? 36 : 32;
+      let idx = 0;
+      const span = (pBot + 8) - (pTop - 10);
+      shape.forEach((count, row) => {
+        const slotTop = pBot - rowH * (row + 1);
+        // further up the pitch = a little smaller, like a broadcast camera
+        const depth = 0.84 + 0.16 * (1 - row / Math.max(1, rows - 1));
+        const sw = sw0 * depth, nameS = Math.round(nameS0 * (0.92 + 0.08 * depth)), chipH = nameS + 18;
+        const block = sw * 0.92 + 10 + chipH, sy = slotTop + (rowH - block) / 2;
+        const v = (sy + sw * 0.92 - (pTop - 10)) / span;
+        const us = count >= 4 ? Array.from({ length: count }, (_, j) => 0.1 + 0.8 * (j / (count - 1))) : { 1: [0.5], 2: [0.3, 0.7], 3: [0.16, 0.5, 0.84] }[count];
+        for (let j = 0; j < count; j++) {
+          const p = list[idx++]; if (!p) continue;
+          const cx = pz.P(us[j], v)[0];
+          // a soft light spot on the turf under each player
+          ctx.save(); const [, gy] = pz.P(us[j], v); const spot = ctx.createRadialGradient(cx, gy, 0, cx, gy, sw * 0.8);
+          spot.addColorStop(0, "rgba(160,205,255,0.35)"); spot.addColorStop(1, "rgba(160,205,255,0)");
+          ctx.fillStyle = spot; ctx.beginPath(); ctx.ellipse(cx, gy, sw * 0.8, sw * 0.26, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+          const gk = row === 0, role = p.role || (roles[row] && roles[row][j]) || "";
+          const h = drawShirt(k, cx, sy, sw, gk);
+          // on the shirt: the number big with the role small above, or the role big
+          ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = gk ? "#0B1E6B" : "#FFFFFF";
+          if (!gk) { ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 6; }
+          if (p.num) {
+            ctx.font = k.font(Math.round(sw * 0.15), k.C, 700); k.spaced(2); ctx.fillText(role, cx, sy + h * 0.38); k.spaced(0);
+            ctx.font = k.font(Math.round(sw * 0.4), k.D); ctx.fillText(p.num, cx, sy + h * 0.82);
+          } else {
+            ctx.font = k.font(k.fit(role, sw * 0.5, Math.round(sw * 0.3), k.D, "", 18), k.D); ctx.fillText(role, cx, sy + h * 0.7);
+          }
+          ctx.restore();
+          // captain's armband badge
+          if (p.c) {
+            const r = sw * 0.13, bx = cx - sw * 0.36, by = sy + h * 0.14;
+            ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2); ctx.fillStyle = GOLD; ctx.fill(); ctx.shadowBlur = 0;
+            ctx.lineWidth = 3; ctx.strokeStyle = "#0B1E6B"; ctx.stroke();
+            ctx.fillStyle = "#0B1E6B"; ctx.textAlign = "center"; ctx.font = k.font(Math.round(r * 1.25), k.C, 700); ctx.fillText("C", bx, by + r * 0.45);
+            ctx.restore();
+          }
+          // name chip
+          const maxW = Math.min(count >= 4 ? (W - 2 * PAD) / count - 14 : 300, 300);
+          ctx.save(); ctx.textAlign = "center";
+          p.name = up(p.name);
+          const fs = k.fit(p.name, maxW - 36, nameS, LF(), LW(), 18);
+          ctx.font = k.font(fs, LF(), LW());
+          const tw = Math.min(ctx.measureText(p.name).width, maxW - 36) + 40, cy = sy + h + 10;
+          ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+          ctx.fillStyle = "rgba(7,18,70,0.94)"; k.roundRect(cx - tw / 2, cy, tw, chipH, 3); ctx.fill();
+          ctx.shadowColor = "transparent";
+          ctx.lineWidth = 2; ctx.strokeStyle = p.c ? GOLD : "rgba(255,255,255,0.28)"; k.roundRect(cx - tw / 2, cy, tw, chipH, 3); ctx.stroke();
+          // a gold strip along the bottom edge, like a broadcast name tag
+          ctx.fillStyle = GOLD; ctx.fillRect(cx - tw / 2, cy + chipH - 5, tw, 5);
+          ctx.fillStyle = "#FFFFFF"; ctx.fillText(p.name, cx, cy + (chipH - 5) * 0.5 + fs * 0.36, maxW - 36);
+          ctx.restore();
+        }
+      });
+      if (g.val("coach")) {
+        ctx.save(); ctx.font = k.font(tall ? 32 : 28, LF(), LW()); ctx.fillStyle = CREAM;
+        ctx.fillText(String(g.val("coach")), PAD, g.footerY - (tall ? 40 : 34), W * 0.55); ctx.restore();
+      }
+      BPG.tour2.bottom(k, g);
+    },
+  };
+
+})();
+
+</script>
+<script>
 // Tournaments section: each tournament gets its own set of cards in its own look, with its logo
 // kept on the phone once. To add a tournament, add an entry to BPG.TOURNAMENTS below.
 //   name     shown on the tournament button
@@ -4226,7 +4420,7 @@ window.BPG = window.BPG || {};
     playingxi:   ["📋", "Playing XI (cricket)", "teams", "Cricket team's eleven for the match", "playing xi 11 eleven lineup cricket team"],
     squad:       ["🏏", "Squad (cricket)", "teams", "Cricket squad announced, with the flag", "squad announcement dol দল cricket"],
     lineup:      ["📋", "Starting XI (football)", "teams", "Football eleven as a list", "starting xi lineup 11 football"],
-    pitch:       ["🏟️", "XI on the pitch", "teams", "Football eleven drawn on a pitch with a formation", "pitch formation 4-3-3 lineup xi"],
+    pitch:       ["🏟️", "XI on the pitch", "teams", "Eleven on a modern pitch: shirts with roles, names in Bangla or English", "pitch formation 4-3-3 lineup xi starting shirt jersey bangla shuru ekadosh একাদশ"],
     fsquad:      ["⚽", "Squad (football)", "teams", "Football squad announced, with the flag", "squad announcement football dol"],
     totwc:       ["🌟", "Team of the week (cricket)", "teams", "Best cricket XI of the week", "team of the week totw best xi cricket"],
     totw:        ["🌟", "Team of the week (football)", "teams", "Best football XI of the week, on a pitch", "team of the week totw best xi football"],
@@ -4739,6 +4933,7 @@ window.BPG = window.BPG || {};
     debut: (v) => `🧢 ${v("format")} cap #${v("cap")}: ${v("player")}. ${v("line")}`,
     story: (v) => `${v("headline")} (swipe ➡️)\n\n${v("result")}\n\n${v("question")}`,
     tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
+    pitch: (v, t, raw) => `📋 ${v("title") || "Starting XI"}: ${v("teamname") || v("team")}${v("opp") ? " vs " + v("opp") : ""} | ${v("formation")}\n\n${String(raw("players")).split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean).join(", ")}\n\n${v("tournament")}`,
     lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,
