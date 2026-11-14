@@ -174,7 +174,7 @@ window.BPG = window.BPG || {};
       if (form) {
         ctx.save(); ctx.font = k.font(tall ? 34 : 30, k.C, 700); k.spaced(2);
         const fw = ctx.measureText(form).width + 34, fh = tall ? 50 : 46, fx = flagCx - fw / 2, fy = fCy + flagSize * 0.42;
-        ctx.fillStyle = GOLD; k.roundRect(fx, fy, fw, fh, fh / 2); ctx.fill();
+        ctx.fillStyle = GOLD; k.roundRect(fx, fy, fw, fh, 4); ctx.fill();
         ctx.fillStyle = "#0B1E6B"; ctx.textAlign = "center"; ctx.fillText(form, flagCx + 1, fy + fh * 0.72); k.spaced(0); ctx.restore();
       }
 
@@ -240,10 +240,12 @@ window.BPG = window.BPG || {};
           ctx.font = k.font(fs, LF(), LW());
           const tw = Math.min(ctx.measureText(p.name).width, maxW - 36) + 40, cy = sy + h + 10;
           ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
-          ctx.fillStyle = "rgba(7,18,70,0.92)"; k.roundRect(cx - tw / 2, cy, tw, chipH, chipH / 2); ctx.fill();
+          ctx.fillStyle = "rgba(7,18,70,0.94)"; k.roundRect(cx - tw / 2, cy, tw, chipH, 3); ctx.fill();
           ctx.shadowColor = "transparent";
-          ctx.lineWidth = 2.5; ctx.strokeStyle = p.c ? GOLD : "rgba(255,255,255,0.35)"; k.roundRect(cx - tw / 2, cy, tw, chipH, chipH / 2); ctx.stroke();
-          ctx.fillStyle = "#FFFFFF"; ctx.fillText(p.name, cx, cy + chipH * 0.5 + fs * 0.36, maxW - 36);
+          ctx.lineWidth = 2; ctx.strokeStyle = p.c ? GOLD : "rgba(255,255,255,0.28)"; k.roundRect(cx - tw / 2, cy, tw, chipH, 3); ctx.stroke();
+          // a gold strip along the bottom edge, like a broadcast name tag
+          ctx.fillStyle = GOLD; ctx.fillRect(cx - tw / 2, cy + chipH - 5, tw, 5);
+          ctx.fillStyle = "#FFFFFF"; ctx.fillText(p.name, cx, cy + (chipH - 5) * 0.5 + fs * 0.36, maxW - 36);
           ctx.restore();
         }
       });
