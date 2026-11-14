@@ -32,7 +32,7 @@ window.BPG = window.BPG || {};
     debut: (v) => `🧢 ${v("format")} cap #${v("cap")}: ${v("player")}. ${v("line")}`,
     story: (v) => `${v("headline")} (swipe ➡️)\n\n${v("result")}\n\n${v("question")}`,
     tframe: (v) => `${v("headline")}\n${v("tag")} | ${v("tournament")}`,
-    xipitch: (v, t, raw) => `📋 ${v("title") || "Starting XI"}: ${v("teamname") || v("team")}${v("opp") ? " vs " + v("opp") : ""} | ${v("formation")}\n\n${String(raw("players")).split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean).join(", ")}\n\n${v("tournament")}`,
+    pitch: (v, t, raw) => `📋 ${v("title") || "Starting XI"}: ${v("teamname") || v("team")}${v("opp") ? " vs " + v("opp") : ""} | ${v("formation")}\n\n${String(raw("players")).split("\n").map((l) => l.split("|")[0].trim()).filter(Boolean).join(", ")}\n\n${v("tournament")}`,
     lineup: (v, t, raw) => `📋 ${v("team")} starting XI vs ${v("opp")} | ${v("tournament")}\n\n${String(raw("players")).split("\n").map((l) => l.trim()).filter(Boolean).join("\n")}\n\nSubs: ${String(raw("subs")).replace(/\n/g, ", ")}`,
     fscore: (v) => `FT: ${v("t1")} ${v("s1")}-${v("s2")} ${v("t2")}. ${v("headline")}. ${v("potm")}`,
     redcard: (v) => `🟥 RED CARD! ${v("player")} (${v("team")}) sent off in the ${v("minute")} minute. ${v("reason")}.`,

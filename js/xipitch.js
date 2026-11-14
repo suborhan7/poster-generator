@@ -89,44 +89,49 @@ window.BPG = window.BPG || {};
     return h;
   }
 
-  // The pitch: mowing stripes that fade into the card at the top, faint lines, a glow in the centre circle.
+  // The pitch in perspective, drawn only as thin glowing lines on the card colour (no grass, so the
+  // SAFF blue stays clean). Returns a mapper from pitch space (u across 0..1, v from far end 0..1) to the card.
   function pitch(k, g, top, bot) {
     const ctx = k.ctx, { W } = g, ph = bot - top;
+    const wTop = W * 0.66, wBot = W * 1.08;
+    const P = (u, v) => [W / 2 + (u - 0.5) * (wTop + (wBot - wTop) * v), top + ph * v];
     ctx.save();
-    const off = document.createElement("canvas"); off.width = W; off.height = Math.ceil(ph);
-    const o = off.getContext("2d"), n = 10;
-    for (let i = 0; i < n; i++) { o.fillStyle = i % 2 ? "rgba(18,150,80,0.55)" : "rgba(24,170,92,0.55)"; o.fillRect(0, (ph / n) * i, W, ph / n + 1); }
-    // lines
-    o.strokeStyle = "rgba(255,255,255,0.38)"; o.lineWidth = 3;
-    const m = 34;
-    o.strokeRect(m, m * 0.5, W - 2 * m, ph - m);
-    o.beginPath(); o.moveTo(m, ph / 2); o.lineTo(W - m, ph / 2); o.stroke();
-    o.beginPath(); o.arc(W / 2, ph / 2, ph * 0.1, 0, Math.PI * 2); o.stroke();
-    o.fillStyle = "rgba(255,255,255,0.5)"; o.beginPath(); o.arc(W / 2, ph / 2, 6, 0, Math.PI * 2); o.fill();
-    const bw = W * 0.56, bh = ph * 0.14, sw = W * 0.28, sh = ph * 0.055;
-    o.strokeRect((W - bw) / 2, ph - m * 0.5 - bh, bw, bh); o.strokeRect((W - sw) / 2, ph - m * 0.5 - sh, sw, sh);
-    o.beginPath(); o.arc(W / 2, ph - m * 0.5 - bh, ph * 0.06, Math.PI * 1.15, Math.PI * 1.85); o.stroke();
-    o.strokeRect((W - bw) / 2, m * 0.5, bw, bh); o.strokeRect((W - sw) / 2, m * 0.5, sw, sh);
-    o.beginPath(); o.arc(W / 2, m * 0.5 + bh, ph * 0.06, Math.PI * 0.15, Math.PI * 0.85); o.stroke();
-    // fade the top and bottom edges into the card colour
-    o.globalCompositeOperation = "destination-in";
-    const fade = o.createLinearGradient(0, 0, 0, ph);
-    fade.addColorStop(0, "rgba(0,0,0,0)"); fade.addColorStop(0.12, "rgba(0,0,0,1)"); fade.addColorStop(0.9, "rgba(0,0,0,1)"); fade.addColorStop(1, "rgba(0,0,0,0.2)");
-    o.fillStyle = fade; o.fillRect(0, 0, W, ph);
-    ctx.drawImage(off, 0, top);
-    // floodlight glow from the top
-    const glow = ctx.createRadialGradient(W / 2, top + ph * 0.45, 0, W / 2, top + ph * 0.45, W * 0.75);
-    glow.addColorStop(0, "rgba(255,255,255,0.10)"); glow.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = glow; ctx.fillRect(0, top, W, ph);
+    // very soft lighter panel inside the pitch so the shape reads, still all blue
+    ctx.beginPath(); ctx.moveTo(...P(0, 0)); ctx.lineTo(...P(1, 0)); ctx.lineTo(...P(1, 1)); ctx.lineTo(...P(0, 1)); ctx.closePath();
+    const pg = ctx.createLinearGradient(0, top, 0, bot);
+    pg.addColorStop(0, "rgba(255,255,255,0)"); pg.addColorStop(0.25, "rgba(255,255,255,0.06)"); pg.addColorStop(1, "rgba(255,255,255,0.03)");
+    ctx.fillStyle = pg; ctx.fill();
+    // faint bands, like mown stripes, in white
+    for (let i = 0; i < 12; i += 2) {
+      const v0 = i / 12, v1 = (i + 1) / 12;
+      ctx.beginPath(); ctx.moveTo(...P(0, v0)); ctx.lineTo(...P(1, v0)); ctx.lineTo(...P(1, v1)); ctx.lineTo(...P(0, v1)); ctx.closePath();
+      ctx.fillStyle = "rgba(255,255,255,0.025)"; ctx.fill();
+    }
+    const line = (pts, close) => { ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo : ctx.moveTo).apply(ctx, P(q[0], q[1]))); if (close) ctx.closePath(); ctx.stroke(); };
+    const rect = (u0, v0, u1, v1) => line([[u0, v0], [u1, v0], [u1, v1], [u0, v1]], true);
+    const arc = (cu, cv, ru, rv, a0, a1) => { const pts = []; for (let i = 0; i <= 48; i++) { const a = a0 + (a1 - a0) * (i / 48); pts.push([cu + Math.cos(a) * ru, cv + Math.sin(a) * rv]); } line(pts); };
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.42)"; ctx.shadowColor = "rgba(140,190,255,0.9)"; ctx.shadowBlur = 12; ctx.lineJoin = "round";
+    rect(0, 0, 1, 1);
+    line([[0, 0.5], [1, 0.5]]);
+    arc(0.5, 0.5, 0.135, 0.087, 0, Math.PI * 2);
+    const bw = 0.59, bd = 0.157, sw = 0.27, sd = 0.052;
+    rect(0.5 - bw / 2, 1 - bd, 0.5 + bw / 2, 1); rect(0.5 - sw / 2, 1 - sd, 0.5 + sw / 2, 1);
+    arc(0.5, 1 - bd, 0.135, 0.087 * 0.75, Math.PI * 1.22, Math.PI * 1.78);
+    rect(0.5 - bw / 2, 0, 0.5 + bw / 2, bd); rect(0.5 - sw / 2, 0, 0.5 + sw / 2, sd);
+    arc(0.5, bd, 0.135, 0.087 * 0.75, Math.PI * 0.22, Math.PI * 0.78);
+    ctx.shadowBlur = 0; ctx.fillStyle = "rgba(255,255,255,0.6)";
+    [[0.5, 0.5], [0.5, 1 - 0.105], [0.5, 0.105]].forEach(([u, v]) => { const [x, y] = P(u, v); ctx.beginPath(); ctx.ellipse(x, y, 6, 4, 0, 0, Math.PI * 2); ctx.fill(); });
     ctx.restore();
+    return { P };
   }
 
-  L.xipitch = {
+  L.pitch = {
     standard: false, tourLook: true, ownSweep: true,
     draw(k, g) {
       const ctx = k.ctx, { W } = g, { tourBg, teamBadge } = BPG.tour, tall = g.H / W > 1.5;
       tourBg(k, g, true);
-      const title = String(g.val("title") || "").trim(), tname = String(g.val("teamname") || "").trim() || full(g.val("team"));
+      let title = String(g.val("title") || "").trim(), tname = String(g.val("teamname") || "").trim() || full(g.val("team"));
+      if (!tname) { tname = title || "Starting XI"; title = ""; }
       const opp = String(g.val("opp") || "").trim(), team = full(g.val("team"));
       ensure(`800 40px "Anek Bangla"`, title + tname + String(g.val("players")));
 
@@ -168,30 +173,38 @@ window.BPG = window.BPG || {};
       }
 
       // ---------- pitch + players ----------
-      const pTop = headBot + (tall ? 16 : 6), pBot = g.footerY - (tall ? 70 : 58);
-      pitch(k, g, pTop - 30, pBot + 20);
+      const pTop = headBot + (tall ? 16 : 6), pBot = g.footerY - (tall ? 76 : 66);
+      const pz = pitch(k, g, pTop - 10, pBot + 8);
       const lines = String(form || "4-3-3").split(/[^\d]+/).map((n) => parseInt(n, 10)).filter((n) => n > 0);
       const shape = [1, ...lines], roles = rolesFor(lines);
       const list = String(g.val("players") || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
         let role = "", num = "", c = false;
         const pipe = l.split("|"); if (pipe.length > 1) { role = pipe.slice(1).join("|").trim().toUpperCase(); l = pipe[0].trim(); }
-        l = l.replace(/\s*[([]\s*(c|ক|অধিনায়ক)\s*[)\]]\s*/i, () => { c = true; return " "; }).trim();
+        l = l.replace(/\s*\((gk|wk)\)\s*/i, " ").replace(/\s*[([]\s*(c|ক|অধিনায়ক)\s*[)\]]\s*/i, () => { c = true; return " "; }).trim();
         const m = l.match(/^(\d{1,2})[.)\-:\s]+(.*)$/); if (m) { num = m[1]; l = m[2].trim(); }
         return { name: l, role, num, c };
       });
       const rows = shape.length, rowH = (pBot - pTop) / rows;
       const maxPer = Math.max(...shape);
-      const sw = Math.min(tall ? 150 : 128, rowH * 0.62, (W - 2 * PAD) / maxPer * 0.62);
-      const nameS = tall ? 36 : 32, chipH = nameS + 18;
+      const sw0 = Math.min(tall ? 150 : 128, rowH * 0.62, (W - 2 * PAD) / maxPer * 0.62);
+      const nameS0 = tall ? 36 : 32;
       let idx = 0;
+      const span = (pBot + 8) - (pTop - 10);
       shape.forEach((count, row) => {
         const slotTop = pBot - rowH * (row + 1);
+        // further up the pitch = a little smaller, like a broadcast camera
+        const depth = 0.84 + 0.16 * (1 - row / Math.max(1, rows - 1));
+        const sw = sw0 * depth, nameS = Math.round(nameS0 * (0.92 + 0.08 * depth)), chipH = nameS + 18;
         const block = sw * 0.92 + 10 + chipH, sy = slotTop + (rowH - block) / 2;
-        // wide lines spread across the card; narrow lines sit closer to the middle like a real shape
-        const gap = count === 3 ? W * 0.3 : W * 0.25;
+        const v = (sy + sw * 0.92 - (pTop - 10)) / span;
+        const us = count >= 4 ? Array.from({ length: count }, (_, j) => 0.1 + 0.8 * (j / (count - 1))) : { 1: [0.5], 2: [0.3, 0.7], 3: [0.16, 0.5, 0.84] }[count];
         for (let j = 0; j < count; j++) {
           const p = list[idx++]; if (!p) continue;
-          const cx = count >= 4 ? PAD + (W - 2 * PAD) * ((j + 0.5) / count) : W / 2 + (j - (count - 1) / 2) * gap;
+          const cx = pz.P(us[j], v)[0];
+          // a soft light spot on the turf under each player
+          ctx.save(); const [, gy] = pz.P(us[j], v); const spot = ctx.createRadialGradient(cx, gy, 0, cx, gy, sw * 0.8);
+          spot.addColorStop(0, "rgba(160,205,255,0.35)"); spot.addColorStop(1, "rgba(160,205,255,0)");
+          ctx.fillStyle = spot; ctx.beginPath(); ctx.ellipse(cx, gy, sw * 0.8, sw * 0.26, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
           const gk = row === 0, role = p.role || (roles[row] && roles[row][j]) || "";
           const h = drawShirt(k, cx, sy, sw, gk);
           // on the shirt: the number big with the role small above, or the role big
@@ -235,9 +248,4 @@ window.BPG = window.BPG || {};
     },
   };
 
-  BPG.TEMPLATES.xipitch = { cat: "football", name: "Starting XI (modern pitch)", layout: "xipitch", photo2: "Team crest (optional, the flag is used for countries)", photo3: "Tournament logo (optional, kept on this phone)", noCut: true, noMain: true,
-    hint: "Names in Bangla or English. Keeper first, then each line from left to right as you look at the card (left back first), forwards last. Add (C) for the captain, a number in front for the shirt (\"10 হামজা\"), or \"| LW\" at the end to set the role yourself. \"Team\" (in English) picks the flag; \"Name on the card\" is what shows big.",
-    fields: [["title","Small heading","Starting XI"],["teamname","Name on the card","Bangladesh"],["team","Team (English, sets the flag)","Bangladesh"],["opp","Opponent (optional)","Pakistan"],["formation","Formation","4-2-1-3"],
-      ["players","Players","Shrabon\nZayyan\nZidan\nTariq\nRahmat\nShomit\nKazem\nHamza (C)\nFarhan\nShuki\nRakib",true,"area"],
-      ["coach","Coach line (optional)",""],["tournament","Tournament","SAFF Championship 2026",true],["info","Info line (optional)","",true],["bgc","Card colour (optional)",""]] };
 })();

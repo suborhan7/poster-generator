@@ -84,8 +84,7 @@ window.BPG = window.BPG || {};
     playingxi:   ["📋", "Playing XI (cricket)", "teams", "Cricket team's eleven for the match", "playing xi 11 eleven lineup cricket team"],
     squad:       ["🏏", "Squad (cricket)", "teams", "Cricket squad announced, with the flag", "squad announcement dol দল cricket"],
     lineup:      ["📋", "Starting XI (football)", "teams", "Football eleven as a list", "starting xi lineup 11 football"],
-    xipitch:     ["👕", "Starting XI (modern pitch)", "teams", "Eleven on a pitch with shirts, roles and Bangla names", "starting xi lineup pitch formation modern shirt jersey bangla shuru ekadosh একাদশ"],
-    pitch:       ["🏟️", "XI on the pitch", "teams", "Football eleven drawn on a pitch with a formation", "pitch formation 4-3-3 lineup xi"],
+    pitch:       ["🏟️", "XI on the pitch", "teams", "Eleven on a modern pitch: shirts with roles, names in Bangla or English", "pitch formation 4-3-3 lineup xi starting shirt jersey bangla shuru ekadosh একাদশ"],
     fsquad:      ["⚽", "Squad (football)", "teams", "Football squad announced, with the flag", "squad announcement football dol"],
     totwc:       ["🌟", "Team of the week (cricket)", "teams", "Best cricket XI of the week", "team of the week totw best xi cricket"],
     totw:        ["🌟", "Team of the week (football)", "teams", "Best football XI of the week, on a pitch", "team of the week totw best xi football"],
@@ -115,7 +114,7 @@ window.BPG = window.BPG || {};
   };
 
   // Tournament copies (saff_matchcard…) take the base card's emoji and a short name.
-  const TOUR_NAMES = { matchcard: "Match card", xipitch: "Starting XI (modern pitch)", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame" };
+  const TOUR_NAMES = { matchcard: "Match card", lineup: "Starting XI", pitch: "XI on the pitch", fixtures: "Fixtures", tgroup: "Group table", tstats: "Match stats", h2h: "Head to head", poll: "Who will win? (poll)", tframe: "Photo frame" };
 
   Object.entries(T).forEach(([key, t]) => {
     let c = CARDS[key];
