@@ -3994,6 +3994,10 @@ window.BPG = window.BPG || {};
 (function () {
   const L = BPG.LAYOUTS, PAD = 56;
   const BN = '"Anek Bangla", "Hind Siliguri", "Noto Sans Bengali", sans-serif';
+  // English text uses a sharp sports font; Bangla letters fall through to Anek Bangla.
+  const XF = () => window.__xiFont || { fam: "Montserrat", w: 900, up: true };
+  const LF = () => XF().fam + ", " + BN, LW = () => XF().w;
+  const up = (s) => (XF().up ? String(s).toUpperCase() : String(s));
   const cap = (s) => String(s == null ? "" : s).toUpperCase();
   const full = (n) => (BPG.teamName && BPG.teamName(n)) || String(n || "").trim();
   const GOLD = "#FFD23F", CREAM = "#FFE6BF";
@@ -4118,6 +4122,7 @@ window.BPG = window.BPG || {};
       if (!tname) { tname = title || "Starting XI"; title = ""; }
       const opp = String(g.val("opp") || "").trim(), team = full(g.val("team"));
       ensure(`800 40px "Anek Bangla"`, title + tname + String(g.val("players")));
+      ensure(`${LW()} 40px ${XF().fam}`, "AZaz");
 
       // ---------- header: small tag, big team name, match line; the waving flag on the right ----------
       const top = g.st + (tall ? 10 : 30);
@@ -4126,13 +4131,14 @@ window.BPG = window.BPG || {};
       ctx.save(); ctx.textAlign = "left";
       if (title) {
         const ts = tall ? 40 : 36;
-        ctx.font = k.font(ts, BN, 800); ctx.fillStyle = GOLD;
+        ctx.font = k.font(ts, LF(), LW()); ctx.fillStyle = GOLD; title = up(title);
         ctx.fillRect(PAD, y + ts * 0.25, 34, 6);
         ctx.fillText(title, PAD + 48, y + ts * 0.62, textMax - 48);
         y += ts + 6;
       }
-      const ns = k.fit(tname, textMax, tall ? 136 : 128, BN, 800, 60);
-      ctx.font = k.font(ns, BN, 800); ctx.fillStyle = "#FFFFFF"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 18;
+      tname = up(tname);
+      const ns = k.fit(tname, textMax, tall ? 136 : 128, LF(), LW(), 60);
+      ctx.font = k.font(ns, LF(), LW()); ctx.fillStyle = "#FFFFFF"; ctx.shadowColor = "rgba(0,0,0,0.35)"; ctx.shadowBlur = 18;
       ctx.fillText(tname, PAD - 4, y + ns * 0.92);
       ctx.shadowBlur = 0;
       y += ns * 1.08 + (tall ? 44 : 38);
@@ -4213,8 +4219,9 @@ window.BPG = window.BPG || {};
           // name chip
           const maxW = Math.min(count >= 4 ? (W - 2 * PAD) / count - 14 : 300, 300);
           ctx.save(); ctx.textAlign = "center";
-          const fs = k.fit(p.name, maxW - 36, nameS, BN, 800, 18);
-          ctx.font = k.font(fs, BN, 800);
+          p.name = up(p.name);
+          const fs = k.fit(p.name, maxW - 36, nameS, LF(), LW(), 18);
+          ctx.font = k.font(fs, LF(), LW());
           const tw = Math.min(ctx.measureText(p.name).width, maxW - 36) + 40, cy = sy + h + 10;
           ctx.shadowColor = "rgba(0,0,0,0.4)"; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
           ctx.fillStyle = "rgba(7,18,70,0.92)"; k.roundRect(cx - tw / 2, cy, tw, chipH, chipH / 2); ctx.fill();
@@ -4225,7 +4232,7 @@ window.BPG = window.BPG || {};
         }
       });
       if (g.val("coach")) {
-        ctx.save(); ctx.font = k.font(tall ? 32 : 28, BN, 800); ctx.fillStyle = CREAM;
+        ctx.save(); ctx.font = k.font(tall ? 32 : 28, LF(), LW()); ctx.fillStyle = CREAM;
         ctx.fillText(String(g.val("coach")), PAD, g.footerY - (tall ? 40 : 34), W * 0.55); ctx.restore();
       }
       BPG.tour2.bottom(k, g);
